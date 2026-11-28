@@ -1,0 +1,7 @@
+"$schema": https://github.com/janearc/slayer/schemas/job-v1.json
+scene: {set: system-showcase-moonrise.yaml}
+renderer: gpu
+camera: {name: moonrise}
+outputs:
+  picture: ../../../out/2026-11-27-system-showcase-moonrise/proof.png
+  raw: ../../../out/2026-11-27-system-showcase-moonrise/light.pfm

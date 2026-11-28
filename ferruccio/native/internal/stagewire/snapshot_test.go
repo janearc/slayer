@@ -51,6 +51,31 @@ func TestSnapshotRoundTripKeepsGeometryCameraAndNotice(t *testing.T) {
 	}
 }
 
+func TestBinarySnapshotCarriesFiniteLightMarkers(t *testing.T) {
+	staged := sample()
+	staged.Version = 5
+	staged.Scene.Objects = nil
+	light := placement.DisplayLight{Kind: "Point", At: maths.V(1, 2, 3), Ordinal: 7,
+		Author: thing.AuthorRef{Collection: "scene.world.lamps", Name: "porch"}}
+	staged.Scene.Lights = []placement.DisplayLight{light}
+	var encoded bytes.Buffer
+	if err := Write(&encoded, staged); err != nil {
+		t.Fatal(err)
+	}
+	got, err := Read(&encoded)
+	if err != nil || len(got.Scene.Lights) != 1 || got.Scene.Lights[0] != light {
+		t.Fatalf("light marker round trip: %+v, %v", got.Scene.Lights, err)
+	}
+	staged.Scene.Lights = append(staged.Scene.Lights, light)
+	if err := Write(io.Discard, staged); err == nil {
+		t.Fatal("accepted duplicate staged light identity")
+	}
+	staged.Scene.Lights = []placement.DisplayLight{{Kind: "Sun", Ordinal: 7, At: light.At}}
+	if err := Write(io.Discard, staged); err == nil {
+		t.Fatal("accepted a distant light with a position and no direction")
+	}
+}
+
 func TestSnapshotRejectsMalformedOrExtraData(t *testing.T) {
 	bad := sample()
 	bad.Scene.Objects[0].Mesh.Indices[2] = 3
@@ -158,8 +183,18 @@ func TestBinaryBatchesKeepTransformsAcrossChunks(t *testing.T) {
 	if len(batch.Places) != len(places) || batch.Places[placeChunk] != places[placeChunk] || !batch.Authored || batch.Author.Name != "city" || !batch.HasBounds || batch.Bounds != original.Scene.Batches[0].Bounds || batch.Mesh.Vertices[0] != mesh.Vertices[0] || batch.Mesh.Notice != mesh.Notice || len(batch.Mesh.Indices) != len(mesh.Indices) || got.Scene.Origins["scene.set.things/city"] != maths.V(3, 4, 5) {
 		t.Fatal("binary batch lost its placement or author")
 	}
+	sized, err := readSized(bytes.NewReader(data.Bytes()), int64(data.Len()))
+	if err != nil || len(sized.Scene.Batches) != 1 || len(sized.Scene.Batches[0].Places) != len(places) || sized.Scene.Batches[0].Places[placeChunk] != places[placeChunk] {
+		t.Fatalf("sized snapshot lost a placement: %v", err)
+	}
+	if cap(sized.Scene.Batches[0].Places) != len(places) {
+		t.Fatal("sized snapshot did not reserve its placement array")
+	}
 	if _, err := Read(bytes.NewReader(data.Bytes()[:data.Len()-1])); err == nil {
 		t.Fatal("accepted a truncated binary snapshot")
+	}
+	if _, err := readSized(bytes.NewReader(data.Bytes()[:data.Len()-1]), int64(data.Len()-1)); err == nil {
+		t.Fatal("accepted a truncated sized binary snapshot")
 	}
 	if _, err := Read(bytes.NewReader(append(bytes.Clone(data.Bytes()), 0))); err == nil {
 		t.Fatal("accepted trailing binary data")
@@ -188,6 +223,53 @@ func TestBinaryBatchesKeepTransformsAcrossChunks(t *testing.T) {
 	}
 }
 
+func TestSizedSnapshotRejectsImpossiblePlacementCount(t *testing.T) {
+	original := sample()
+	original.Version = 5
+	mesh := original.Scene.Objects[0].Mesh
+	original.Scene.Objects = nil
+	original.MeshCount, original.BatchCount = 1, 1
+	var data bytes.Buffer
+	data.WriteString(binaryMagicWithOrigins)
+	if err := writeJSONRecord(&data, original); err != nil {
+		t.Fatal(err)
+	}
+	if err := writeBinaryMesh(&data, mesh); err != nil {
+		t.Fatal(err)
+	}
+	if err := writeJSONRecord(&data, binaryBatch{Mesh: 0, Count: ^uint64(0)}); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := readSized(bytes.NewReader(data.Bytes()), int64(data.Len())); err == nil || !strings.Contains(err.Error(), "larger than its snapshot") {
+		t.Fatalf("impossible batch count was not refused: %v", err)
+	}
+}
+
+func BenchmarkBinaryBatchDecode(b *testing.B) {
+	original := sample()
+	original.Version = 5
+	mesh := original.Scene.Objects[0].Mesh
+	original.Scene.Objects = nil
+	original.Scene.Batches = []placement.StagedBatch{{Mesh: mesh, Places: make([]maths.Subspace, 100_000)}}
+	var data bytes.Buffer
+	if err := Write(&data, original); err != nil {
+		b.Fatal(err)
+	}
+	for _, test := range []struct {
+		name string
+		size int64
+	}{{"stream", -1}, {"known-size", int64(data.Len())}} {
+		b.Run(test.name, func(b *testing.B) {
+			b.ReportAllocs()
+			for i := 0; i < b.N; i++ {
+				if _, err := readSized(bytes.NewReader(data.Bytes()), test.size); err != nil {
+					b.Fatal(err)
+				}
+			}
+		})
+	}
+}
+
 func TestSnapshotDecodeRespondsToCancellation(t *testing.T) {
 	original := sample()
 	original.Version = 4
@@ -203,5 +285,29 @@ func TestSnapshotDecodeRespondsToCancellation(t *testing.T) {
 	_, err := Read(contextReader{ctx: ctx, source: cancelAfterRead{data: bytes.NewReader(data.Bytes()), cancel: cancel}})
 	if err == nil || ctx.Err() != context.Canceled {
 		t.Fatalf("decode after cancellation: %v", err)
+	}
+}
+
+func TestVersionFiveSnapshotCarriesCameraWithoutGeometry(t *testing.T) {
+	empty := sample()
+	empty.Version = 5
+	empty.Scene.Objects = nil
+	empty.Scene.Origins = map[string]maths.Vec{"scene.set.things/plane": maths.V(1, 2, 3)}
+	empty.Notice = "No drawable surfaces in the working view"
+	var encoded bytes.Buffer
+	if err := Write(&encoded, empty); err != nil {
+		t.Fatal(err)
+	}
+	got, err := Read(&encoded)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got.Notice != empty.Notice || got.Scene.Focus != empty.Scene.Focus || len(got.Scene.Batches) != 0 || got.Scene.Origins["scene.set.things/plane"] != maths.V(1, 2, 3) {
+		t.Fatalf("empty round trip = %+v", got)
+	}
+	empty.Scene.Origins = nil
+	empty.Version = 4
+	if err := Write(io.Discard, empty); err == nil {
+		t.Fatal("accepted geometry-free snapshot with legacy wire version")
 	}
 }

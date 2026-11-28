@@ -1,0 +1,9 @@
+$schema: https://github.com/janearc/slayer/schemas/job-v1.json
+scene: {set: billows-v2.yaml}
+renderer: gpu-native
+shortcuts: {restir: off}
+film: {width: 960, height: 600, rays: 1, wide: 55}
+camera: {name: oblique}
+outputs:
+  picture: ../../../out/2026-11-27-local-cloud-billows-v2/proof.png
+  raw: ../../../out/2026-11-27-local-cloud-billows-v2/light.pfm

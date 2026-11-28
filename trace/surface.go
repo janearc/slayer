@@ -231,6 +231,11 @@ func (met hit) raised(point, dir maths.Vec) maths.Vec {
 type look struct {
 	ray   maths.Ray
 	pixel float64
+	// shifted is whether the look has a fine pixel of its own, at
+	// across and down, whose MarchShift sets where its march takes its
+	// samples in each step; a look without one takes the middle.
+	shifted      bool
+	across, down uint32
 	// grain is the angular width of a pixel of the finished picture,
 	// which pixel's rays share: a wrinkle fades by it
 	grain  float64
@@ -489,7 +494,8 @@ func shade(scene *staged, seen look) frame.Pixel {
 	if mixedClearCloud {
 		gathered = throughClear(scene, seen, distance, water)
 	} else {
-		gathered = through(scene, ray, float64(drawn.Depth))
+		gathered = throughShifted(scene, ray, float64(drawn.Depth),
+			scene.shiftFor(seen))
 	}
 	if told != nil {
 		told.tell("the volumes along the ray", "keep", gathered.keep,
@@ -575,6 +581,9 @@ func (met hit) named() string {
 // surfaceAt is surface for a look already known to meet a thing.
 func surfaceAt(scene *staged, seen look, met hit) frame.Pixel {
 	ray, placed, dist := seen.ray, met.thing, met.dist
+	if material := placed.thing.Material; material != nil && material.Fibre != nil {
+		return fibreSurface(scene, seen, met, material.Fibre)
+	}
 	// a ray that leaves the sun's disc out leaves it out for the sky, and
 	// for what a clear surface lets through to it: whatever an opaque
 	// surface sends on, or a surface mirrors, finds the disc as usual
@@ -602,6 +611,16 @@ func surfaceAt(scene *staged, seen look, met hit) frame.Pixel {
 		normal = material.Crinkle.CrinkledWithin(point, normal,
 			ray.Dir.Neg(), (seen.come+dist)*seen.grain)
 	}
+	chart := local
+	if placed.paint != nil || material.Finish != nil {
+		chart = met.paintPoint(local)
+	}
+	satin := material.Satin
+	if material.Finish != nil {
+		// Filter relief against the finished pixel, as with Crinkle.
+		finishWidth := away * max(seen.grain, seen.pixel) / placed.scale
+		normal, satin = met.surfaceFinish(material.Finish, chart, normal, ray.Dir, finishWidth)
+	}
 	// Optics follow the final shading normal, crinkle included: for water
 	// and a clear height field, their waves' own slope fronted to the
 	// side the ray met them on (shadingNormal). That side alone says
@@ -613,10 +632,9 @@ func surfaceAt(scene *staged, seen look, met hit) frame.Pixel {
 	colour := material.Colour
 	if placed.paint != nil {
 		if oriented, has := placed.paint.(texture.Oriented); has {
-			colour = oriented.Facing(met.paintPoint(local), point, faced)
+			colour = oriented.Facing(chart, point, faced)
 		} else {
-			colour = texture.Sample(placed.paint, met.paintPoint(local),
-				footprint)
+			colour = texture.Sample(placed.paint, chart, footprint)
 		}
 	}
 	told := scene.walked
@@ -626,19 +644,60 @@ func surfaceAt(scene *staged, seen look, met hit) frame.Pixel {
 			"colour", colour)
 	}
 	emitted := emits(material, placed.shine, local, footprint)
+	if material != nil {
+		// a shining surface darkens toward its edge as a glowing one does
+		emitted = emitted.Scale(thing.LimbShare(material.Limb, normal,
+			ray.Dir.Neg()))
+	}
 	lifted := met.raised(point, ray.Dir)
+	if material != nil && material.DirectSun != nil {
+		var passed maths.Light
+		if material.DirectSunSize > 0 {
+			ways := placed.directSunWays
+			for _, way := range ways {
+				passed = passed.Add(scene.transmit(lifted, way, math.Inf(1)))
+			}
+			passed = passed.Scale(1 / float64(len(ways)))
+		} else {
+			passed = scene.transmit(lifted, *material.DirectSun, math.Inf(1))
+		}
+		fill := material.DirectSunFill
+		emitted = emitted.Times(passed.Scale(1 - fill).Add(maths.Grey(fill)))
+	}
 	lit := scene.oceanLamplight(lifted, normal, colour, seen, placed.thing)
+	diffused, dermalShare := met.subsurfaceAt(ray)
+	scatters := dermalShare != (maths.Light{})
+	thin := material.ThinTissue.Enabled() && seen.holding == 0
 	// a replay tells the sky's share, so it asks for it here. A picture
 	// asks only where the surface keeps its own colour, below: sixteen
-	// rays cast for light that is multiplied by zero are not cast.
+	// rays cast for light that is multiplied by zero are not cast. The
+	// subsurface mixture needs the local sky term before applying its share.
 	var skylit maths.Light
-	if told != nil {
+	skyAsked := told != nil || scatters || thin
+	if skyAsked {
 		skylit = scene.skylight(lifted, normal, colour)
 	}
 	sum := emitted.Add(lit).Add(skylit)
+	var scattered maths.Light
+	if scatters || thin {
+		local := lit.Add(skylit)
+		if scatters {
+			scattered = colour.Times(diffused)
+			localShare := maths.RGB(1-dermalShare.R, 1-dermalShare.G, 1-dermalShare.B)
+			local = local.Times(localShare)
+			sum = emitted.Add(local).Add(scattered)
+		}
+		if thin {
+			sum = emitted.Add(local.Add(scattered).Scale(1 - material.ThinTissue.Share()))
+		}
+	}
 	if told != nil {
 		told.tell("its own light, the lamps' and the sky's", "emits",
 			emitted, "lamps", lit, "sky", skylit, "sum", sum)
+		if scatters {
+			told.tell("diffuse light through the surface", "share",
+				dermalShare, "diffused", scattered)
+		}
 	}
 	// a glossy surface mirrors whatever the eye would see along the
 	// mirrored ray, once, by the share fresnel gives at this look. a
@@ -712,7 +771,13 @@ func surfaceAt(scene *staged, seen look, met hit) frame.Pixel {
 	// water's faces drop the disc only where the highlight's lobe is as
 	// wide as the faces' slopes. Where the two widths differ the disc is
 	// kept, and the faces and the highlight both count the sun.
-	glossed := roughened(material, lost)
+	glossed := material
+	if satin >= 0 && satin <= 1 && satin != material.Satin {
+		finished := *material
+		finished.Satin = satin
+		glossed = &finished
+	}
+	glossed = roughened(glossed, lost)
 	highlit := seen
 	highlit.discless = glints(glossed) && (!roughly ||
 		glossed.SlopeVariance == met.facetVariance(lost))
@@ -720,6 +785,7 @@ func surfaceAt(scene *staged, seen look, met hit) frame.Pixel {
 	if roughly {
 		reflects = maths.Grey(facetShare(rough))
 	}
+	tissueMirror := reflects.R
 	share := math.Max(reflects.R, math.Max(reflects.G, reflects.B))
 	through := math.Min(math.Max(material.Through, 0), 1)
 	oceanBudget := scene.oceanEventBudget(placed.thing)
@@ -773,7 +839,7 @@ func surfaceAt(scene *staged, seen look, met hit) frame.Pixel {
 		// product in all three
 		left := maths.RGB((1-reflects.R)*(1-through),
 			(1-reflects.G)*(1-through), (1-reflects.B)*(1-through))
-		if told == nil && left != (maths.Light{}) {
+		if !skyAsked && left != (maths.Light{}) {
 			sum = sum.Add(scene.skylight(lifted, normal, colour))
 		}
 		kept := sum.Times(left)
@@ -843,11 +909,18 @@ func surfaceAt(scene *staged, seen look, met hit) frame.Pixel {
 			}
 		}
 		sum = kept
-	} else if told == nil {
+	} else if !skyAsked {
 		sum = sum.Add(scene.skylight(lifted, normal, colour))
 	}
 	// the lamps' highlights, over what it keeps, mirrors and passes
 	sum = sum.Add(skyward)
+	if thin {
+		transmitted := scene.thinTissueLight(met, seen, tissueMirror)
+		sum = sum.Add(transmitted)
+		if told != nil {
+			told.tell("diffuse light across the tissue", "transmitted", transmitted)
+		}
+	}
 	// the slope the pixel cannot show widens the highlight's lobe
 	if glints(glossed) {
 		glint := scene.oceanGlint(lifted, normal, ray.Dir.Neg(), glossed,
@@ -889,6 +962,29 @@ func (met hit) paintPoint(local maths.Vec) maths.Vec {
 		}
 	}
 	return local
+}
+
+// surfaceFinish carries the chart's slope with the posed surface. The
+// oblique footprint approximates the wider axis of the pixel on the skin.
+func (met hit) surfaceFinish(finish texture.Finish, chart, normal, dir maths.Vec,
+	footprint float64,
+) (maths.Vec, float64) {
+	footprint /= max(.35, -normal.Dot(dir))
+	slope, satin := finish.FinishAt(chart, footprint)
+	if slope == (maths.Vec{}) {
+		return normal, satin
+	}
+	if met.on.meshed {
+		skin := met.thing.thing.Shape.(*mesh.Mesh)
+		slope = skin.PosedSlope(met.on.met, slope)
+	}
+	slope = met.thing.at.Orientation.Out(slope)
+	tangent := slope.Sub(normal.Scale(normal.Dot(slope)))
+	tilted := normal.Sub(tangent).Unit()
+	if tilted.Dot(dir) < -leastFacing {
+		return tilted, satin
+	}
+	return normal, satin
 }
 
 // throughFoam limits the mixture to real clear boundaries. The clear branch

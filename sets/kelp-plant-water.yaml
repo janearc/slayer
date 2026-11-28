@@ -67,7 +67,7 @@ scene:
         size: [400, 400, 0.1]
         source: eye
   recipes:
-    profile-kelp: {alga: {family: kelp, file: ../manufacture/algae/kelp/kelp.yaml, species: macrocystis-pyrifera, condition: moderate}}
+    profile-kelp: {alga: {family: kelp, file: '@builtin', species: macrocystis-pyrifera, condition: moderate}}
   set:
     things:
       plant:

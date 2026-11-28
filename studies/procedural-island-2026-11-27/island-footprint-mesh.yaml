@@ -1,0 +1,28 @@
+height-model: authored-procedural
+radius-metres: 6371000
+anchor: {longitude-deg: -155.5, latitude-deg: 19.5, height-metres: 0}
+sources: []
+procedural-ground: {seed: 9, base-metres: 100, height-metres: 6000, wavelength-metres: 15000, fine-metres: 300, made-up: true}
+raster-budget: {cache-total-bytes: 0, cache-tiles-per-source: 0, tile-bytes: 4, metadata-bytes: 8}
+region: {west: -156.2, south: 18.8, east: -154.8, north: 20.2}
+detail:
+  patches: 1024
+  evaluations: 8192
+  depth: 10
+  side: 9
+  points: 262144
+  cell-pixels: 4
+  minimum-height-metres: 0
+  maximum-height-metres: 6500
+  normal-step: {longitude-deg: 0.01, latitude-deg: 0.01}
+  normal-footprint: mesh
+camera:
+  at: {longitude-deg: -155.7, latitude-deg: 19.3, height-metres: 16000}
+  look-at: {longitude-deg: -155.5, latitude-deg: 19.5, height-metres: 1200}
+  near-metres: 1
+film: {width: 640, height: 480, rays: 1, wide-deg: 55}
+sun: {azimuth-deg: 285, altitude-deg: 28, strength-rgb: [2, 1.75, 1.4]}
+ground-rgb: [0.32, 0.27, 0.22]
+sky-rgb: [0.02, 0.025, 0.04]
+ocean: {height-metres: 0, colour-rgb: [0.01, 0.06, 0.10], gloss: 1, index: 1.34}
+exposure: 1.5

@@ -57,7 +57,7 @@ func TestMessageBodyDrawsEveryPageWithinDialogWidth(t *testing.T) {
 	text := "schema validation failed: " + strings.Repeat("unexpected long path/segment ", 20)
 	for _, size := range []float32{16, 24} {
 		work := &Workspace{ui: app.New(), size: size}
-		width := work.messageLineRunes(size)
+		width := work.messageLineRunes(size, 560)
 		lines := wrapMessageLines(text, width)
 		pageSize := messagePageLines(size, 768)
 		context := gg.NewContext(560, 160)
@@ -95,5 +95,21 @@ func TestShortDiagnosticIsBoundedAndSingleLine(t *testing.T) {
 	}
 	if !strings.HasSuffix(got, "…") {
 		t.Fatalf("truncated summary should signal omitted detail: %q", got)
+	}
+}
+
+// TestMessageGroupsPreserveLongLimitations keeps the fallback pager lossless.
+func TestMessageGroupsPreserveLongLimitations(t *testing.T) {
+	groups := []string{"First", "This sentence needs several rows at a larger reading size.", "Last"}
+	pages := paginateMessageGroups(groups, 16, 1)
+	var shown strings.Builder
+	for _, rows := range pages {
+		if len(rows) != 1 {
+			t.Fatalf("page has %d rows, want one", len(rows))
+		}
+		shown.WriteString(rows[0])
+	}
+	if want := strings.Join(groups, ""); shown.String() != want {
+		t.Fatalf("pages recovered %q, want %q", shown.String(), want)
 	}
 }

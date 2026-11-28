@@ -1,0 +1,17 @@
+[
+  {
+    "id": "portrait",
+    "request": "Use a portrait film 96 pixels across and 144 high. Use three rays along each side of a pixel. Leave the camera and its aim alone.",
+    "expected": {"width":96,"height":144,"rays":3,"at":[0,-10,1],"look_at":[0,0,1]}
+  },
+  {
+    "id": "offset-view",
+    "request": "For a 192 by 108 still at one ray along each side of a pixel, put the front camera two metres east and three metres higher than it is now. Keep it looking at the ball's centre.",
+    "expected": {"width":192,"height":108,"rays":1,"at":[2,-10,4],"look_at":[0,0,1]}
+  },
+  {
+    "id": "reframe",
+    "request": "Set the front camera at [0,-8,2] and aim it half a metre above the ball's centre. Use a 112 by 64 frame with four rays along each side of a pixel.",
+    "expected": {"width":112,"height":64,"rays":4,"at":[0,-8,2],"look_at":[0,0,1.5]}
+  }
+]

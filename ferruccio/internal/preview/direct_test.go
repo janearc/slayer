@@ -126,3 +126,69 @@ func TestChildGetsTheCacheTheFlagGave(t *testing.T) {
 		t.Fatalf("the child would get %q", found)
 	}
 }
+
+func TestDirectRejectsReferenceEditsBeforeStartingOrAccepting(t *testing.T) {
+	for _, phase := range []string{"before", "during", "unchanged"} {
+		t.Run(phase, func(t *testing.T) {
+			dir := t.TempDir()
+			setPath := filepath.Join(dir, "rig.yaml")
+			changed := strings.Replace(rigFixture, "stop: 8", "stop: 4", 1)
+			if err := os.WriteFile(setPath, []byte(rigFixture), 0600); err != nil {
+				t.Fatal(err)
+			}
+			if err := os.WriteFile(filepath.Join(dir, "changed.yaml"), []byte(changed), 0600); err != nil {
+				t.Fatal(err)
+			}
+			plan, err := Prepare(Request{
+				Path: filepath.Join(dir, "job.yaml"), Text: rigJobFixture,
+				Profile: Profile{Full: true}, OutputRoot: dir,
+			})
+			if err != nil {
+				t.Fatal(err)
+			}
+			defer plan.Close()
+
+			queuePNG(t, &Plan{Output: filepath.Join(dir, "fixture.png")}, 18, 12)
+			body := "cp fixture.png \"$4\""
+			switch phase {
+			case "before":
+				if err := os.WriteFile(setPath, []byte(changed), 0600); err != nil {
+					t.Fatal(err)
+				}
+			case "during":
+				body = "cp changed.yaml rig.yaml\n" + body
+			}
+			producer, args := fakeSlayer(t, body)
+			var last Update
+			err = runDirect(context.Background(), Tools{Slayer: producer, Cache: dir}, plan, io.Discard,
+				func(update Update) { last = update })
+			receipt := filepath.Join(plan.Directory, "receipt.json")
+			if phase == "unchanged" {
+				if err != nil || !last.Terminal || last.State != "succeeded" {
+					t.Fatalf("unchanged reference gave %v, state %+v", err, last)
+				}
+				raw, err := os.ReadFile(receipt)
+				if err != nil || !strings.Contains(string(raw), "\"f_stop\": 8") {
+					t.Fatalf("accepted receipt lost the rig: %s, %v", raw, err)
+				}
+				return
+			}
+			if err == nil || !strings.Contains(err.Error(), "referenced set changed") {
+				t.Fatalf("changed reference gave %v", err)
+			}
+			if _, err := os.Stat(receipt); !os.IsNotExist(err) || last.State == "succeeded" {
+				t.Fatalf("accepted changed reference: receipt %v, state %+v", err, last)
+			}
+			if phase == "before" {
+				if _, err := os.Stat(args); !os.IsNotExist(err) {
+					t.Fatalf("producer started with a stale profile: %v", err)
+				}
+			}
+			if phase == "during" {
+				if _, err := os.Stat(plan.Output); err != nil || !last.Terminal || last.State != "failed" {
+					t.Fatalf("completed output or refusal lost: %v, state %+v", err, last)
+				}
+			}
+		})
+	}
+}

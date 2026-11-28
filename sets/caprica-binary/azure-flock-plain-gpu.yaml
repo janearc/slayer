@@ -1,0 +1,86 @@
+$schema: https://github.com/janearc/slayer/schemas/ecosystem-v2.json
+# GPU diagnostic: identical placement, but membrane paint is omitted.
+# See AZURE-FLOCK.md for the detailed CPU reference and limitations.
+scene:
+  name: Azure flock, membrane-unpainted GPU diagnostic
+  seed: 241
+  setting: space
+  light: none
+  recipes:
+    pterosaur: {animal: {family: reptile, file: "@builtin", species: hatzegopteryx, study: detailed-plain}}
+  film: {width: 1280, height: 800, rays: 2, exposure: 0.003, wide: 55}
+  cameras:
+    flock:
+      location: {at: [0, 0, 0]}
+      orientation: {look_at: [-200, -38, 8]}
+  set:
+    things:
+      flyer-01: {recipe: pterosaur, seed: 241, east: -82, north: -42, height: {value: 1, unit: m}, heading: {value: 168, unit: deg}}
+      flyer-02: {recipe: pterosaur, seed: 242, east: -82, north: -24, height: {value: 8, unit: m}, heading: {value: 184, unit: deg}}
+      flyer-03: {recipe: pterosaur, seed: 243, east: -82, north: -6, height: {value: 2, unit: m}, heading: {value: 193, unit: deg}}
+      flyer-04: {recipe: pterosaur, seed: 244, east: -82, north: 12, height: {value: 10, unit: m}, heading: {value: 174, unit: deg}}
+      flyer-05: {recipe: pterosaur, seed: 245, east: -116, north: -54, height: {value: 12, unit: m}, heading: {value: 188, unit: deg}}
+      flyer-06: {recipe: pterosaur, seed: 246, east: -116, north: -36, height: {value: 3, unit: m}, heading: {value: 165, unit: deg}}
+      flyer-07: {recipe: pterosaur, seed: 247, east: -116, north: -18, height: {value: 15, unit: m}, heading: {value: 180, unit: deg}}
+      flyer-08: {recipe: pterosaur, seed: 248, east: -116, north: 0, height: {value: 6, unit: m}, heading: {value: 195, unit: deg}}
+      flyer-09: {recipe: pterosaur, seed: 249, east: -150, north: -65, height: {value: 4, unit: m}, heading: {value: 173, unit: deg}}
+      flyer-10: {recipe: pterosaur, seed: 250, east: -150, north: -47, height: {value: 17, unit: m}, heading: {value: 190, unit: deg}}
+      flyer-11: {recipe: pterosaur, seed: 251, east: -150, north: -29, height: {value: 7, unit: m}, heading: {value: 166, unit: deg}}
+      flyer-12: {recipe: pterosaur, seed: 252, east: -150, north: -11, height: {value: 19, unit: m}, heading: {value: 182, unit: deg}}
+  world:
+    unit: 1
+    sky:
+      stars: {seed: 29, share: 0.06, size: 0.5, bright: 0.9}
+      source: eye
+    binaries:
+      pair:
+        generate:
+          primary: {mass: 2.45, age: 1.2e7}
+          companion: {mass: 0.62, temperature: 7400, radius: 0.0122}
+          separation: 9.2
+          eccentricity: 0.16
+          drop: {mass: 0.1, temperature: 3000, age: 1.0e9, distance: 48, phase: 8, made_up: true}
+        drop_at: [3830375473414, -2214876735866, -46725997.1872]
+        time: 4
+    bodies:
+      azure:
+        generate:
+          mass: 17.15
+          makeup: {metal: 0.03, rock: 0.12, ice: 0.70, gas: 0.15}
+          day: 16
+          tilt: 20
+          distance: 20
+          sun: {mass: 2.45, luminosity: 50.6292440418}
+          age: 1.2e7
+          seed: 29
+          giant_look:
+            made_up: true
+            paints: [[0.03, 0.08, 0.2], [0.12, 0.42, 0.65], [0.58, 0.85, 0.9], [0.08, 0.25, 0.5], [0.25, 0.65, 0.75], [0.04, 0.12, 0.3], [0.45, 0.7, 0.85]]
+            roil: 0.09
+            shear: 5
+            grain: 0.06
+            fine: 0.04
+            mottle: 0.4
+            jets: 14
+        middle: [0, 0, -46725997.1872]
+        detail: 3
+    wisps:
+      # Made-up local clouds; they are not resolved giant weather.
+      low-blue-bank:
+        middle: [-235, -45, -85]
+        radius: 125
+        thick: 0.002
+        seed: 308
+        scale: 34
+        amount: 0.82
+        colour: {srgb_linear: [0.20, 0.52, 0.84]}
+        source: eye
+      high-pale-bank:
+        middle: [-340, -25, 102]
+        radius: 115
+        thick: 0.001
+        seed: 309
+        scale: 47
+        amount: 0.86
+        colour: {srgb_linear: [0.46, 0.72, 0.95]}
+        source: eye

@@ -1,0 +1,4 @@
+# the last check before a release is tagged, about half an hour; its
+# README is tools/ship-ready/README.md. --runner OWNER/REPO adds a run
+# on GitHub's Mac: game run ship-ready -- --runner OWNER/REPO
+ship-ready . :: /bin/sh tools/ship-ready/ship-ready.sh

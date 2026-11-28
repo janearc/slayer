@@ -10,6 +10,7 @@ type stageRequest struct {
 	path, source, kind string
 	generation         uint64
 	build              stageBuild
+	prepare            stagePrepare
 }
 
 // stageResult transfers ownership of the staged view to its receiver.
@@ -20,6 +21,9 @@ type stageResult struct {
 }
 
 type stageBuild func(context.Context, string, string, string) (*stagedView, error)
+
+// stagePrepare may supply a lightweight scene without invoking the helper.
+type stagePrepare func(context.Context, string, string, string) (*stagedView, error)
 
 // stageLoader runs at most one build and keeps only the latest waiting request.
 type stageLoader struct {
@@ -32,6 +36,7 @@ type stageLoader struct {
 	ready          *stageResult
 	cancel         context.CancelFunc
 	active, closed bool
+	preparing      bool
 }
 
 // newStageLoader creates an idle loader around build.
@@ -44,13 +49,17 @@ func (loader *stageLoader) request(path, source, kind string) {
 
 // requestBuild captures the configuration belonging to this particular text.
 func (loader *stageLoader) requestBuild(path, source, kind string, build stageBuild) {
+	loader.requestPreparedBuild(path, source, kind, nil, build)
+}
+
+func (loader *stageLoader) requestPreparedBuild(path, source, kind string, prepare stagePrepare, build stageBuild) {
 	loader.mu.Lock()
 	if loader.closed {
 		loader.mu.Unlock()
 		return
 	}
 	loader.generation++
-	loader.pending = &stageRequest{path: path, source: source, kind: kind, generation: loader.generation, build: build}
+	loader.pending = &stageRequest{path: path, source: source, kind: kind, generation: loader.generation, build: build, prepare: prepare}
 	stale := loader.ready
 	loader.ready = nil
 	if loader.cancel != nil {
@@ -110,6 +119,7 @@ func (loader *stageLoader) startLocked() {
 	ctx, cancel := context.WithCancel(context.Background())
 	loader.cancel = cancel
 	loader.active = true
+	loader.preparing = request.prepare != nil
 	loader.workers.Add(1)
 	go loader.run(ctx, request)
 }
@@ -117,7 +127,20 @@ func (loader *stageLoader) startLocked() {
 // run disposes a superseded result before starting the newest request.
 func (loader *stageLoader) run(ctx context.Context, request stageRequest) {
 	defer loader.workers.Done()
-	view, err := request.build(ctx, request.path, request.source, request.kind)
+	var view *stagedView
+	var err error
+	if request.prepare != nil {
+		view, err = request.prepare(ctx, request.path, request.source, request.kind)
+		loader.mu.Lock()
+		loader.preparing = false
+		if err == nil {
+			err = ctx.Err()
+		}
+		loader.mu.Unlock()
+	}
+	if err == nil && view == nil {
+		view, err = request.build(ctx, request.path, request.source, request.kind)
+	}
 	loader.mu.Lock()
 	ready := false
 	if loader.closed || request.generation != loader.generation {
@@ -132,8 +155,17 @@ func (loader *stageLoader) run(ctx context.Context, request stageRequest) {
 	loader.active = false
 	loader.cancel = nil
 	loader.startLocked()
-	loader.mu.Unlock()
 	if ready && loader.notify != nil {
+		loader.notify()
+	}
+	loader.mu.Unlock()
+}
+
+// wakePreparing serializes the window wake with close and supersession.
+func (loader *stageLoader) wakePreparing(ctx context.Context) {
+	loader.mu.Lock()
+	defer loader.mu.Unlock()
+	if !loader.closed && ctx.Err() == nil && loader.notify != nil {
 		loader.notify()
 	}
 }
@@ -150,14 +182,16 @@ func (loader *stageLoader) take() (stageResult, bool) {
 	return result, true
 }
 
-// close cancels active work and releases any result not yet taken.
-func (loader *stageLoader) close() {
+// close cancels active work and releases a result not yet taken. A true
+// result means only read-only preparation is active. It may finish later.
+func (loader *stageLoader) close() bool {
 	loader.mu.Lock()
 	if loader.closed {
 		loader.mu.Unlock()
-		return
+		return false
 	}
 	loader.closed = true
+	preparing := loader.preparing
 	loader.pending = nil
 	if loader.cancel != nil {
 		loader.cancel()
@@ -171,6 +205,7 @@ func (loader *stageLoader) close() {
 	if ready != nil {
 		go func() { defer loader.workers.Done(); _ = ready.view.close() }()
 	}
+	return preparing
 }
 
 // wait joins workers after close has prevented any new requests.

@@ -3,9 +3,20 @@ package session
 import (
 	"flag"
 	"fmt"
+	"io"
 
 	"github.com/janearc/slayer/set"
 )
+
+// toldOf says, before a picture is drawn, each line a staged set has to
+// say: a departure of its fantasy block from what is measured or derived,
+// and each "made up:" line of a number the set made up and drew anyway. The
+// command's own draw said them; a job's drew in silence.
+func toldOf(out io.Writer, given asked) {
+	for _, line := range given.departures {
+		fmt.Fprintln(out, line)
+	}
+}
 
 // the scene flags a set's fantasy block may also say; the command line
 // stands over the block

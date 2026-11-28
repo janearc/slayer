@@ -318,6 +318,20 @@ func (field PropellerCavitation) fragmentShare(x, y, downstream float64) float64
 	return fragment
 }
 
+// filament is one blade's Gaussian core at a squared distance from its
+// centre, cut at propellerCoreSupport standard deviations and lowered by its
+// own value there, so it reaches zero at the cut and does not step. 2026-11-26:
+// as a step (about 0.011 of the peak) a sample within rounding of the cut
+// was inside in float32 and outside in float64, and the two draws differed.
+func filament(squared, width float64) float64 {
+	cut := propellerCoreSupport * propellerCoreSupport
+	if squared > cut*width*width {
+		return nought
+	}
+	return math.Max(nought, math.Exp(-gaussianHalf*squared/(width*width))-
+		math.Exp(-gaussianHalf*cut))
+}
+
 // Density is the sum of compact Gaussian cores. Their phase advances at
 // authored shaft RPM and their downstream position is convected at the
 // authored slipstream speed. Linear pressure recovery and the explicit
@@ -339,11 +353,7 @@ func (field PropellerCavitation) Density(point maths.Vec) float64 {
 		centre := field.filamentCentre(downstream, blade).Sub(field.origin).
 			Sub(field.axis.Scale(downstream))
 		cx, cy := centre.Dot(field.radial), centre.Dot(field.cross)
-		squared := (x-cx)*(x-cx) + (y-cy)*(y-cy)
-		if squared > propellerCoreSupport*propellerCoreSupport*width*width {
-			continue
-		}
-		density += math.Exp(-gaussianHalf * squared / (width * width))
+		density += filament((x-cx)*(x-cx)+(y-cy)*(y-cy), width)
 	}
 	if field.spread > nought {
 		density *= (field.core / width) * (field.core / width)

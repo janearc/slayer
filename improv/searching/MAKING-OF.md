@@ -132,7 +132,7 @@ Every completed `searching render` now writes `behind-the-scenes.html`,
 its data and a manifest beside the film. For an older completed take:
 
 ```sh
-game run searching -- explain RENDER_DIRECTORY
+bin/searching explain RENDER_DIRECTORY
 ```
 
 The command refuses changed shot plans or scores and mismatched movie

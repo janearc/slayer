@@ -1,0 +1,9 @@
+"$schema": https://github.com/janearc/slayer/schemas/job-v1.json
+scene: {set: ../../sets/bioforms/adult-human-reach-clip.yaml}
+renderer: cpu
+film: {width: 360, height: 480, rays: 2}
+fps: 24
+duration: {value: 3.5, unit: s}
+outputs:
+  frames: ../../out/adult-human-reach-clip
+  movie: ../../out/adult-human-reach-clip.mp4

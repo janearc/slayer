@@ -1,4 +1,4 @@
-written by `game signature` and committed. taken at 0a1d1e3.
+written by `game signature` and committed. taken at 2407143.
 
 # signature
 
@@ -6,28 +6,28 @@ written by `game signature` and committed. taken at 0a1d1e3.
 
 | directory | go | test | ratio | other | files |
 | --- | ---: | ---: | ---: | ---: | ---: |
-| . | 0 | 0 | - | 8273 | 18 |
+| . | 0 | 0 | - | 7632 | 17 |
 | .game5 | 0 | 0 | - | 7 | 1 |
 | .game5/excludes | 0 | 0 | - | 31 | 1 |
 | .game5/lint | 0 | 0 | - | 16 | 3 |
 | .game5/needs | 0 | 0 | - | 5 | 1 |
 | .game5/omissions | 0 | 0 | - | 37 | 1 |
-| .game5/runs | 0 | 0 | - | 230 | 136 |
+| .game5/runs | 0 | 0 | - | 234 | 137 |
 | .game5/sweep | 0 | 0 | - | 3 | 1 |
 | .game5/targets | 0 | 0 | - | 23 | 10 |
 | .game5/wants | 0 | 0 | - | 8 | 2 |
-| .github | 0 | 0 | - | 95 | 2 |
-| .github/workflows | 0 | 0 | - | 101 | 2 |
+| .github | 0 | 0 | - | 94 | 2 |
+| .github/workflows | 0 | 0 | - | 94 | 2 |
 | .idea | 0 | 0 | - | 31 | 4 |
 | airlight | 1267 | 2336 | 1.8 | 0 | 18 |
 | airlight/mocks | 84 | 0 | 0.0 | 0 | 1 |
 | airs | 1418 | 1770 | 1.2 | 714 | 20 |
 | arid | 4093 | 4055 | 1.0 | 127 | 44 |
 | art | 0 | 0 | - | 25 | 1 |
-| azazel | 0 | 0 | - | 1123 | 12 |
-| azazel/cmd/azazel | 684 | 821 | 1.2 | 183 | 17 |
-| azazel/engine | 164 | 271 | 1.7 | 12 | 6 |
-| azazel/examples/validation | 0 | 0 | - | 57 | 3 |
+| azazel | 0 | 0 | - | 799 | 9 |
+| azazel/cmd/azazel | 684 | 821 | 1.2 | 185 | 17 |
+| azazel/engine | 164 | 271 | 1.7 | 5 | 6 |
+| azazel/examples/validation | 0 | 0 | - | 55 | 3 |
 | azazel/internal/budget | 2362 | 5093 | 2.2 | 0 | 38 |
 | azazel/internal/budget/testdata | 0 | 0 | - | 406 | 5 |
 | azazel/internal/budget/testdata/rapid/TestAdmissionObservationHistoriesCannotResume | 0 | 0 | - | 8 | 1 |
@@ -39,17 +39,17 @@ written by `game signature` and committed. taken at 0a1d1e3.
 | azazel/internal/budget/testdata/rapid/TestReservationSequencesPreserveEarlierClaims | 0 | 0 | - | 10 | 1 |
 | azazel/internal/budget/testdata/rapid/TestStopSequencesRequireEligibleExplicitResume | 0 | 0 | - | 15 | 1 |
 | azazel/internal/footprint | 371 | 259 | 0.7 | 0 | 8 |
-| azazel/internal/locking | 71 | 539 | 7.6 | 23 | 5 |
+| azazel/internal/locking | 71 | 539 | 7.6 | 17 | 5 |
 | azazel/internal/locking/testdata | 0 | 0 | - | 20 | 2 |
 | azazel/internal/locking/testdata/rapid/TestNativeLockGeneratedOwnership | 0 | 0 | - | 9 | 1 |
 | azazel/internal/locking/testdata/rapid/TestNativeReleaseGeneratedOwnership | 0 | 0 | - | 9 | 1 |
-| azazel/internal/processinfo | 483 | 1112 | 2.3 | 224 | 9 |
+| azazel/internal/processinfo | 483 | 1112 | 2.3 | 225 | 9 |
 | azazel/internal/processinfo/testdata | 0 | 0 | - | 4 | 1 |
 | azazel/internal/processinfo/testdata/rapid/TestIdentityGeneratedRoundTrip | 0 | 0 | - | 10 | 1 |
 | azazel/internal/processinfo/testdata/rapid/TestNativeUsageGeneratedInvalidInputsIsTheAntiProperty | 0 | 0 | - | 22 | 2 |
 | azazel/internal/processinfo/testdata/rapid/TestNativeUsageGeneratedStableCurrentReads | 0 | 0 | - | 3 | 1 |
 | azazel/internal/processinfo/testdata/rapid/TestOwnerGeneratedPIDReuseNeverMatches | 0 | 0 | - | 6 | 1 |
-| azazel/internal/publication | 391 | 2694 | 6.9 | 486 | 35 |
+| azazel/internal/publication | 391 | 2694 | 6.9 | 410 | 32 |
 | azazel/internal/publication/testdata | 0 | 0 | - | 38 | 3 |
 | azazel/internal/publication/testdata/rapid/TestExclusiveInstallGeneratedBytesArriveWhole | 0 | 0 | - | 7 | 1 |
 | azazel/internal/publication/testdata/rapid/TestExclusiveInstallGeneratedIncumbentsRemain | 0 | 0 | - | 7 | 1 |
@@ -59,10 +59,10 @@ written by `game signature` and committed. taken at 0a1d1e3.
 | azazel/internal/publication/testdata/rapid/TestPreparedGeneratedFailuresRetainEvidence | 0 | 0 | - | 8 | 1 |
 | azazel/internal/publication/testdata/rapid/TestReplacementGeneratedBytesArriveWhole | 0 | 0 | - | 5 | 1 |
 | azazel/internal/publication/testdata/rapid/TestTemporaryCleanupGeneratedCauses | 0 | 0 | - | 13 | 1 |
-| azazel/internal/queue | 2827 | 4680 | 1.7 | 39 | 55 |
-| azazel/internal/storageprobe | 0 | 169 | - | 53 | 3 |
+| azazel/internal/queue | 2827 | 4680 | 1.7 | 15 | 55 |
+| azazel/internal/storageprobe | 0 | 169 | - | 50 | 3 |
 | azazel/internal/telemetry | 838 | 822 | 1.0 | 0 | 9 |
-| azazel/pages | 2515 | 2407 | 1.0 | 217 | 29 |
+| azazel/pages | 2515 | 2407 | 1.0 | 132 | 29 |
 | azazel/pages/testdata/fixture | 0 | 0 | - | 34 | 1 |
 | azazel/pages/testdata/fixture/tree/animations/2026-11-02-team-heard-film | 0 | 0 | - | 9 | 2 |
 | azazel/pages/testdata/fixture/tree/frames/2026-11-01-studio-sky | 0 | 0 | - | 4 | 2 |
@@ -81,7 +81,7 @@ written by `game signature` and committed. taken at 0a1d1e3.
 | biome/testdata | 0 | 0 | - | 172 | 4 |
 | biome/testdata/golden | 0 | 0 | - | 3651 | 1 |
 | burning-trousers | 0 | 0 | - | 55 | 4 |
-| burning-trousers/animation | 0 | 324 | - | 25 | 3 |
+| burning-trousers/animation | 0 | 324 | - | 20 | 3 |
 | burning-trousers/bench | 0 | 122 | - | 0 | 1 |
 | burning-trousers/cmd/apart | 74 | 248 | 3.4 | 0 | 2 |
 | burning-trousers/divergence | 100 | 106 | 1.1 | 0 | 2 |
@@ -92,7 +92,7 @@ written by `game signature` and committed. taken at 0a1d1e3.
 | burning-trousers/fixture/testdata | 0 | 0 | - | 482 | 2 |
 | burning-trousers/kernel | 0 | 303 | - | 0 | 4 |
 | burning-trousers/manufactory | 0 | 588 | - | 0 | 6 |
-| burning-trousers/mesh | 0 | 926 | - | 157 | 6 |
+| burning-trousers/mesh | 0 | 926 | - | 151 | 6 |
 | burning-trousers/mocks | 9 | 0 | 0.0 | 17 | 2 |
 | burning-trousers/mocks/mediummock | 137 | 0 | 0.0 | 0 | 1 |
 | burning-trousers/mocks/shapemock | 107 | 0 | 0.0 | 0 | 1 |
@@ -105,7 +105,7 @@ written by `game signature` and committed. taken at 0a1d1e3.
 | camera | 308 | 789 | 2.6 | 0 | 9 |
 | camera/testdata | 0 | 0 | - | 72 | 2 |
 | cast | 85 | 75 | 0.9 | 0 | 2 |
-| cheeptune | 6543 | 5353 | 0.8 | 2103 | 89 |
+| cheeptune | 6543 | 5353 | 0.8 | 1816 | 89 |
 | cheeptune/audition | 1104 | 926 | 0.8 | 0 | 14 |
 | cheeptune/builtin | 0 | 0 | - | 848 | 20 |
 | cheeptune/candidates | 0 | 0 | - | 1052 | 13 |
@@ -140,14 +140,15 @@ written by `game signature` and committed. taken at 0a1d1e3.
 | contrib/nvim | 16 | 40 | 2.5 | 94 | 3 |
 | cuesheet | 1058 | 693 | 0.7 | 15 | 12 |
 | dependencies/patches | 0 | 0 | - | 183 | 1 |
-| diskcache | 813 | 1253 | 1.5 | 123 | 19 |
+| diskcache | 813 | 1253 | 1.5 | 33 | 19 |
 | diskcache/testdata | 0 | 0 | - | 20 | 1 |
-| doc | 0 | 0 | - | 12064 | 111 |
-| doc/applications/ferruccio | 0 | 0 | - | 548 | 9 |
+| doc | 0 | 0 | - | 10661 | 111 |
+| doc/applications/ferruccio | 0 | 0 | - | 304 | 12 |
+| doc/applications/ferruccio/quick-start-images | 0 | 0 | - | 0 | 2 |
 | doc/design | 0 | 0 | - | 95 | 3 |
-| doc/examples/jobs | 0 | 0 | - | 101 | 11 |
+| doc/examples/jobs | 0 | 0 | - | 104 | 11 |
 | doc/examples/jobs/alfa | 0 | 0 | - | 180 | 3 |
-| doc/model/bioform | 0 | 0 | - | 145 | 2 |
+| doc/model/bioform | 0 | 0 | - | 109 | 2 |
 | doc/model/bioform/allosaurus | 0 | 0 | - | 130 | 1 |
 | doc/model/bioform/bay-seal | 0 | 0 | - | 75 | 1 |
 | doc/model/bioform/hatzegopteryx | 0 | 0 | - | 199 | 2 |
@@ -157,23 +158,23 @@ written by `game signature` and committed. taken at 0a1d1e3.
 | doc/model/bioform/purussaurus | 0 | 0 | - | 138 | 1 |
 | doc/model/bioform/walrus | 0 | 0 | - | 178 | 1 |
 | doc/model/boat | 0 | 0 | - | 480 | 6 |
-| doc/model/city | 0 | 0 | - | 285 | 3 |
+| doc/model/city | 0 | 0 | - | 284 | 3 |
 | doc/model/fire | 0 | 0 | - | 492 | 4 |
 | doc/model/material | 0 | 0 | - | 176 | 3 |
 | doc/model/observatory | 0 | 0 | - | 875 | 12 |
 | doc/model/ocean | 0 | 0 | - | 501 | 8 |
 | doc/model/sky | 0 | 0 | - | 615 | 7 |
-| doc/model/spacecraft | 0 | 0 | - | 417 | 7 |
-| doc/model/spacecraft/guide | 0 | 0 | - | 1707 | 4 |
+| doc/model/spacecraft | 0 | 0 | - | 378 | 7 |
+| doc/model/spacecraft/guide | 0 | 0 | - | 518 | 4 |
 | doc/model/spacecraft/guide/images | 0 | 0 | - | 0 | 9 |
 | doc/model/spacecraft/guide/images/step-7-frames | 0 | 0 | - | 0 | 8 |
 | doc/model/spacecraft/guide/jobs | 0 | 0 | - | 75 | 9 |
 | doc/model/spacecraft/guide/sets | 0 | 0 | - | 249 | 8 |
 | doc/model/terrain | 0 | 0 | - | 187 | 1 |
 | doc/model/vegetation | 0 | 0 | - | 575 | 5 |
-| doc/visualguide | 0 | 0 | - | 2010 | 6 |
+| doc/visualguide | 0 | 0 | - | 1680 | 6 |
 | doc/visualguide/images | 0 | 0 | - | 0 | 31 |
-| door | 7969 | 9539 | 1.2 | 525 | 98 |
+| door | 7969 | 9539 | 1.2 | 476 | 98 |
 | door/testdata | 0 | 0 | - | 97 | 3 |
 | door/testdata/tunes | 0 | 0 | - | 11 | 2 |
 | embers | 412 | 1005 | 2.4 | 0 | 14 |
@@ -181,36 +182,36 @@ written by `game signature` and committed. taken at 0a1d1e3.
 | emit | 733 | 1135 | 1.5 | 0 | 19 |
 | emit/testdata | 0 | 0 | - | 57 | 1 |
 | fermat | 281 | 234 | 0.8 | 0 | 4 |
-| ferruccio | 0 | 0 | - | 849 | 15 |
+| ferruccio | 0 | 0 | - | 781 | 15 |
 | ferruccio/assets | 0 | 0 | - | 0 | 1 |
 | ferruccio/cmd/atelier | 158 | 67 | 0.4 | 0 | 3 |
 | ferruccio/cmd/atelier-capture | 88 | 74 | 0.8 | 0 | 2 |
 | ferruccio/examples | 0 | 0 | - | 536 | 8 |
 | ferruccio/examples/oakland-larson | 0 | 0 | - | 304 | 5 |
 | ferruccio/gallery | 0 | 0 | - | 43 | 1 |
-| ferruccio/internal/assets | 48 | 54 | 1.1 | 18173 | 20 |
+| ferruccio/internal/assets | 48 | 55 | 1.1 | 18232 | 21 |
 | ferruccio/internal/capture | 44 | 70 | 1.6 | 0 | 2 |
-| ferruccio/internal/draft | 1661 | 2195 | 1.3 | 107 | 32 |
-| ferruccio/internal/preview | 2017 | 2785 | 1.4 | 177 | 46 |
+| ferruccio/internal/draft | 1852 | 2307 | 1.2 | 124 | 37 |
+| ferruccio/internal/preview | 2653 | 3593 | 1.4 | 230 | 58 |
 | ferruccio/internal/preview/testdata | 0 | 0 | - | 245 | 6 |
 | ferruccio/internal/studio | 1141 | 400 | 0.4 | 0 | 11 |
-| ferruccio/native | 0 | 0 | - | 628 | 10 |
-| ferruccio/native/cmd/ferruccio | 1714 | 1402 | 0.8 | 0 | 15 |
+| ferruccio/native | 0 | 0 | - | 561 | 10 |
+| ferruccio/native/cmd/ferruccio | 1870 | 1547 | 0.8 | 41 | 20 |
 | ferruccio/native/cmd/ferruccio-stage | 106 | 165 | 1.6 | 0 | 5 |
 | ferruccio/native/internal/appearance | 812 | 409 | 0.5 | 0 | 5 |
 | ferruccio/native/internal/appearance/themes | 0 | 0 | - | 1175 | 18 |
-| ferruccio/native/internal/editor | 761 | 490 | 0.6 | 0 | 5 |
+| ferruccio/native/internal/editor | 778 | 490 | 0.6 | 0 | 5 |
 | ferruccio/native/internal/headless | 114 | 0 | 0.0 | 0 | 1 |
 | ferruccio/native/internal/look | 425 | 293 | 0.7 | 0 | 4 |
 | ferruccio/native/internal/picking | 157 | 220 | 1.4 | 0 | 3 |
 | ferruccio/native/internal/processmetrics | 127 | 117 | 0.9 | 0 | 3 |
 | ferruccio/native/internal/settings | 463 | 336 | 0.7 | 0 | 3 |
-| ferruccio/native/internal/stagewire | 768 | 336 | 0.4 | 0 | 8 |
-| ferruccio/native/internal/workingview | 961 | 461 | 0.5 | 51 | 7 |
-| ferruccio/native/internal/workspace | 7192 | 8618 | 1.2 | 74 | 104 |
+| ferruccio/native/internal/stagewire | 860 | 461 | 0.5 | 0 | 8 |
+| ferruccio/native/internal/workingview | 1090 | 565 | 0.5 | 51 | 9 |
+| ferruccio/native/internal/workspace | 8088 | 10363 | 1.3 | 113 | 117 |
 | ferruccio/native/patches | 0 | 0 | - | 550 | 2 |
 | ferruccio/native/third_party | 0 | 0 | - | 3 | 1 |
-| ferruccio/scripts | 0 | 0 | - | 378 | 8 |
+| ferruccio/scripts | 0 | 0 | - | 537 | 10 |
 | film | 794 | 1023 | 1.3 | 0 | 18 |
 | firefront | 184 | 431 | 2.3 | 0 | 6 |
 | flame | 1256 | 2110 | 1.7 | 0 | 38 |
@@ -220,11 +221,11 @@ written by `game signature` and committed. taken at 0a1d1e3.
 | fuelbed/testdata | 0 | 0 | - | 57 | 1 |
 | geom | 100 | 125 | 1.2 | 0 | 3 |
 | globe | 77 | 156 | 2.0 | 0 | 3 |
-| gpu | 12368 | 24701 | 2.0 | 6300 | 289 |
+| gpu | 12368 | 24701 | 2.0 | 6297 | 289 |
 | gpu/testdata | 0 | 0 | - | 492 | 9 |
 | hud | 816 | 1516 | 1.9 | 20 | 20 |
 | hud/mocks | 56 | 0 | 0.0 | 4 | 2 |
-| improv/cascades | 0 | 0 | - | 39 | 1 |
+| improv/cascades | 0 | 0 | - | 22 | 1 |
 | improv/cascades/figure | 425 | 304 | 0.7 | 0 | 6 |
 | improv/cascades/flatland | 543 | 385 | 0.7 | 0 | 5 |
 | improv/cloudsea | 0 | 78 | - | 917 | 5 |
@@ -233,7 +234,7 @@ written by `game signature` and committed. taken at 0a1d1e3.
 | improv/host | 649 | 355 | 0.5 | 0 | 8 |
 | improv/larson | 0 | 0 | - | 99 | 2 |
 | improv/magnetar | 295 | 574 | 1.9 | 163 | 7 |
-| improv/moonlake | 0 | 0 | - | 4497 | 10 |
+| improv/moonlake | 0 | 0 | - | 4503 | 10 |
 | improv/moonlake/cues | 741 | 637 | 0.9 | 0 | 4 |
 | improv/moonlake/cueshow | 78 | 175 | 2.2 | 0 | 2 |
 | improv/moonlake/cueshow/testdata | 0 | 0 | - | 23 | 2 |
@@ -248,7 +249,7 @@ written by `game signature` and committed. taken at 0a1d1e3.
 | improv/moonlake/mist | 326 | 316 | 1.0 | 0 | 3 |
 | improv/moonlake/mistlake | 120 | 191 | 1.6 | 0 | 2 |
 | improv/moonlake/ocean | 396 | 418 | 1.1 | 0 | 5 |
-| improv/moonlake/omnipositor | 2149 | 3533 | 1.6 | 142 | 36 |
+| improv/moonlake/omnipositor | 2149 | 3533 | 1.6 | 155 | 36 |
 | improv/moonlake/omnipositor/cmd/omnipositor | 1652 | 2553 | 1.5 | 0 | 14 |
 | improv/moonlake/omnipositor/compare | 340 | 475 | 1.4 | 0 | 2 |
 | improv/moonlake/omnipositor/encoder | 343 | 798 | 2.3 | 7 | 4 |
@@ -284,7 +285,7 @@ written by `game signature` and committed. taken at 0a1d1e3.
 | improv/quasar/photonring | 10 | 179 | 17.9 | 87 | 3 |
 | improv/quasar/rings | 515 | 295 | 0.6 | 0 | 9 |
 | improv/quasar/ringshots | 378 | 220 | 0.6 | 0 | 4 |
-| improv/searching | 6844 | 3649 | 0.5 | 35598 | 96 |
+| improv/searching | 6844 | 3649 | 0.5 | 35347 | 96 |
 | improv/searching/studies | 0 | 0 | - | 29334 | 49 |
 | improv/searching/studies/music | 0 | 0 | - | 1938 | 7 |
 | improv/searching/testdata | 0 | 0 | - | 34 | 1 |
@@ -304,7 +305,7 @@ written by `game signature` and committed. taken at 0a1d1e3.
 | internal/appicon | 16 | 44 | 2.8 | 9 | 5 |
 | internal/commandtest | 25 | 36 | 1.4 | 0 | 2 |
 | internal/observability | 1322 | 1050 | 0.8 | 0 | 24 |
-| job | 2847 | 5916 | 2.1 | 1533 | 75 |
+| job | 2847 | 5916 | 2.1 | 1519 | 75 |
 | job/testdata | 0 | 0 | - | 30 | 1 |
 | jobs | 0 | 0 | - | 141 | 18 |
 | jobs/alfa-gas-cloud-proof | 0 | 0 | - | 983 | 11 |
@@ -337,7 +338,7 @@ written by `game signature` and committed. taken at 0a1d1e3.
 | manufacture/cassini-huygens/attached | 0 | 0 | - | 0 | 2 |
 | manufacture/cassini-huygens/cassini | 0 | 0 | - | 0 | 8 |
 | manufacture/cassini-huygens/huygens | 0 | 0 | - | 0 | 2 |
-| manufacture/cities | 25741 | 13633 | 0.5 | 2796 | 206 |
+| manufacture/cities | 25775 | 13681 | 0.5 | 2809 | 207 |
 | manufacture/cities/cultures | 0 | 0 | - | 5844 | 15 |
 | manufacture/geometry | 679 | 26 | 0.0 | 0 | 10 |
 | manufacture/new-horizons | 0 | 0 | - | 24 | 4 |
@@ -383,7 +384,7 @@ written by `game signature` and committed. taken at 0a1d1e3.
 | ninjafilm/curve/testdata | 0 | 0 | - | 15 | 2 |
 | ninjafilm/data | 154 | 302 | 2.0 | 2106 | 9 |
 | ninjafilm/data/testdata | 0 | 0 | - | 9 | 1 |
-| ninjafilm/doc | 0 | 0 | - | 980 | 6 |
+| ninjafilm/doc | 0 | 0 | - | 930 | 6 |
 | ninjafilm/film | 741 | 2021 | 2.7 | 0 | 14 |
 | ninjafilm/film/testdata | 0 | 0 | - | 90 | 17 |
 | ninjafilm/frame | 95 | 425 | 4.5 | 0 | 4 |
@@ -436,14 +437,14 @@ written by `game signature` and committed. taken at 0a1d1e3.
 | render/colour | 165 | 1330 | 8.1 | 0 | 18 |
 | render/compare | 116 | 63 | 0.5 | 0 | 2 |
 | render/emptyspace | 456 | 478 | 1.0 | 22 | 9 |
-| render/finish | 832 | 1691 | 2.0 | 88 | 15 |
+| render/finish | 832 | 1691 | 2.0 | 71 | 15 |
 | render/finish/mocks | 182 | 0 | 0.0 | 4 | 2 |
 | render/finish/testdata | 0 | 0 | - | 7 | 1 |
 | render/frame | 137 | 778 | 5.7 | 0 | 6 |
 | render/frame/testdata | 0 | 0 | - | 78 | 1 |
-| render/live | 1938 | 2883 | 1.5 | 162 | 24 |
+| render/live | 1938 | 2883 | 1.5 | 113 | 24 |
 | render/progress | 406 | 546 | 1.3 | 0 | 11 |
-| render/regioncompare | 944 | 1001 | 1.1 | 79 | 15 |
+| render/regioncompare | 944 | 1001 | 1.1 | 80 | 15 |
 | render/regioninput | 202 | 126 | 0.6 | 21 | 5 |
 | render/regionjudge | 109 | 184 | 1.7 | 30 | 4 |
 | render/regionmanifest | 83 | 96 | 1.2 | 17 | 3 |
@@ -475,7 +476,7 @@ written by `game signature` and committed. taken at 0a1d1e3.
 | scene/island | 980 | 1856 | 1.9 | 0 | 13 |
 | scene/medium | 3137 | 7562 | 2.4 | 521 | 72 |
 | scene/medium/testdata | 93 | 0 | 0.0 | 4050 | 54 |
-| scene/named | 5339 | 3452 | 0.6 | 312 | 65 |
+| scene/named | 5339 | 3452 | 0.6 | 306 | 65 |
 | scene/pier | 198 | 0 | 0.0 | 0 | 2 |
 | scene/seaside | 284 | 0 | 0.0 | 24 | 3 |
 | scene/shape | 2631 | 7793 | 3.0 | 40 | 54 |
@@ -495,9 +496,9 @@ written by `game signature` and committed. taken at 0a1d1e3.
 | section | 575 | 1951 | 3.4 | 0 | 17 |
 | section/testdata | 0 | 0 | - | 334 | 5 |
 | session | 15519 | 30652 | 2.0 | 373 | 365 |
-| session/placement | 1676 | 1205 | 0.7 | 108 | 30 |
+| session/placement | 1698 | 1266 | 0.7 | 88 | 31 |
 | session/testdata | 358 | 0 | 0.0 | 653 | 29 |
-| set | 12139 | 15723 | 1.3 | 13921 | 203 |
+| set | 12139 | 15723 | 1.3 | 13912 | 203 |
 | set/testdata | 0 | 0 | - | 1830 | 20 |
 | sets | 0 | 0 | - | 34033 | 211 |
 | sets/bioforms | 0 | 0 | - | 1958 | 35 |
@@ -507,9 +508,9 @@ written by `game signature` and committed. taken at 0a1d1e3.
 | sets/cassini-huygens-study/huygens | 0 | 0 | - | 54 | 2 |
 | sets/guide | 0 | 0 | - | 107 | 2 |
 | sets/new-horizons-study | 0 | 0 | - | 92 | 5 |
-| sets/oakland-larson | 0 | 0 | - | 315 | 5 |
+| sets/oakland-larson | 0 | 0 | - | 306 | 5 |
 | sets/shots | 0 | 0 | - | 115 | 1 |
-| sets/vanguard | 0 | 0 | - | 465 | 21 |
+| sets/vanguard | 0 | 0 | - | 460 | 21 |
 | shelf | 0 | 0 | - | 4 | 1 |
 | simulation/flow | 862 | 1145 | 1.3 | 142 | 9 |
 | simulation/gravitational | 335 | 684 | 2.0 | 55 | 5 |
@@ -518,7 +519,7 @@ written by `game signature` and committed. taken at 0a1d1e3.
 | simulation/internal/metalwave | 309 | 143 | 0.5 | 33 | 5 |
 | simulation/optics | 295 | 755 | 2.6 | 43 | 5 |
 | simulation/spectral | 424 | 1107 | 2.6 | 123 | 7 |
-| simulation/waves | 376 | 1257 | 3.3 | 77 | 10 |
+| simulation/waves | 376 | 1257 | 3.3 | 75 | 10 |
 | skyglow | 844 | 705 | 0.8 | 0 | 11 |
 | skylight | 1180 | 2022 | 1.7 | 0 | 25 |
 | skytable | 92 | 87 | 0.9 | 0 | 2 |
@@ -553,13 +554,13 @@ written by `game signature` and committed. taken at 0a1d1e3.
 | tools/antitests/testdata/gaps | 0 | 20 | - | 0 | 1 |
 | tools/antitests/testdata/missing | 0 | 8 | - | 0 | 1 |
 | tools/antitests/testdata/old | 0 | 11 | - | 0 | 1 |
-| tools/bootstrap | 0 | 0 | - | 123 | 1 |
 | tools/breakdown | 194 | 213 | 1.1 | 0 | 2 |
 | tools/lighting-census | 730 | 1121 | 1.5 | 1069 | 14 |
 | tools/lighting-census/cmd/report | 49 | 39 | 0.8 | 0 | 2 |
 | tools/maturity | 115 | 136 | 1.2 | 0 | 2 |
 | tools/mutate | 303 | 519 | 1.7 | 0 | 5 |
 | tools/render/alfa-surface-clip | 278 | 152 | 0.5 | 78 | 3 |
+| tools/ship-ready | 0 | 0 | - | 369 | 2 |
 | tools/tiers | 458 | 459 | 1.0 | 7536 | 6 |
 | trace | 8101 | 18393 | 2.3 | 170 | 174 |
 | trace/testdata | 0 | 0 | - | 22 | 1 |
@@ -569,27 +570,27 @@ written by `game signature` and committed. taken at 0a1d1e3.
 | typography/mocks | 100 | 0 | 0.0 | 4 | 2 |
 | typography/testdata | 0 | 0 | - | 8 | 2 |
 | typography/testdata/golden | 0 | 0 | - | 3072 | 1 |
-| validation/clear-interface | 0 | 0 | - | 146 | 3 |
-| validation/ocean-interface | 0 | 0 | - | 101 | 4 |
-| validation/refraction-ab | 0 | 0 | - | 240 | 5 |
+| validation/clear-interface | 0 | 0 | - | 149 | 3 |
+| validation/ocean-interface | 0 | 0 | - | 99 | 4 |
+| validation/refraction-ab | 0 | 0 | - | 235 | 5 |
 | validation/refraction-ab/patches | 0 | 0 | - | 33 | 3 |
 | weather | 1391 | 698 | 0.5 | 305 | 23 |
 | weathering | 2235 | 1651 | 0.7 | 0 | 19 |
-| total | 351340 | 430174 | 1.2 | 296564 | 7389 |
+| total | 353513 | 433323 | 1.2 | 291775 | 7431 |
 
 ## by language
 
 | language | files | lines |
 | --- | ---: | ---: |
-| go | 2160 | 351340 |
-| go test | 2998 | 430174 |
-| markdown | 377 | 40883 |
-| shell | 17 | 881 |
+| go | 2173 | 353513 |
+| go test | 3017 | 433323 |
+| markdown | 380 | 35794 |
+| shell | 18 | 1098 |
 | c | 9 | 562 |
-| yaml | 771 | 165361 |
-| json | 162 | 45049 |
-| game | 159 | 384 |
-| other | 736 | 43444 |
+| yaml | 772 | 165406 |
+| json | 162 | 45055 |
+| game | 160 | 388 |
+| other | 740 | 43472 |
 
 ## go tests against go
 
@@ -605,6 +606,6 @@ more            25  ##########
 
 ## totals
 
-lines     go 351340, go test 430174, everything 1078078
-files     7389
+lines     go 353513, go test 433323, everything 1078611
+files     7431
 packages  324

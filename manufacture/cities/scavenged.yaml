@@ -4,9 +4,9 @@
 # value is picked, not measured. Dimensions are metres, shares are from zero
 # to one, colours are shares of light, each channel from zero to one, and
 # gloss is how much of a mirror a surface is. Which kinds the parts are
-# drawn from is the set's to say; a set that says none gets any kind that
-# fits the size range here, and the count and band spacing here are what a
-# set that says none gets.
+# drawn from is the set's to say; a set that says none uses the historical
+# candidate list and the size range here. The count and band spacing here
+# are also defaults.
 numbers:
 - name: scavenged-part-count
   value: 12

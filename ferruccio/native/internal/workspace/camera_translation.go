@@ -16,6 +16,9 @@ func (work *Workspace) moveCamera(east, north, up float64) error {
 	if !work.viewer.navigable || work.viewer.source == nil {
 		return fmt.Errorf("a current working camera is required before moving it")
 	}
+	if err := work.cameraEditRefusal(); err != nil {
+		return err
+	}
 	before := work.state.document.Text()
 	if err := work.state.document.MoveCamera(east, north, up); err != nil {
 		return err
@@ -42,6 +45,7 @@ func (ball *cameraBall) moveTravel(rise bool) {
 	if base == nil || ball.radius <= 0 {
 		return
 	}
+	started := workingClock()
 	offset := base.Focus.Sub(base.Eye.Origin)
 	distance := math.Hypot(math.Hypot(offset.X, offset.Y), offset.Z)
 	if distance <= 0 || math.IsInf(distance, 0) {
@@ -65,5 +69,6 @@ func (ball *cameraBall) moveTravel(rise bool) {
 	scene.Focus = scene.Focus.Add(delta)
 	ball.displacement = delta
 	live.scene, live.dirty = scene, true
+	live.timing.moved(started)
 	ball.work.invalidate()
 }

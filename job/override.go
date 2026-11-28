@@ -6,6 +6,8 @@ import (
 	"image"
 	"path/filepath"
 	"time"
+
+	"github.com/janearc/slayer/camera"
 )
 
 // Region puts a rectangle over the job's region.
@@ -170,6 +172,23 @@ func CameraName(name string) Override {
 			wire.Camera = &lens
 			return nil
 		}}
+}
+
+// CameraWide sets the horizontal field of view of a named still camera.
+func CameraWide(degrees float64) Override {
+	return Override{key: "camera-wide", apply: func(wire *document) error {
+		if wire.film() || wire.Camera == nil || wire.Camera.Name == "" {
+			return refusal{fmt.Errorf("camera-wide requires a named still camera")}
+		}
+		if _, err := camera.NewZoom(degrees, degrees, time.Second, ""); err != nil {
+			return refusal{fmt.Errorf("camera-wide: %w", err)}
+		}
+		view := *wire.Camera
+		angle := quantity{Value: degrees, Unit: "deg"}
+		view.Zoom = &zoomWire{From: angle, To: angle, Duration: quantity{Value: 1, Unit: "s"}}
+		wire.Camera = &view
+		return nil
+	}}
 }
 
 // Renderer is the renderer, over the job's.

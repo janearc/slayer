@@ -133,13 +133,16 @@ func (ButtonPainter) ButtonRadius() float32 { return 8 }
 
 // DropdownPainter replaces the upstream DevTools painter's fixed 13px labels.
 type DropdownPainter struct {
-	Size  float32
-	Theme *devtools.Theme
+	Size          float32
+	Theme         *devtools.Theme
+	TriggerPrefix string
 }
 
 // PaintTrigger draws a dropdown trigger with the configured type size.
 func (p DropdownPainter) PaintTrigger(canvas widget.Canvas, state *dropdown.TriggerPaintState) {
-	devtools.DropdownPainter{Theme: p.theme()}.PaintTrigger(fontCanvas{Canvas: canvas, size: normalizedSize(p.Size)}, state)
+	trigger := *state
+	trigger.SelectedText = p.TriggerPrefix + trigger.SelectedText
+	devtools.DropdownPainter{Theme: p.theme()}.PaintTrigger(fontCanvas{Canvas: canvas, size: normalizedSize(p.Size)}, &trigger)
 }
 
 // PaintMenu draws dropdown choices with the configured type size.

@@ -29,7 +29,15 @@ func (reading reader) algaRecipe(name, block *yaml.Node) error {
 	if family == "" || file == "" || species == "" {
 		return fmt.Errorf("%s: alga recipe %s needs family, file and species", reading.file, name.Value)
 	}
-	path, raw, err := reading.profileFile(file)
+	var path, builtin string
+	var raw []byte
+	var err error
+	if file == BuiltinProfileBook {
+		builtin = "alga:" + family
+		path, raw, err = manufacture.EmbeddedAlgaBook(family)
+	} else {
+		path, raw, err = reading.profileFile(file)
+	}
 	if err != nil {
 		return err
 	}
@@ -41,7 +49,11 @@ func (reading reader) algaRecipe(name, block *yaml.Node) error {
 	if err != nil {
 		return fmt.Errorf("%s: %w", path, err)
 	}
+	profilePath := path
+	if builtin != "" {
+		profilePath = ""
+	}
 	reading.set.recipes[name.Value] = Recipe{kind: "alga-profile", profileFamily: family,
-		profileSpecies: species, profileKind: &row, profileDigest: sha256.Sum256(raw), profilePath: path}
+		profileSpecies: species, profileKind: &row, profileDigest: sha256.Sum256(raw), profilePath: profilePath, profileBuiltin: builtin}
 	return nil
 }

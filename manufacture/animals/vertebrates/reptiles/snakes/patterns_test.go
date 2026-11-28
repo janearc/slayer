@@ -24,26 +24,50 @@ func TestSaddlesHaveIrregularOutlinedDorsalBlotches(t *testing.T) {
 		p := testProfile(t, name)
 		t.Run(name, func(t *testing.T) {
 			threshold := (brightness(p.Pattern.Base) + brightness(p.Pattern.Mark)) / 2
-			fewest, most, outlined := 101, 0, 0
+			fewest, most, outlined, displaced := 101, 0, 0, 0
+			// A warped marking can cross a nominal cell boundary, so a
+			// single world-space cell no longer measures a saddle's width.
+			// Measure the underlying cell geometry without that displacement;
+			// separately check coverage and outlines on the actual warped coat.
+			unwarped := p
+			unwarped.Pattern.Warp.Strength = 0
+			var warpedCounts []int
 			for cell := 5; cell < 13; cell++ {
-				count := 0
+				count, warped := 0, 0
 				for sample := 0; sample < 100; sample++ {
 					along := (float64(cell) + (float64(sample)+.5)/100) / p.Pattern.Repeat
 					colour := brightness(sampleCoat(p, along, 0))
-					if colour < threshold {
+					straight := brightness(sampleCoat(unwarped, along, 0))
+					if straight < threshold {
 						count++
+					}
+					if math.Abs(colour-straight) > .01 {
+						displaced++
+					}
+					if colour < threshold {
+						warped++
 					}
 					if colour > brightness(p.Pattern.Base)+.01 {
 						outlined++
 					}
 				}
 				fewest, most = min(fewest, count), max(most, count)
+				warpedCounts = append(warpedCounts, warped)
 			}
 			if outlined == 0 {
 				t.Fatal("saddles have no pale outlines")
 			}
+			if p.Pattern.Warp.Strength > 0 && displaced == 0 {
+				t.Fatal("coat warp did not displace any dorsal markings")
+			}
 			if fewest < 10 || most > 85 || most-fewest < 8 {
 				t.Fatalf("saddle widths vary too little or cover incorrectly: %d..%d samples", fewest, most)
+			}
+			for i := 0; i+2 < len(warpedCounts); i++ {
+				covered := warpedCounts[i] + warpedCounts[i+1] + warpedCounts[i+2]
+				if covered < 30 || covered > 255 {
+					t.Errorf("warped coat coverage in cells %d..%d: %d of 300", i+5, i+7, covered)
+				}
 			}
 		})
 	}

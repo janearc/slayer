@@ -1,0 +1,9 @@
+$schema: https://github.com/janearc/slayer/schemas/job-v1.json
+# One first CPU preview of the fully detailed model.
+scene: {set: azure-flock-local.yaml}
+renderer: cpu
+film: {width: 960, height: 600, rays: 1, wide: 55}
+camera: {name: flock}
+outputs:
+  picture: ../../out/2026-11-27-azure-flock-preview/proof.png
+  raw: ../../out/2026-11-27-azure-flock-preview/light.pfm

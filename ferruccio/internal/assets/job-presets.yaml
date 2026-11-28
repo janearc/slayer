@@ -1,0 +1,52 @@
+# the film presets: a picture's size in pixels and, for the previews, a
+# rate in frames a second. the job schema's preset enum and the table in
+# README.md hold the same names, in the same order; a test holds them
+# together. by says who picked each and when, or where it came from.
+presets:
+  - name: portrait
+    width: 1080
+    height: 1920
+    by: picked, the job design note, 2026-11-12; a phone held upright
+  - name: half-portrait
+    width: 1080
+    height: 960
+    by: picked, 2026-11-16; half a portrait frame split horizontally
+  - name: portrait-preview
+    width: 360
+    height: 640
+    rate: 6
+    by: picked, the job design note, 2026-11-12; a third of portrait
+  - name: 4k
+    width: 3840
+    height: 2160
+    by: picked, the job design note, 2026-11-12; the 4K UHD frame
+  - name: 2k
+    width: 2048
+    height: 1152
+    by: picked, the job design note, 2026-11-12; 2048 across at 16 by 9
+  - name: "720"
+    width: 1280
+    height: 720
+    by: picked, the job design note, 2026-11-12; the 720p frame
+  - name: "320"
+    width: 320
+    height: 180
+    by: picked, the job design note, 2026-11-12; a quick look at 16 by 9
+  - name: imax
+    width: 4096
+    height: 3002
+    by: the moonlake recipes' size; gpu/rays.go and metal/metal.go measure at it
+  - name: imax-2k
+    width: 2048
+    height: 1501
+    by: the moonlake recipes' size; CHANGELOG.md records the 2048 by 1501 draw
+  - name: video-preview
+    width: 320
+    height: 180
+    rate: 6
+    by: picked, the job design note, 2026-11-12; a quick film to look at
+  - name: video-preview-720
+    width: 1280
+    height: 720
+    rate: 6
+    by: picked, the job design note, 2026-11-12; a quick film at 720p

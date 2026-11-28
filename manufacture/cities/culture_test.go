@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"slices"
 	"strings"
+	"sync"
 	"testing"
 )
 
@@ -38,6 +39,53 @@ func TestEveryCultureLoadsAndEveryElementIsPickedOrRecalled(t *testing.T) {
 					"a unit and who chose it", name, each.Name)
 			}
 		}
+	}
+}
+
+func TestRepeatedCultureLoadsReuseCheckedLayers(t *testing.T) {
+	allocations := testing.AllocsPerRun(3, func() {
+		_, err := loadCulture("tower")
+		if err != nil {
+			t.Fatal(err)
+		}
+	})
+	// The assembled tower culture has hundreds of elements. Its fresh
+	// copies fit this allowance, but repeated YAML decoding does not.
+	if allocations > 2000 {
+		t.Fatalf("repeated tower load made %.0f allocations", allocations)
+	}
+}
+
+func TestConcurrentCultureLoadsKeepOptionsAndColoursIndependent(t *testing.T) {
+	var loads sync.WaitGroup
+	for range 4 {
+		loads.Go(func() {
+			data, err := loadCulture("portofino")
+			if err != nil {
+				t.Error(err)
+				return
+			}
+			palette := data.elements["palette"].Options
+			if len(palette) == 0 || len(palette[0].Colour) == 0 {
+				t.Error("loaded culture has no palette colour")
+				return
+			}
+			if palette[0].Name == "changed" || palette[0].Colour[0] == -1 {
+				t.Error("another load's changed palette escaped")
+				return
+			}
+			palette[0].Name, palette[0].Colour[0] = "changed", -1
+			delete(data.elements, "palette")
+		})
+	}
+	loads.Wait()
+	data, err := loadCulture("portofino")
+	if err != nil {
+		t.Fatal(err)
+	}
+	palette := data.elements["palette"].Options
+	if len(palette) == 0 || palette[0].Name == "changed" || palette[0].Colour[0] == -1 {
+		t.Fatal("a caller changed the checked culture for future loads")
 	}
 }
 

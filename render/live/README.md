@@ -4,42 +4,16 @@ The view behind `slayer watch JOB`: a job's current frame drawn small at
 once and then finer, in a terminal pane, drawn again when the job file
 changes or a key asks.
 
-The package is pure: it is handed a screen, a stager, a clock and a
-reader of the job, each an interface or a function, and `door` hands it
-the real ones (terminal.Live, a session, time.Now, the door's
-own intake). Its tests hand it mocks made by mockgen.
+The terminal retains the last good picture when a scene fails to read.
+It cancels an obsolete draw when a new edit or key arrives and draws the
+latest view when the worker is ready. Job dimensions and the terminal's
+pixel shape determine how the picture fits.
 
-## The parts
+For a preview, use `slayer watch JOB` in a terminal. Choose
+`--dry-run` to inspect the resolved job and status directory without
+rendering. Use the [render queue](../../doc/azazel.md) for offline jobs.
 
-- `Change` is how much a change costs, in order: nothing; redevelop (the
-  kept light developed again); redraw (the frame drawn again by the open
-  session); restage (the session closed and the job opened again).
-- `Compare(old, new)` is the change between two jobs, read from their
-  canonical forms, key by key, by a table.
-- A `ladder` is the rungs for a pane: the picture fitted to the pane,
-  then drawn at an eighth, a quarter, a half and the whole of that size
-  at one ray, then the whole at two rays and at four. A rung whose
-  predicted time passes the ceiling is not started; the prediction is
-  the last rung's time scaled by pixels and by rays squared.
-- `fitted` is the picture's size in the pane, keeping the job's shape:
-  the pane's pixels are not square (`Screen.Pixel`), so the picture is
-  drawn with square pixels and then resampled onto the pane's, so a
-  circle stays round. A portrait job in a wide pane is a tall picture
-  with bars either side.
-- `view` is the state keys change: the frame shown, the camera chosen,
-  exposure in thirds of a stop, playing or not, and the mode (preview,
-  help, full size). Each key is a row of a table: the key, and what it
-  does to the view and what that costs.
-- `watcher` is the loop. One goroutine owns the view; one worker owns
-  the stage and draws one plan at a time. A key or a file change while a
-  plan runs cancels its context, waits for it to stop, folds everything
-  that came meanwhile into one change, and starts the ladder again.
-- `foot` is the last few notes and errors, newest at the bottom, above
-  the status row. A file that does not read is a line of its own that
-  stays until the file reads again, and the last good picture stays up.
-- The status folder is described below.
-
-## The status folder: the seam a graphical front end attaches to
+## Status files
 
 Beside the job, in `.NAME.watch/` (NAME the job file's name without its
 extension), `watch` keeps three files. Each is written beside itself and
@@ -129,34 +103,11 @@ scene's exposure scaled by the stops chosen. A film's frame is not a
 key of the job and is not written. The status row says the editor must
 reload.
 
-## What it is not
+## Rendering limits
 
-A preview is drawn at preview quality unless the job or `--quality
-exact` says otherwise, and the status row says which. It is never
-evidence of what the final render looks like to the bit. The tracers
-report a frame once it is done, so `f` shows the full frame when it is
-finished, not row by row; a frame already being traced runs to its end
-before a cancel is seen.
+The status row identifies preview or exact quality. The full-size action
+shows a frame when tracing completes. Cancellation of a trace can wait
+for the current frame.
 
-## Tests
-
-Every test is quick: no GPU, no shelf and no staged scene. They run on
-mocks and on temporary folders, under `go test -race ./render/live/`,
-about 4 s with `GOMAXPROCS=3` (the slowest waits on a real poll or on
-a cancelled frame, under 0.3 s each; a few that expect nothing to
-happen wait 100 to 200 ms). Nothing here draws, so there is nothing to
-list under "Tests that draw".
-
-Every positive test is answered by at least one anti-test, marked
-`// anti-test of TestX` (`go run ./tools/antitests ./render/live/`).
-
-The failure cases that matter are covered by anti-tests: a key that
-changes nothing does not cancel a frame; a frame cancelled by a key is
-not a trouble at the foot or in the status; a job that does not read at
-the start is not staged and is in the status as an error until it does;
-a refused job and a panicking scene are told and the loop lands; a
-status that cannot be put in place leaves no stray file.
-
-### Tests with no anti-test, and why
-
-None.
+The tests use temporary folders and mock stages. Run them
+with `game test -- -race ./render/live/...`.

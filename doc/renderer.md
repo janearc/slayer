@@ -1,9 +1,8 @@
 # The Slayer renderer
 
-Slayer combines procedural scene construction, a CPU reference tracer,
-Metal rendering, a linear-light darkroom and film output. A backend is
-one choice within that pipeline; lighting approximations, scene detail,
-camera sampling and development are separate choices.
+Slayer renders stills and films on the CPU or through Metal on macOS.
+choose the backend alongside the scene detail, sampling, lighting and
+development settings.
 
 ## From world to picture
 
@@ -15,11 +14,9 @@ camera sampling and development are separate choices.
 5. Sample averaging makes a linear RGB frame with coverage and depth.
 6. Development applies a print or film stock, then output writes the image.
 
-`trace` is the CPU tracer used by the front door and scene commands.
-There is no second active `render/trace` implementation. `gpu` returns
-the same frame representation. `session.Session` connects jobs, scene
-clocks and retained drawing; `door` handles output, film resume and sound.
-See [package boundaries](../PACKAGES.md).
+the CPU and GPU paths return the same linear-frame representation.
+[package boundaries](../PACKAGES.md) describes staging, tracing,
+development and output in code.
 
 ## Backends
 
@@ -35,7 +32,7 @@ later. All GPU paths validate scene support and return named errors.
 Native queries accelerate meshes; analytic and procedural shapes keep
 their own intersections. A hardware closest-hit candidate is refined
 with Slayer's triangle predicate; failed refinement can use software
-fallback. A native miss remains a miss. This is not a byte-exact cache.
+fallback. a native miss remains a miss.
 
 ## Geometry and fields
 
@@ -53,6 +50,17 @@ every Go callback.
 CPU textures may require finishing records and host
 evaluation. Read the returned unsupported-feature error when adding a type.
 
+An opt-in CPU material can diffuse a portion of direct lamp and sky
+illumination laterally across a smooth, opaque Slayer mesh. This is a
+mesh-based RGB approximation with one Gaussian per channel. Metal
+refuses the material. See [bioform paint and tissue](../bioforms/README.md)
+for the material API, sampling bounds and transport limits.
+
+A separate opt-in CPU response transfers light across a closed mesh
+where opposing faces form a thin slab. It samples visibility and Fresnel
+loss at the lit side and draws from the diffuse budget. Metal refuses
+this response. See [tissue layers](model/bioform/tissue-layers.md).
+
 Boxed and baked fields interpolate prepared samples rather than repeatedly
 calling Go density functions on the device. `gpu.NewRenderer(2..192)`
 offers an explicit longest-side bound for CPU-baked volume grids. It
@@ -62,9 +70,10 @@ appropriate; the ordinary `gpu.Sampled` policy is unchanged.
 
 ## Cameras and time
 
-`rays: n` means `n*n` samples per pixel. Pinhole rays and thin-lens rays
-can be generated on Metal. Other lenses can require CPU-generated rays;
-large requests use stripes to avoid retaining a whole fine ray grid.
+`rays: n` gives `n*n` samples per pixel. for a supported pinhole
+still, `film.samples` gives a total directly. see
+[job sampling](../job/README.md#film) for the supported combinations. Metal can generate pinhole and thin-lens
+rays. other lenses may use CPU-generated rays in stripes.
 
 A film's scene clock is independent of playback time. `scene-duration`
 can compress an hour of weather into thirty seconds; the soundtrack
@@ -78,10 +87,9 @@ The CPU `trace.RenderWithInitialMedia` and
 camera rays inside an explicit ordered stack of clear media. A set camera's
 `initial-media` names that stack; the same staged values go to either backend.
 
-Each entry supplies the refractive index and rank used by clear boundary
-materials, and Slayer does not infer containment from scene geometry. Existing
-calls without a stack still start in air. A moving job camera is refused
-because a fixed authored stack cannot follow it.
+each entry supplies the refractive index and rank used at clear
+surface boundaries. a camera without a stack starts in air. use the
+stack with a fixed camera.
 
 Metal also refuses positive in-scattering, composite passes with optical
 state, and initial media with its gravity kernel. Neither initial stack adds
@@ -105,10 +113,8 @@ when world identity, generation, time, dimensions and mode agree. The
 generation is the caller's promise: reusing it after mutating the world
 can produce stale output.
 
-Ordinary time-advancing sessions may still
-encode on each frame even when device comparison avoids most transfers.
-Retained buffers save allocation and upload; they do not automatically
-eliminate host encoding or tracing.
+time-advancing sessions may still encode and trace every frame.
+retained buffers reduce allocation and upload costs.
 
 The session also reuses unchanged sections of fixed-view films under its
 `scene.film.sections` policy. CPU can redraw rectangles; Metal currently
@@ -134,8 +140,7 @@ Reducing transport resolution and reusing a plate are visible
 approximations. A reused plate freezes surface
 illumination too. Camera motion or zoom requires fresh plates.
 
-Thin
-geometry or beams missed by coarse transport cannot be reconstructed.
+coarse transport can miss thin geometry or beams.
 Scenery samples remain separate until compositing; multiplying independently
 averaged transport and scenery is generally a different estimator.
 
@@ -163,14 +168,13 @@ scene.
 
 ## What correctness means here
 
-Default `quality: exact` is the renderer's own configured answer. It is
-not complete physical transport. The model has finite integration steps,
-limited reflections/refractions and single scattering. Native traversal,
-baked grids and CPU/device arithmetic need their own comparison contracts.
-Unchanged-input repeatability within a path does not establish equality
-between backends or across every native process.
+`quality: exact` requests the full frame from the configured tracer.
+finite integration steps, limited bounces and single scattering still
+apply. compare native traversal, baked fields and CPU/Metal arithmetic
+separately when judging accuracy.
 
-Use CPU reference checks and selected-pixel replay where supported. Keep raw light, development, source
-revision, scene inputs and temporal comparisons with numerical claims.
+use CPU reference checks and selected-pixel replay where supported.
+keep the linear frame, development settings, source revision and scene
+inputs with results.
 [Light](light.md), [modes](modes.md) and [optimizations](optimizations.md)
 explain which choices alter the model or estimator.

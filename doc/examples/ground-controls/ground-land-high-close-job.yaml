@@ -1,0 +1,5 @@
+"$schema": https://github.com/janearc/slayer/schemas/job-v1.json
+scene: {set: ground-land-high.yaml}
+renderer: cpu
+camera: {name: close}
+outputs: {picture: ../../../out/2026-11-27-ground-land-high-close/proof.png}

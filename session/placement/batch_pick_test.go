@@ -14,28 +14,40 @@ func TestBatchHitFindsNearestAuthoredThingAndHonoursBlockers(t *testing.T) {
 	far := StagedBatch{Mesh: mesh, Places: []maths.Subspace{{Origin: maths.V(0, 0, -8)}}, Author: thing.AuthorRef{Collection: "scene.set.things", Name: "city"}, Authored: true}
 	scene := DisplayScene{Batches: []StagedBatch{far, near}}
 	ray := maths.NewRay(maths.V(0, 0, 0), maths.V(0, 0, -2))
-	hit, ok := scene.batchHit(ray, math.Inf(1))
+	hit, ok := scene.batchHit(ray, 0, math.Inf(1))
 	if !ok || hit.ID != "scene.set.things/fish" || math.Abs(hit.Distance-4) > 1e-9 {
 		t.Fatalf("nearest hit = %+v %v", hit, ok)
 	}
 	scene.Batches[1].Authored = false
-	hit, ok = scene.batchHit(ray, math.Inf(1))
+	hit, ok = scene.batchHit(ray, 0, math.Inf(1))
 	if !ok || hit.ID != "scene.world" {
 		t.Fatalf("unowned blocker = %+v %v", hit, ok)
 	}
 	scene.Batches[1].Authored = true
 	scene.Batches[1].Author.Collection = "scene.set.stands"
-	hit, ok = scene.batchHit(ray, math.Inf(1))
+	hit, ok = scene.batchHit(ray, 0, math.Inf(1))
 	if !ok || hit.ID != "scene.set.stands/fish" {
 		t.Fatalf("generated member did not identify its authored group: %+v %v", hit, ok)
 	}
-	scene.Batches[1].Author.Collection = "scene.set.things"
-	mesh.Notice = "approximation"
-	hit, ok = scene.batchHit(ray, math.Inf(1))
-	if !ok || hit.ID != "scene.world" {
-		t.Fatalf("proxy was editable: %+v %v", hit, ok)
+	scene.Batches[1].Author.Collection = "scene.world.imports"
+	hit, ok = scene.batchHit(ray, 0, math.Inf(1))
+	if !ok || hit.ID != "scene.world.imports/fish" || math.Abs(hit.Distance-4) > 1e-9 {
+		t.Fatalf("import did not identify its authored object: %+v %v", hit, ok)
 	}
-	if _, ok := scene.batchHit(maths.NewRay(maths.V(0, 0, 0), maths.V(0, 1, 0)), math.Inf(1)); ok {
+	scene.Batches[1].Authored = false
+	hit, ok = scene.batchHit(ray, 0, math.Inf(1))
+	if !ok || hit.ID != "scene.world" || math.Abs(hit.Distance-4) > 1e-9 {
+		t.Fatalf("unowned import did not block the farther object: %+v %v", hit, ok)
+	}
+	scene.Batches[1].Authored = true
+	proxy := *mesh
+	proxy.Notice = "approximation"
+	scene.Batches[1].Mesh = &proxy
+	hit, ok = scene.batchHit(ray, 0, math.Inf(1))
+	if !ok || hit.ID != "scene.world" || math.Abs(hit.Distance-4) > 1e-9 {
+		t.Fatalf("proxy did not block the farther object: %+v %v", hit, ok)
+	}
+	if _, ok := scene.batchHit(maths.NewRay(maths.V(0, 0, 0), maths.V(0, 1, 0)), 0, math.Inf(1)); ok {
 		t.Fatal("missed ray selected a batch")
 	}
 }
@@ -56,14 +68,14 @@ func TestIndexedBatchPickingMatchesUnindexedAndInvalidatesAfterEdit(t *testing.T
 	want := make([]DisplayHit, len(rays))
 	wantOK := make([]bool, len(rays))
 	for i, ray := range rays {
-		want[i], wantOK[i] = scene.batchHit(ray, math.Inf(1))
+		want[i], wantOK[i] = scene.batchHit(ray, 0, math.Inf(1))
 	}
 	scene.IndexPicking()
 	if len(scene.Batches[0].pickBlocks) != 3 {
 		t.Fatal("large batch did not receive three picking blocks")
 	}
 	for i, ray := range rays {
-		got, ok := scene.batchHit(ray, math.Inf(1))
+		got, ok := scene.batchHit(ray, 0, math.Inf(1))
 		if ok != wantOK[i] || got != want[i] {
 			t.Fatalf("ray %d: indexed %v %v, unindexed %v %v", i, got, ok, want[i], wantOK[i])
 		}
@@ -72,7 +84,7 @@ func TestIndexedBatchPickingMatchesUnindexedAndInvalidatesAfterEdit(t *testing.T
 	// hide the moved geometry.
 	scene.Batches[0].HasBounds = false
 	scene.Batches[0].Places[0].Origin = maths.V(0, 0, -2)
-	got, ok := scene.batchHit(rays[0], math.Inf(1))
+	got, ok := scene.batchHit(rays[0], 0, math.Inf(1))
 	if !ok || math.Abs(got.Distance-2) > 1e-9 {
 		t.Fatalf("moved instance missed after index invalidation: %+v %v", got, ok)
 	}

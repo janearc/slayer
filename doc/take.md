@@ -18,74 +18,31 @@ Slayer renders each glimpse. A ninjafilm roll integrates their light and
 develops the frame, producing motion blur. Frame times derive directly
 from the rate rather than accumulating per-frame delays, avoiding drift.
 
-## API
+## Go API
 
-- **`Cranked(rate, shutter, glimpses)`:** Result: Pace; Validation: Positive
-  finite rate and shutter; shutter at most one turn; at least one glimpse
+- `take.Cranked(rate, shutter, glimpses)` constructs a pace. use a
+  positive finite rate, an opening above zero and at most one full turn
+  in radians, and at least one glimpse.
+- `take.Take(path, pace, length)` constructs a take with a non-nil
+  path and positive duration.
+- `shot.Frames()` counts complete frame intervals.
+- `shot.Glimpses(i)` returns the samples for frame `i`, counted from zero.
+  each sample exposes `At()` for scene time and `Eye()` for the camera
+  transform.
 
-- **`Take(path, pace, length)`:** Result: Take; Validation: Non-nil path,
-  constructed pace, positive duration
+a glimpse sits at the midpoint of its share of the open interval.
+use its time to evaluate the world and its transform to place the
+camera. the [ninjafilm roll](../ninjafilm/README.md) integrates and
+develops the resulting frames.
 
-- **`take.Frames()`:** Result: Number of complete frames; Validation: No error
+## job films
 
-- **`take.Glimpses(number)`:** Result: Samples for a frame; Validation: No
-  error
+a job uses its [film clock](../job/README.md#time) to count frames
+and map playback time to scene time. its
+[shutter](../job/README.md#shutter) averages linear light across
+glimpses. each glimpse costs another trace. start with one for a fixed
+scene and increase the count to resolve motion in the shutter interval.
 
-- **`glimpse.At()`, `glimpse.Eye()`:** Result: Scene time and camera
-  transform; Validation: No error
-
-
-## Choosing a pace
-
-- **rate:** Meaning: Frames per second; Historical reference: Hand-cranked
-  film often ran near 16, with roughly 10-26 possible
-
-- **shutter:** Meaning: Opening angle, in radians; Historical reference: 170
-  degrees: `170*maths.Degree`
-
-- **glimpses:** Meaning: Renders per opening; Historical reference: Choose for
-  motion and rendering cost
-
-
-Every glimpse costs a render. One freezes motion regardless of speed;
-three or more begin to capture blur, though fast motion may need more.
-A stationary camera and scene need only one.
-
-That is a take's own arithmetic. A job's film on the gpu adds to it: inside
-each glimpse the kernel gives every ray of a pixel its own moment of the
-glimpse's share of the shutter and looks from the camera path there, so one
-glimpse blurs a camera's move. It does not blur things that move in the
-scene; those still want glimpses. See `shutter` in `job/README.md`.
-
-Time starts at zero, when the first frame opens. Use each glimpse's `At()`
-for both scene evaluation and camera placement, so moving objects and camera
-share the same clock.
-
-## Example
-
-This films two seconds of a ball on grey ground using every stock:
-
-```go
-roll, err := ninjafilm.Roll(stock, 1921)
-pace, err := take.Cranked(16, 170*maths.Degree, 3)
-shot, err := take.Take(path, pace, 2*time.Second)
-for number := range shot.Frames() {
-    for _, glimpse := range shot.Glimpses(number) {
-        // Render the world at glimpse.At() from glimpse.Eye().
-    }
-    // Develop this frame with roll.Print(number, glimpses).
-}
-```
-
-Error handling is omitted in this outline. Check each error before using
-the resulting value.
-
-## Errors
-
-- **`take: a camera is cranked at a rate above nought, ...`:** Cause: Invalid
-  rate, shutter, or glimpse count; Check: Shutter uses radians and is at most
-  one full turn
-
-- **`take: a take has a path, a pace from Cranked, and a length above
-  nought`:** Cause: Nil path, invalid pace, or nonpositive duration; Check:
-  Handle `Cranked` errors before constructing the take
+on supported Metal paths, each ray can also sample a moving camera
+within a glimpse. moving scenery is evaluated only at the glimpse
+instants.

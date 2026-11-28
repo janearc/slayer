@@ -1,33 +1,28 @@
-# Borrowed Light: opening light studies
+# borrowed light
 
-These are synthetic, deliberately small scene studies for the opening and
-return of the Vanguard reel. They are not accepted hero frames. The set
-coordinates are metres east, north, up; the camera, light, dust and
-materials are artistic choices, not measured values.
+these small Vanguard scenes study a spotlight crossing a receiver and
+painted dust. the cone is an inverse-square point spotlight. the dust is
+an authored single-scattering volume with isotropic scattering.
 
-`borrowed-light-opening.yaml` is the first narrow-spot diagnostic, with a
-moving sphere and a floor receiver. `borrowed-light-anchor.yaml` moves the
-receiver to the editorial highlight target and uses a wider cone. The numbered
-moments are separate still jobs at 0, 1 and 2 seconds. The cone is an inverse
-square point spotlight, not a Gaussian beam. Both scenes use isotropic
-single-scattering painted dust. The dust is not a measured aerosol.
+- [opening study](borrowed-light-opening.yaml) uses a narrow spot, a
+  moving sphere and a floor receiver.
+- [anchor study](borrowed-light-anchor.yaml) places the receiver at the
+  highlight and widens the cone. its jobs sample the scene at
+  [zero](anchor-before.yaml), [one](anchor-interrupted.yaml) and
+  [two seconds](anchor-after.yaml).
 
-At this revision both spot studies show visible beads, stripes and repeated
-shadow forms, because a narrow spot is sampled by the volume march's fixed
-spatial steps. The second scene changes the light footprint and the subject;
-it is not a controlled comparison of sampling algorithms. Neither is accepted.
-
-To keep images out of the source tree, copy a set and its jobs together to a
-new folder under the shared renders home and draw the copied job through the
-Slayer command. For example, from the Slayer checkout, after building the
-`bin/slayer` command with Game:
+from the checkout root, check the first anchor job. to draw it, copy the
+job and its set together so the outputs go beside the copies:
 
 ```sh
-bin/slayer draw /path/to/render-folder/anchor-before.yaml --fresh --renderer cpu
+game run slayer -- assess sets/vanguard/anchor-before.yaml
+mkdir -p out/vanguard
+cp sets/vanguard/anchor-before.yaml sets/vanguard/borrowed-light-anchor.yaml out/vanguard/
+game run slayer -- draw out/vanguard/anchor-before.yaml
 ```
 
-The jobs request a 360 by 320 picture, one ray per pixel, and a matching raw
-PFM next to it. `anchor-interrupted.yaml` and `anchor-after.yaml` use the same
-scene at one and two seconds. Record the build revision, command, output hashes
-and limitations with every new render. This is a framing and transport study,
-not proof of the final camera, photometry, film, visual quality or motion blur.
+the jobs request 360 by 320 pixels at one ray per pixel and retain a PFM
+raw alongside the developed image. the narrow spot can show beads or
+stripes where it intersects the volume march’s fixed steps. the two sets
+change the light footprint and the receiver, so use a fixed set when
+comparing sampling algorithms.

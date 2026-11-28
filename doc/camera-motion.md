@@ -1,8 +1,8 @@
 # Move the camera
 
-A sequence plan can describe camera travel as well as scene time. It retains
-the scene, samples the camera at each frame's elapsed time, and writes the
-same numbered PNGs and resume manifest as a static-camera sequence.
+a film job or sequence plan can move the camera through the scene.
+Slayer samples the camera by elapsed scene time and writes numbered
+PNGs when the job asks for frames.
 
 ```yaml
 camera:
@@ -17,9 +17,10 @@ camera:
       duration: {value: 2, unit: s}
 ```
 
-That is an eight-second move at 3.5 metres per second followed by a two-second
-hold. Set the plan's `duration` to ten seconds to include both. A longer film
-holds the final camera; a shorter one ends during the path.
+the camera moves for eight seconds at 3.5 metres per second and
+holds for two seconds. use ten seconds of scene time to include both.
+a longer clip holds the final camera. a shorter clip ends during
+the path.
 
 Points use Slayer's local scene coordinates: x east, y up, z south. On
 terrain, the origin is the window's northwest corner at its lowest elevation.
@@ -29,26 +30,20 @@ camera.
 The older set-file camera arrays use east, north, up; convert their north
 coordinate to negative z when writing this block.
 
-`look-at` is independent of travel. It stays fixed while the camera moves
-unless a move gives its own `look` (see the end of this document). The
-path must not pass through it. Up defaults to the scene's y axis; an optional
-`up: {x: ..., y: ..., z: ...}` supplies a nonzero alternative.
+`look-at` gives the fixed target. a move can give its own target
+path as `look: {from: POINT, to: POINT}`. a hold with a moving target
+pans in place. adjacent camera positions and look targets must meet,
+and the camera path cannot cross its target. `up` defaults to the
+scene’s y axis. supply a nonzero vector to change it.
 
-The existing look-at orientation chooses another up near a vertical view, so a
-path through that region can roll; this is not a banking controller.
+each move gives either `speed` or `duration`. `speed` stays constant.
+a timed move can set `ease: smooth` to start and finish at zero
+velocity. linear easing is the default. use equal endpoints and a
+positive duration for a hold.
 
-Every move gives exactly one of `speed` and `duration`. Duration can use
-`ease: smooth`, a cubic ease with zero velocity at either end. Speed means
-constant speed, so combining it with smooth easing is refused. The default
-ease is linear.
-
-Consecutive endpoints must meet; holds use equal endpoints with a positive
-duration.
-
-Camera time starts at zero relative to the sequence's start. A sequence
-that starts its fire at 40 seconds still begins at the first camera point.
-Reordering frames or resuming does not advance a mutable playhead. The plan
-hash covers the camera, so a changed move cannot resume into an old film.
+camera time starts at zero relative to the film’s start. a job
+starting its scene at 40 seconds still begins at the first camera
+point. near a vertical view, look-at orientation can roll.
 
 ## Zoom while moving
 
@@ -68,9 +63,8 @@ Add this beside `moves` in the camera block. Smaller angles frame the
 subject tightly; larger angles reveal more surroundings. This controls a
 pinhole lens's field of view, not aperture, exposure or depth of field.
 
-The first and last angles hold outside the zoom's duration. The lens and
-position are sampled from time, so reordered or resumed frames keep the
-same framing. Existing plans without `zoom` keep their scene's fixed lens.
+the first and last angles hold outside the zoom duration. without
+zoom the scene keeps its fixed lens.
 
 ## Hyperlapse: an hour in thirty seconds
 
@@ -89,82 +83,37 @@ scene by twenty seconds. Camera speeds remain metres per scene second;
 camera movement and zoom durations must cover the intended hour too.
 
 Scene `start` is added after this mapping. At start 45 seconds, the first
-three frames sample 45,65 and85 seconds. The final frame samples 3625
-seconds; the hour's end is the end of the last displayed frame interval.
+three frames sample 45, 65 and 85 seconds. the final frame samples
+3625 seconds.
 
-Time-dependent fire, mist and motion receive the accelerated scene clock.
-Explicit Sun and Moon directions stay authored and fixed; this option
-does not add ephemeris-driven sky motion or invent intermediate frames.
+time-dependent fire, mist and motion use the accelerated scene
+clock. authored Sun and Moon directions stay fixed.
 
-[camera-hyperlapse.yaml](camera-hyperlapse.yaml) is a complete smoke example
-with an hour-long camera move and a tight-to-wide zoom. It needs no survey
-data to render. With the binary built, run:
+## Example plans
 
-```sh
-game run hillside -- sequence --plan doc/camera-hyperlapse.yaml
-```
-
-The manifest records the actual scene timestamp for every frame. Resume
-checks those timestamps and the plan hash, so altered time compression or
-zoom cannot silently reuse an old sequence.
-
-## A working wooded-slope plan
-
-For a first look without survey data, use the self-contained smoke plan:
+check the resolved timing, camera and output paths before rendering.
 
 ```sh
-game run demo camera
+bin/slayer draw doc/camera-smoke-sequence.yaml --dry-run
+bin/slayer draw doc/camera-hyperlapse.yaml --dry-run
+bin/slayer draw doc/fire-camera-sequence.yaml --dry-run
 ```
 
-It draws smoke 1 with a three-second move at 2 m/s and a one-second hold: 96
-actual 640x360 frames at 24 fps. The poster goes to `out/demos/camera.png`;
-frames and the resume manifest go to `out/demos/camera/`. This example uses
-the CPU and an authored metre scale.
+- [smoke camera](camera-smoke-sequence.yaml) moves for three seconds
+  and holds for one. it writes 96 frames at 640 by 360 under
+  `out/camera-smoke/`.
+- [smoke hyperlapse](camera-hyperlapse.yaml) fits an hour of camera
+  movement and zoom into 180 frames under `out/camera-hyperlapse/`.
+- [woodland fire](fire-camera-sequence.yaml) moves past a fire and
+  holds its ending view. it uses the woodland set’s external data.
+  use `game run fire-camera-check` to check admission and inputs.
+  its frames go under `out/fire-camera/`.
 
-The original smoke scenes can use different coordinate scales; choose camera
-points and speeds accordingly.
+on a shared machine, submit renders through
+[Azazel](azazel.md#submit-work). use the same job, files and build to
+resume a sequence. see [frame resume](../door/README.md#resume).
 
-[camera-smoke-sequence.yaml](camera-smoke-sequence.yaml) is the complete plan.
-It replaces `scene` with `smoke: 1` and gives the `film` size and sampling.
-The same sequence writer and resume checks serve both routes. Smoke input
-files, when any are declared, must be available and are hashed for resuming.
-
-The plan selects the original scene factory; it does not recreate that scene
-with special demonstration geometry.
-
-The selector needs Game's argument-forwarding fix. `game run demo-one` is a
-fixed smoke still for older Game builds. The [demo guide](demos.md) explains
-the dependency and the menu.
-
-[fire-camera-sequence.yaml](fire-camera-sequence.yaml) moves sideways past the
-existing woodland fire and holds the ending view. It needs the same external
-terrain and lunar data as the woodland scene. Build
-first with `game build`, then:
-
-```sh
-game run fire-camera-check
-game run hillside -- sequence --plan doc/fire-camera-sequence.yaml
-```
-
-Application argument forwarding requires the Game fix described in
-[developing.md](developing.md). The fixed dry-run target works without it.
-Frames go to `out/fire-camera/`. `--output DIR` can choose another directory;
-relative CLI paths use the current working directory.
-
-`--resume` verifies completed frames before reusing them. The interval is half
-open: ten seconds at 24 fps samples 0 through 9 + 23/24 seconds. The explicit
-hold keeps the endpoint visible.
-
-To encode the actual frames, from the checkout root:
-
-```sh
-ffmpeg -framerate 24 -i out/fire-camera/frame-%06d.png \
-  -c:v libx264 -crf 18 -pix_fmt yuv420p out/fire-camera.mp4
-```
-
-Encoding needs FFmpeg. PNGs and the resume manifest do not. Camera motion does
-not yet add collision avoidance, curved splines, or geographic flight
-planning. A sequence plan has no shutter; a job has one (`job/README.md`,
-`shutter`), and on the gpu it blurs a camera's move in one render a frame. A moving look target exists: a move in `hillside`'s
-sequence camera takes `look: {from, to}` (`camera.Move.Looking`). The
-`look-at` key described above stays fixed.
+the sequence format samples at one instant per frame. a
+[job shutter](../job/README.md#shutter) can integrate multiple
+instants and, on supported Metal paths, sample a moving camera
+within a glimpse.

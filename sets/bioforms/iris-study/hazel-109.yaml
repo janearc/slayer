@@ -1,0 +1,48 @@
+# Matched native eye study. Camera coordinates are east, north and up.
+"$schema": https://github.com/janearc/slayer/schemas/ecosystem-v2.json
+scene:
+  name: Adult human iris, hazel seed 109
+  seed: 27
+  setting: space
+  light: none
+  set:
+    things:
+      adult:
+        kind: adult-human-iris-hazel
+        seed: 109
+        heading: {value: 0, unit: deg}
+        position:
+          east: {value: 0, unit: m}
+          north: {value: 0, unit: m}
+          up: {value: 0, unit: m}
+  film: {width: 768, height: 480, rays: 4, exposure: 1, wide: 24}
+  cameras:
+    front:
+      title: Anatomical left eye along the gaze axis
+      location: {at: [0.03150, -0.16000, 1.586]}
+      orientation: {look_at: [0.03150, -0.07565, 1.586]}
+    oblique:
+      title: Anatomical left eye at twenty degrees outboard
+      location: {at: [0.06035, -0.15491, 1.586]}
+      orientation: {look_at: [0.03150, -0.07565, 1.586]}
+  world:
+    unit: 1
+    sky:
+      horizon: {srgb_linear: [0.090, 0.090, 0.090]}
+      zenith: {srgb_linear: [0.060, 0.060, 0.060]}
+      ground: {srgb_linear: [0.040, 0.040, 0.040]}
+      source: eye
+    suns:
+      key:
+        toward: [-0.35, -0.87, 0.34]
+        colour: {srgb_linear: [0.94, 0.94, 0.94]}
+        source: eye
+      fill:
+        toward: [0.61, -0.72, 0.15]
+        colour: {srgb_linear: [0.24, 0.24, 0.24]}
+        source: eye
+    floods:
+      room:
+        colour: {srgb_linear: [0.12, 0.12, 0.12]}
+        strength: 1
+        source: eye

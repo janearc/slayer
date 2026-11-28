@@ -1,8 +1,8 @@
 # A plant from a profile book
 
-A plant recipe can read a species from a profile book beside a set, or from
-another path relative to that set. This is a construction recipe, not a new
-registry name or an alias:
+a plant recipe reads a species from a book relative to its set. the
+[observatory set](observatory-ecosystem.yaml) uses one recipe for a stand
+of redwoods. this recipe selects a valley oak in autumn:
 
 ```yaml
 scene:
@@ -17,7 +17,8 @@ scene:
 
 `file` and `species` are required. `family` selects the construction policy;
 it may be `seasonal`, `conifer`, `fern`, or `cactus`, and defaults to
-`seasonal` when omitted. The corresponding examples are
+`seasonal` when omitted. use `file: "@builtin"` to select the book
+embedded for the family. the corresponding file examples are
 `manufacture/plants/seasonal/profiles.yaml`, `manufacture/plants/conifers/conifer-profiles.yaml`,
 `manufacture/plants/ferns/fern-profiles.yaml`, and `manufacture/plants/cacti/cactus-profiles.yaml`.
 The species must exist in the selected family's book. `season` is optional
@@ -105,7 +106,3 @@ families expose `ReadConiferProfiles`, `ReadFernProfiles`, and
 `NewCactus` methods. Named methods such as `book.NewValleyOak()` select a
 known species without embedding its data in the constructor.
 `manufacture.WithSeason` applies a season where supported.
-
-The existing embedded default profiles and `plant-choices.yaml` still exist;
-this path prepares species data for a separate models repository but does not
-move those defaults or make the shared numerical construction policies external.

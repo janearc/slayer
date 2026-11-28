@@ -1,10 +1,26 @@
 package preview
 
 import (
+	"bytes"
 	"encoding/json"
+	"fmt"
 	"os"
 	"path/filepath"
 )
+
+// verifyFilmReference checks the file identity that informed the film estimate.
+func (plan *Plan) verifyFilmReference(job queueJob) error {
+	reference := plan.Profile.reference
+	if reference.path == "" {
+		return nil
+	}
+	for _, file := range job.Files {
+		if file.Path == reference.path && file.SHA256 == reference.digest {
+			return nil
+		}
+	}
+	return fmt.Errorf("Azazel did not verify the referenced set used for the render settings")
+}
 
 // recordQueueIdentity augments measured image evidence with its verified job.
 func (plan *Plan) recordQueueIdentity(tools Tools, job queueJob) error {
@@ -14,7 +30,9 @@ func (plan *Plan) recordQueueIdentity(tools Tools, job queueJob) error {
 		return err
 	}
 	var receipt map[string]any
-	if err := json.Unmarshal(raw, &receipt); err != nil {
+	decoder := json.NewDecoder(bytes.NewReader(raw))
+	decoder.UseNumber()
+	if err := decoder.Decode(&receipt); err != nil {
 		return err
 	}
 	delete(receipt, "game")

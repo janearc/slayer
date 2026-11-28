@@ -56,8 +56,11 @@ func (book *ReptileProfiles) NewReptile(species, study string) (Kind, error) {
 		if study == "" {
 			study = "composite"
 		}
-		if study != "composite" && study != "cage" && study != "density" {
+		if study != "composite" && study != "cage" && study != "density" && study != "soaring" && study != "detailed" && study != "detailed-plain" && study != "detailed-silver" {
 			return Kind{}, fmt.Errorf("reptile: unsupported pterosaur study %q", study)
+		}
+		if p.Bank != 0 && study != "detailed" && study != "detailed-plain" && study != "detailed-silver" {
+			return Kind{}, fmt.Errorf("reptile: bank is supported only by detailed pterosaur studies")
 		}
 	default:
 		return Kind{}, fmt.Errorf("reptile: unsupported scaffold %q", p.Scaffold)
@@ -104,6 +107,14 @@ func (row reptileStudy) made(from seed) (good, error) {
 			parts, err = hatzegopteryx.NewCage(p, p.Fold, p.Seconds, maths.Local())
 		case "density":
 			parts, err = hatzDensity(p, p.Phase, true, maths.Local())
+		case "soaring":
+			parts, err = hatzegopteryx.NewSoaring(p, maths.Local())
+		case "detailed":
+			return bankedPterosaur(p, false, false)
+		case "detailed-plain":
+			return bankedPterosaur(p, true, false)
+		case "detailed-silver":
+			return bankedPterosaur(p, true, true)
 		default:
 			return good{}, fmt.Errorf("reptile: unsupported pterosaur study %q", row.study)
 		}
@@ -114,6 +125,20 @@ func (row reptileStudy) made(from seed) (good, error) {
 		return good{}, err
 	}
 	return good{native: parts}, nil
+}
+
+// bankedPterosaur applies the authored bank about the animal's forward axis
+// before the scene places or turns it. It is a fixed pose, not flight physics.
+func bankedPterosaur(profile reptiles.Profile, plain, silver bool) (good, error) {
+	made, err := (pterosaurKind{plain: plain, silver: silver}).build(profile.Phase)
+	if err != nil || profile.Bank == 0 {
+		return made, err
+	}
+	bank := maths.NewSubspace(maths.Vec{}, maths.Rotation(maths.XAxis, profile.Bank), 1)
+	for i := range made.native {
+		made.native[i].Motion = thing.Still(made.native[i].At(0).Within(bank))
+	}
+	return made, nil
 }
 
 var defaultReptileProfiles = func() *ReptileProfiles {

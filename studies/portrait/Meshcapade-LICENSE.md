@@ -1,0 +1,1 @@
+Meshcapade's [upstream notice](https://github.com/Meshcapade/SMPL_texture_samples/blob/c87d871c7498fdc98f3cabb7341b5c85c38debaa/LICENSE.md) identifies the [SMPL-Body CC BY 4.0 licence](https://smpl.is.tue.mpg.de/bodylicense.html). This local notice omits the upstream sales contact. See the study README for the source, checksum, attribution and changes.

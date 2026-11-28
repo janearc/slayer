@@ -31,7 +31,8 @@ func (work *Workspace) stockPanel() widget.Widget {
 	choice := dropdown.New(dropdown.Items(labels...), dropdown.Selected(work.play.stockChoice), dropdown.PainterOpt(appearance.DropdownPainter{Theme: work.theme, Size: work.size}), dropdown.OnChange(func(index int, _ string) { work.play.stockChoice = index }))
 	choice.SetID("Development stock")
 	set := work.action("Set stock", true, func() bool { return false }, func() { work.problem(work.changeStock(work.play.stockChoice)) })
-	return primitives.VBox(work.text("Development stock"), choice, work.paragraph("Stock changes development and grain. An existing stock's seed and rating are retained.", appearance.Ink), set).Gap(12)
+	return primitives.VBox(work.text("Development stock"), primitives.HBox(primitives.Expanded(choice)),
+		work.paragraphAtWidth("Stock changes development and grain. An existing stock's seed and rating are retained.", appearance.Ink, playDrawerContentWidth), set).Gap(12)
 }
 
 // changeStock records one undoable job edit without starting a render.

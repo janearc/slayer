@@ -43,9 +43,15 @@ func TestPinnedAssetKeepsActualShelfAndCatalogueRefusalCauses(t *testing.T) {
 				}
 			}
 			asset, err := pinnedAssetAt("fixture", "", near, fetchFlag)
-			if err == nil || err.Error() != cause.Error() ||
-				(fault == "missing-shelf" && !errors.Is(err, cause)) {
-				t.Fatalf("%s was hidden by a later unrelated refusal: %v, want %v", fault, err, cause)
+			want := cause.Error()
+			if fault == "missing-shelf" {
+				want = `dataset "fixture" requires a source shelf: ` + want
+				if !errors.Is(err, cause) {
+					t.Fatalf("missing shelf was hidden by a later unrelated refusal: %v", err)
+				}
+			}
+			if err == nil || err.Error() != want {
+				t.Fatalf("%s: got %v, want %s", fault, err, want)
 			}
 			if asset != nil {
 				t.Fatal("failed pin returned an apparently usable asset")

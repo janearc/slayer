@@ -17,6 +17,7 @@ import (
 	"strconv"
 	"strings"
 	"syscall"
+	"time"
 
 	"github.com/janearc/slayer/ferruccio/internal/draft"
 	"gopkg.in/yaml.v3"
@@ -31,12 +32,12 @@ type Request struct {
 }
 
 // Profile freezes preview dimensions and an optional CPU or GPU renderer
-// choice. GPU is the person's own choice of the GPU renderer and is never set
-// with CPURenderer; with neither, the producer's own renderer is used.
+// choice. With no renderer selected, the producer's own renderer is used.
 type Profile struct {
 	Width, Height int
 	CPURenderer   bool
 	GPU           bool
+	NativeGPU     bool
 	Full          bool
 	Rays          int
 	// Samples is an explicit total per pixel; zero keeps authored sampling.
@@ -46,6 +47,16 @@ type Profile struct {
 	SizePreset string
 	// Camera overrides the authored camera by its producer-defined name.
 	Camera string
+	// CameraWide is the checked horizontal angle inherited from a still job.
+	CameraWide float64
+	// CameraPathRecipe is the checked job camera and still time, frozen at open.
+	CameraPathRecipe string
+	// StillAt preserves an inherited clock when an explicit camera replaces a path.
+	StillAt   time.Duration
+	rig       *physicalRig
+	stock     *developmentStock
+	reference filmReference
+	region    *renderRegion
 }
 
 // Plan owns one temporary input and a fresh output directory.
@@ -64,6 +75,8 @@ type Plan struct {
 type Tools struct {
 	Game, Slayer, Catalogue, GameHome, Shelf, Cache, Data, Azazel, Queue, Agent, Transport string
 	Renderer, Processors                                                                   string
+	// ManageWorker permits a drain process on demand for this Azazel queue.
+	ManageWorker bool
 }
 
 // Prepare checks a still request without changing the source or its outputs.
@@ -92,13 +105,31 @@ func Prepare(request Request) (*Plan, error) {
 	if err != nil {
 		return nil, err
 	}
-	if profile.Full {
-		profile, err = authoredProfile(tree, document.Kind(), profile)
+	if profile.Full || profile.CameraPathRecipe != "" {
+		full, err := readFullFilm(request.Path, document, tree)
+		if err != nil {
+			return nil, err
+		}
+		if profile.Full {
+			profile, err = full.Resolve(profile)
+		} else {
+			var authored Profile
+			authored, err = full.Resolve(Profile{Full: true, CameraPathRecipe: profile.CameraPathRecipe})
+			if err == nil {
+				profile.Width, profile.Height, err = fitCameraAspect(authored.Width, authored.Height, profile.Width, profile.Height)
+			}
+		}
 		if err != nil {
 			return nil, err
 		}
 	}
 	var specimen, detail string
+	if (profile.CameraWide != 0 || profile.CameraPathRecipe != "" || profile.StillAt != 0) && document.Kind() != "set" && document.Kind() != "legacy-set" {
+		return nil, fmt.Errorf("an inherited camera override requires a scene set")
+	}
+	if profile.CameraWide != 0 && field(field(field(tree.Content[0], "scene"), "film"), "frame") != nil {
+		return nil, fmt.Errorf("a physical camera rig cannot use an inherited job zoom")
+	}
 	if document.Kind() == "catalogue" {
 		specimen, err = ResolveSpecimen(request)
 		if err != nil {
@@ -246,13 +277,31 @@ func (plan *Plan) record(_ Tools) error {
 	if err != nil {
 		return err
 	}
-	if picture.Width != profile.Width || picture.Height != profile.Height {
-		return fmt.Errorf("preview is %dx%d, expected %dx%d", picture.Width, picture.Height, profile.Width, profile.Height)
+	width, height := profile.OutputSize()
+	if picture.Width != width || picture.Height != height {
+		return fmt.Errorf("preview is %dx%d, expected %dx%d", picture.Width, picture.Height, width, height)
 	}
 	receipt := map[string]any{"source_sha256": plan.Digest, "width": picture.Width, "height": picture.Height, "preview": !profile.Full, "quality": profile.quality(), "document_kind": plan.Kind}
-	if profile.Full && profile.Samples > 0 {
-		receipt["samples_per_pixel"] = profile.Samples
-	} else {
+	receipt["samples_per_pixel"] = profile.SamplesPerPixel()
+	if profile.Full {
+		receipt["primary_samples_requested"] = profile.PrimarySamples()
+		if reference := profile.reference; reference.path != "" {
+			receipt["referenced_set"] = map[string]string{"path": reference.path, "sha256": reference.digest}
+		}
+	}
+	if region := profile.region; region != nil {
+		receipt["region"] = map[string]int{
+			"left": region.Left, "top": region.Top, "width": width, "height": height,
+			"frame_width": profile.Width, "frame_height": profile.Height,
+		}
+	}
+	if profile.rig != nil {
+		receipt["physical_rig"] = profile.rig
+	}
+	if profile.stock != nil {
+		receipt["development_stock"] = profile.stock
+	}
+	if !profile.Full || profile.Samples == 0 {
 		receipt["rays_per_axis"] = profile.samples()
 	}
 	if profile.SizePreset != "" {
@@ -261,13 +310,19 @@ func (plan *Plan) record(_ Tools) error {
 	if profile.Camera != "" {
 		receipt["camera_override"] = profile.Camera
 	}
+	if profile.CameraWide != 0 {
+		receipt["camera_wide_degrees"] = profile.CameraWide
+	}
+	if profile.CameraPathRecipe != "" {
+		receipt["camera_path_recipe"] = json.RawMessage(profile.CameraPathRecipe)
+	}
+	if profile.StillAt != 0 {
+		receipt["still_at"] = profile.StillAt.String()
+	}
 	receipt["lane"] = plan.lane()
 	receipt["renderer_override"] = ""
-	if plan.Profile.CPURenderer && plan.Kind != "catalogue" {
-		receipt["renderer_override"] = "cpu"
-	}
-	if plan.Profile.GPU && plan.Kind != "catalogue" {
-		receipt["renderer_override"] = "gpu"
+	if plan.Kind != "catalogue" {
+		receipt["renderer_override"] = profile.rendererOverride()
 	}
 	if plan.Kind == "catalogue" {
 		receipt["specimen"], receipt["detail"] = plan.Specimen, plan.Detail

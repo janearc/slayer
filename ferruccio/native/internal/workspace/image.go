@@ -26,6 +26,7 @@ type imageView struct {
 	fontSize         float32
 	selectObject     func(float64, float64) bool
 	selectionCurrent func() bool
+	refuseCamera     func() bool
 	changeObject     func(float64, float64, float64, float64)
 	playKey          func(*event.KeyEvent) bool
 	mode             string
@@ -39,6 +40,8 @@ type imageView struct {
 	endWorking       func(bool)
 	ball             *cameraBall
 	travel           *cameraBall
+	lightMarkers     []lightMarker
+	volumeBounds     []volumeOutline
 	// settingsHandler opens the settings sheet on command and comma.
 	settingsHandler func()
 }
@@ -60,6 +63,8 @@ func (view *imageView) set(source image.Image) {
 		view.aspect = float64(source.Bounds().Dx()) / float64(source.Bounds().Dy())
 	}
 	view.hoverName = ""
+	view.lightMarkers = nil
+	view.volumeBounds = nil
 	view.scaled = nil
 	view.SetNeedsRedraw(true)
 }
@@ -136,6 +141,9 @@ func (view *imageView) Event(ctx widget.Context, e event.Event) bool {
 				dx, dy := float64(current.X-start.X), float64(current.Y-start.Y)
 				if releaseValid && navigable && view.navigate != nil && math.Hypot(dx, dy) > 2 {
 					committed = true
+					if view.moveWorking != nil {
+						view.moveWorking()
+					}
 					if isObject && view.changeObject != nil && !imageBounds.IsEmpty() {
 						view.changeObject(float64(imageStart.X), float64(imageStart.Y), float64(imageStart.X)+dx/float64(imageBounds.Width()), float64(imageStart.Y)+dy/float64(imageBounds.Height()))
 					} else {
@@ -158,6 +166,11 @@ func (view *imageView) Event(ctx widget.Context, e event.Event) bool {
 			ctx.SetCursor(widget.CursorMove)
 			return false
 		}
+		if !view.navigable && view.source != nil && mouse.MouseType == event.MousePress && mouse.Button == event.ButtonLeft &&
+			finitePoint(mouse.Position) && view.Bounds().Contains(mouse.Position) {
+			ctx.RequestFocus(view)
+			return true
+		}
 		if !view.navigable || view.source == nil || view.navigate == nil || !finitePoint(mouse.Position) || !view.Bounds().Contains(mouse.Position) {
 			return false
 		}
@@ -178,6 +191,10 @@ func (view *imageView) Event(ctx widget.Context, e event.Event) bool {
 				selected := view.selectObject(float64(point.X), float64(point.Y))
 				view.dragObject = selected && view.mode != "look"
 			}
+			if !view.dragObject && view.refuseCamera != nil && view.refuseCamera() {
+				ctx.RequestFocus(view)
+				return true
+			}
 			view.dragImage = point
 			view.dragStart, view.dragCurrent = mouse.GlobalPosition, mouse.GlobalPosition
 			view.dragging = true
@@ -194,6 +211,9 @@ func (view *imageView) Event(ctx widget.Context, e event.Event) bool {
 		return false
 	}
 	if wheel, ok := e.(*event.WheelEvent); ok {
+		if view.dragging {
+			return true
+		}
 		if !view.navigable || view.source == nil || view.navigate == nil || !finitePoint(wheel.Position) ||
 			!finite32(wheel.Delta.Y) || !view.Bounds().Contains(wheel.Position) {
 			return false
@@ -202,7 +222,7 @@ func (view *imageView) Event(ctx widget.Context, e event.Event) bool {
 		view.navigate(0, 0, math.Exp(exponent))
 		return true
 	}
-	if key, ok := e.(*event.KeyEvent); ok && key.KeyType == event.KeyPress && view.IsFocused() && view.navigable && view.source != nil && view.navigate != nil {
+	if key, ok := e.(*event.KeyEvent); ok && key.KeyType == event.KeyPress && view.IsFocused() {
 		if view.dragging {
 			if key.Key == event.KeyEscape {
 				view.cancelGesture(ctx)
@@ -215,6 +235,10 @@ func (view *imageView) Event(ctx widget.Context, e event.Event) bool {
 			}
 			view.undoHandler(ctx, key.Modifiers().Has(event.ModShift))
 			return true
+		}
+		// Staging suspends navigation, but source history is still available.
+		if !view.navigable || view.source == nil || view.navigate == nil {
+			return false
 		}
 		if view.playKey != nil && view.playKey(key) {
 			return true
@@ -301,6 +325,8 @@ func (view *imageView) Draw(_ widget.Context, canvas widget.Canvas) {
 		picture = view.scaled
 	}
 	canvas.DrawImage(picture, fitted.Min)
+	view.drawVolumeBounds(canvas, fitted)
+	view.drawLightMarkers(canvas, fitted)
 	view.drawHover(canvas)
 	if view.ball != nil {
 		view.ball.Draw(canvas, bounds)

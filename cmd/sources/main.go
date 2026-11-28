@@ -4,7 +4,7 @@
 // runs it; the list in the repository is the claim they are held to.
 //
 //	SLAYER_SHELF=$HOME/slayer/sources \
-//	    sources fetch [KEY ...]
+//	    sources fetch [--research | KEY ...]
 //	sources check
 //	sources path KEY
 //	sources verify
@@ -13,10 +13,8 @@
 //
 // SLAYER_SHELF names the citation shelf, the papers numbers are verified
 // against. when it is set it wins. when it is unset the shelf is the
-// shelf folder committed beside sources.yaml, so verify, check and path
-// need no setup. fetch never fills the tree: the list holds large data
-// that must not go there, so with no shelf named it refuses and says
-// how to name one.
+// shelf folder beside sources.yaml. fetch requires a named shelf to keep
+// large downloads outside the tree.
 package main
 
 import (
@@ -107,7 +105,9 @@ func tool(at place) *pzm.Tool {
 	reads := verb.NewFacts(verb.WritesNothing, verb.LeavesAlone,
 		verb.ThisMachine, verb.NoOne, verb.Light)
 	made.Verb("fetch", 'f', "bring the listed sources onto this machine",
-		fetchPage, "Example_fetch", fetches, at.fetch)
+		fetchPage, "Example_fetch", fetches, at.fetch,
+		pzm.Switch("research", verb.NoShort,
+			"fetch the citations that verify reads"))
 	made.Verb("check", 'c', "hold every pinned source to its hash",
 		checkPage, "Example_check", hashes, at.check)
 	made.Verb("path", 'p', "where a source's bytes are on this machine",
@@ -120,9 +120,13 @@ func tool(at place) *pzm.Tool {
 const fetchPage = `# fetch
 
 fetches every source in sources.yaml onto this machine, or the ones
-named after it. a pinned source already here is kept. bytes that do not
-match their pin are refused and removed. a source with no pin yet is
-kept, and its sha256 said, to be pinned in the list by hand.
+named after it. with --research it fetches the citations that verify
+reads. put the checkout's shelf/prima-ipac-observatory excerpt on your
+configured shelf before fetching research citations.
+
+a pinned source already here is kept. bytes that do not match their pin
+are refused and removed. a source with no pin yet is kept, and its
+sha256 said, to be pinned in the list by hand.
 
 it reaches outside the machine, to where each source is published.`
 
@@ -149,7 +153,7 @@ func (at place) fetch(call pzm.Call) error {
 	if err != nil {
 		return err
 	}
-	chosen, err := chosen(list, call.Args())
+	chosen, err := at.fetchSources(list, call)
 	if err != nil {
 		return err
 	}
@@ -217,6 +221,35 @@ func (at place) fetchLines(out io.Writer, chosen []sources.Source) error {
 		}
 	}
 	return errors.Join(failed...)
+}
+
+// fetchSources selects named sources, or just the citations behind the
+// published numbers when requested.
+func (at place) fetchSources(list sources.List,
+	call pzm.Call) ([]sources.Source, error) {
+	if !call.On("research") {
+		return chosen(list, call.Args())
+	}
+	if len(call.Args()) != 0 {
+		return nil, errors.New("use --research without explicit source keys")
+	}
+	data, err := at.research()
+	if err != nil {
+		return nil, err
+	}
+	seen := make(map[string]bool)
+	var picked []sources.Source
+	for _, number := range data {
+		source, err := citedSource(list, number)
+		if err != nil {
+			return nil, err
+		}
+		if !seen[source.Key()] {
+			picked = append(picked, source)
+			seen[source.Key()] = true
+		}
+	}
+	return picked, nil
 }
 
 // chosen is the sources named, or every source when none is.

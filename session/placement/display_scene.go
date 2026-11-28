@@ -1,9 +1,6 @@
 package placement
 
 import (
-	"crypto/sha256"
-	"encoding/hex"
-	"encoding/json"
 	"fmt"
 	"math"
 
@@ -40,36 +37,65 @@ func (cache *DisplayCache) Scene(read set.Set) (*DisplayScene, error) {
 		}
 		scene.Objects = append(scene.Objects, DisplayObject{ID: "scene.set.things/" + each.Name(), Name: each.Name(), Mesh: skin, At: SpaceAt(each)})
 	}
+	worldLamps := 0
+	scene.WorkingSkyOmitted = read.Light() == "moon" && (read.InSpace() || stage.WorldOnly(read))
 	if said, exists := read.World(); exists {
 		world := thing.NewWorld()
 		if err := stage.Add(world, said, maths.Vec{}); err != nil {
 			return nil, err
 		}
+		scene.Lights = WorkingLights(world)
+		worldLamps = len(world.Lamps)
+		scene.VolumeBounds = WorkingVolumeBounds(world, 0)
+		scene.OmittedVolumeBounds = len(world.Volumes) - len(scene.VolumeBounds)
+		scene.GiantAtmospheres = WorkingGiantAtmospheres(world)
+		scene.GiantBoundaries = WorkingGiantBoundaries(world, 0)
+		// A scene Moon can stage its own sky or refuse an authored one.
+		// Ground daylight can also take precedence over the world half.
+		if read.Light() != "moon" && (read.InSpace() || stage.WorldOnly(read)) {
+			scene.SkyGradient = WorkingSkyGradient(world.Sky)
+		}
+		scene.WorkingSkyOmitted = scene.WorkingSkyOmitted || (scene.SkyGradient == nil && world.Sky != nil)
 		if len(world.Things) > 0 {
 			builder := newDisplayBuilder()
+			builder.localPicking = true
+			checkWorldDepth := len(said.Bodies()) > 0
+			origin := compactWorldOrigin(world.Things)
 			for _, part := range world.Things {
-				if err := builder.thing(*part); err != nil {
+				placed := *part
+				if origin != (maths.Vec{}) && !part.Hidden() {
+					at := part.At(0)
+					at.Origin = at.Origin.Sub(origin)
+					placed.Motion = thing.Still(at)
+				}
+				if err := builder.thing(placed); err != nil {
 					return nil, err
+				}
+				if checkWorldDepth && !part.Hidden() && beyondDisplayFar(part.Shape.Bounds(), part.At(0), scene.Eye) {
+					scene.FarClippedWorldSurfaces++
 				}
 			}
 			skin, err := builder.finish()
 			if err != nil {
 				return nil, err
 			}
-			raw, err := json.Marshal(skin)
+			key, err := worldMeshKey(skin, builder.components)
 			if err != nil {
 				return nil, err
 			}
-			digest := sha256.Sum256(raw)
-			key := hex.EncodeToString(digest[:])
 			if kept := cache.worlds[key]; kept != nil {
 				skin = kept
 			} else {
 				cache.worlds[key] = skin
 			}
-			scene.Objects = append(scene.Objects, DisplayObject{ID: "scene.world", Name: "world", Mesh: skin, At: maths.Local()})
+			if origin == (maths.Vec{}) {
+				low, high, _ := skin.Bounds()
+				scene.SplitWorldVertices = max(worldCoordinateMagnitude(low), worldCoordinateMagnitude(high)) > DisplayFar
+			}
+			scene.Objects = append(scene.Objects, DisplayObject{ID: "scene.world", Name: "world", Mesh: skin, At: maths.Subspace{Origin: origin}})
 		}
 	}
+	scene.addSpaceLight(read, worldLamps)
 	return scene, nil
 }
 
@@ -104,6 +130,7 @@ func displayConstruction(request Construction) (*DisplayMesh, error) {
 		return nil, err
 	}
 	builder := newDisplayBuilder()
+	builder.localPicking = true
 	for _, part := range parts {
 		if err := builder.thing(part); err != nil {
 			return nil, err
@@ -150,6 +177,50 @@ func (scene *DisplayScene) DragHeight(height, x0, y0, x1, y1 float64) (float64, 
 		return 0, 0, fmt.Errorf("working drag produced an invalid displacement")
 	}
 	return delta.X, -delta.Z, nil
+}
+
+// DragViewDepth moves east and north at the camera depth of an absolute
+// placement. Both pointer rays meet one view-facing plane through the
+// anchor, so moving across the horizon keeps the same projection. Only the
+// east/north components survive: a vertical drag in a level view cannot
+// change the placement, while a pitched view has a north/south component.
+func (scene *DisplayScene) DragViewDepth(anchor maths.Vec, x0, y0, x1, y1 float64) (float64, float64, error) {
+	// Stop extending the lens rays a full image beyond any edge. This
+	// bounds captured motion without imposing a narrower field of view.
+	if x1 < -1 || x1 > 2 || y1 < -1 || y1 > 2 {
+		return 0, 0, fmt.Errorf("working drag is too far outside the image")
+	}
+	first, err := scene.displayRay(x0, y0)
+	if err != nil {
+		return 0, 0, err
+	}
+	last, err := scene.displayRay(x1, y1)
+	if err != nil {
+		return 0, 0, err
+	}
+	forward := scene.Eye.Forward()
+	from, firstOK := dragViewPoint(first, anchor, forward)
+	to, lastOK := dragViewPoint(last, anchor, forward)
+	if !firstOK || !lastOK {
+		return 0, 0, fmt.Errorf("working drag cannot reach the placement's camera depth")
+	}
+	delta := to.Sub(from)
+	if !displayFinite(delta.X) || !displayFinite(delta.Z) {
+		return 0, 0, fmt.Errorf("working drag produced an invalid displacement")
+	}
+	return delta.X, -delta.Z, nil
+}
+
+func dragViewPoint(ray maths.Ray, anchor, forward maths.Vec) (maths.Vec, bool) {
+	along := ray.Dir.Dot(forward)
+	depth := anchor.Sub(ray.At).Dot(forward)
+	// Reject a numerically parallel or backward ray without clipping
+	// valid edge rays from the widest supported perspective lenses.
+	const minimumForward = 1e-12
+	if !displayFinite(along) || along < minimumForward || !displayFinite(depth) || depth <= 0 {
+		return maths.Vec{}, false
+	}
+	return ray.Point(depth / along), true
 }
 
 // displayRay returns the eye ray through the pixel at image coordinates x and

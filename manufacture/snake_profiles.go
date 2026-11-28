@@ -5,6 +5,7 @@ import (
 
 	"github.com/janearc/slayer/manufacture/animals/vertebrates/reptiles/snakes"
 	"github.com/janearc/slayer/maths"
+	"github.com/janearc/slayer/maths/noise"
 )
 
 // SnakeProfiles owns a checked book of snake profiles.
@@ -82,7 +83,12 @@ func (row snakeKind) made(from seed) (good, error) {
 	if !from.made() {
 		return good{}, errGood
 	}
-	result, err := snakes.Build(row.profile)
+	profile := row.profile
+	if from.number != 0 {
+		profile.Pattern.Mottle.Seed = noise.Mix(profile.Pattern.Mottle.Seed ^ from.number)
+		profile.Pattern.Warp.Seed = noise.Mix(profile.Pattern.Warp.Seed ^ from.number)
+	}
+	result, err := snakes.Build(profile)
 	if err != nil {
 		return good{}, err
 	}

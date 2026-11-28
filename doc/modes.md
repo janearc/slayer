@@ -6,7 +6,7 @@ and development explicitly. A job records these choices. See
 [flags](flags.md) for precedence and [optimizations](optimizations.md)
 for the mechanisms behind them.
 
-## Give me the full science, Rebecca
+## CPU reference
 
 Start with a small CPU reference, an explicitly stated physical model and
 all optional lighting shortcuts disabled:
@@ -19,6 +19,7 @@ fastlight: off
 shortcuts:
   lamp-store: off
   sky-looks: off
+  restir: off
 ```
 
 This is a fragment to add to a job. Keep geometry, units, seed, time,
@@ -42,47 +43,44 @@ not physical completeness. There is no `--science` or `--strict` switch.
 Signed-build verification is not an implemented end-to-end workflow here.
 Read [flags and proof](flags.md) before describing a result as validated.
 
-## I just want to shoot this fast and put it on YouTube
+## Film preview
 
 First get the composition right at 320 by 180, one or two rays per axis,
-and a short duration. Inspect the frame count with `--dry-run`. Use the
-Metal backend for supported scenes and retained sessions for films.
+and a short duration. inspect the resolved duration and rate with
+`--dry-run`. use Metal for supported scenes and retained sessions for
+films.
 
-For a GPU set with a pinhole, this fragment requests the light shortcuts:
+for mist or smoke in a GPU set with a pinhole, use the lamp store
+and shared sky looks.
 
 ```yaml
 renderer: gpu
 film: {preset: "720", rays: 2}
 quality: exact
-vibes: on
+fastlight: on
+shortcuts: {restir: off}
 ```
 
-`quality: exact` can coexist with `vibes`: quality controls how much of
-the frame is drawn, while vibes chooses approximations in its light.
-Today vibes enables `lamp-store` and `sky-looks`, using their native
-traversal kernels.
-
-With `restir` (a third light shortcut, [restir.md](restir.md)) it also
-lights a crowd of lamps from a light tree and reservoirs, where the exact
-path scans every lamp at every point. It does not simplify geometry or lower transport resolution.
-The shortcuts refuse CPU, named scenes, rig lenses, proofs and certain
-other combinations. More than sixteen lamps is refused by the lamp store.
+`quality: exact` draws a full frame with the lighting specified in the
+job.
+`fastlight` and `vibes` both request all three lighting shortcuts.
+`restir` takes priority when enabled. use [ReSTIR](restir.md) for
+direct light from many positioned lamps. the lamp store supports
+up to sixteen lamps. see [flags](flags.md) for the full limits.
 
 For dense meshes, compare `gpu-native` against `gpu` with shortcuts off
 first. The fast-light modes themselves use native primary and shadow
 traversal, even when the job says `renderer: gpu`. They therefore need
 native ray-tracing support too.
 
-Cached smoke lighting also selects its
-own native mode. The mode resolver chooses shared-sky, lamp-store, cached
-lighting, native-primary, native-shadow, then software, in that order;
-these are not independent kernels to stack arbitrarily. Inspect the
-resolved profile and compare like-for-like when attributing a speedup.
+cached smoke lighting also selects its own native mode. the regular
+Metal frame path chooses ReSTIR, shared sky, lamp store, cached
+lighting, native primary, native shadow or software, in that order.
+compare the resolved modes when attributing a speedup.
 
-Use a conventional movie output such as `.mp4`, with `ffmpeg` available.
-Set the desired final dimensions, frame rate and sound in the job. Slayer
-does not upload to YouTube. Review the encoded film, including its sound,
-before publishing it yourself.
+set the final dimensions, frame rate and sound in the job. use
+`outputs.movie` for an MP4 on macOS with cgo or `outputs.frames`
+for a frame sequence.
 
 ## What each control actually changes
 
@@ -90,7 +88,7 @@ before publishing it yourself.
 |---|---|
 | `renderer` | CPU, Metal software or native mesh traversal |
 | `quality: preview` | preview drawing policy; not a physical transport model |
-| width, height, rays | raster and sample budget |
+| width, height, rays or samples | raster and per-pixel sample budget |
 | `vibes`, `fastlight`, shortcuts | explicit approximate lighting policy |
 | volume illumination model | legacy lamp response or normalized isotropic single scattering |
 | density/source grids | spatial representation and interpolation |
@@ -104,7 +102,7 @@ Shortcut resolution first checks the shortcut's own setting, then
 `fastlight`, then `vibes`. At each level, CLI wins over job, then set.
 Sets expose the two umbrella flags, not individual shortcuts. Consequently
 an explicit job shortcut can override a CLI umbrella flag. To force a
-direct reference, turn both shortcuts off by name as well as the umbrellas.
+direct reference, turn all three shortcuts off by name as well as the umbrellas.
 `sky-looks` currently requires `lamp-store`.
 
 ## Increase speed without guessing

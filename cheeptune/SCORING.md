@@ -1,12 +1,8 @@
 # writing a score for cheeptune
 
-this page is for a small language model that has never seen the format. read
-all of it once, then write one score file, then check it. the checker tells
-you every mistake at once; fix them all and check again.
-
-you write a score. a voicing says what plays it, and you can choose one that
-already exists instead of writing one. a score never names a sound: it names
-roles, and notes in those roles.
+a score gives notes and hits by role. a voicing selects the machine
+and the instruments that play each role. start with a built-in
+voicing and check the pair before using it in a film.
 
 ## the shortest way to a tune
 
@@ -39,6 +35,8 @@ trailing commas. a file with a `parts` key is a score and a file with a
   "loop": true,
   "parts": [
     {"role": "lead", "bars": ["e5:2 c5 a4", "c5:2 b4:2"]},
+    {"role": "pad", "bars": ["-:4", "-:4"]},
+    {"role": "bass", "bars": ["-:4", "-:4"]},
     {"role": "perc", "bars": ["k -:1 s -", "k -:1 s -"]}
   ]
 }
@@ -67,7 +65,7 @@ in 3/4 three. the sum is exact: `1/3` three times is one beat.
 | --- | --- |
 | `a4` | the note a in octave 4, which is 440 hertz. a letter a to g, lowercase, an optional `#` (sharp) or `b` (flat), then an octave digit 0 to 9. `c#5`, `bb3`, `e2`. middle c is `c4` |
 | `-` | a rest |
-| `(c4 e4 g4)` | a chord of two or more notes, in parentheses, with spaces between. no chord inside a chord. the channel plays the notes one after another very fast, which sounds like a chord |
+| `(c4 e4 g4)` | a chord of two or more notes, in parentheses, with spaces between. no chord inside a chord. the Game Boy arpeggiates the notes, while the studio sounds them together |
 | `k`, `s`, `h` | a hit: a lowercase word, letters only, not shaped like a note. the voicing decides what it sounds like. only a `perc` part uses hits |
 | `(k h)` | hits struck together: two or more hit names in parentheses, in a `perc` part. it takes a length and a loudness mark as a chord of notes does: `(k h):1/2@f`. a chord is all notes or all hits. the studio sounds every hit. the Game Boy has one noise channel and plays the first hit written, so write the one that matters first |
 | `:n` or `:n/d` | after any token, its length in beats. no suffix means one beat. `:2` two beats, `:1/2` half a beat, `:3/2` a beat and a half, `:1/3` a third. the numbers are whole and above nought |
@@ -84,8 +82,8 @@ because the noise channel plays hits and the other channels play pitch.
 
 ### the roles and the machine
 
-the machine is a Game Boy and has four channels. each role is played by one
-of them in the built-in voicings.
+the Game Boy has four hardware channels. the Game Boy voicings
+use these assignments.
 
 | role | channel | what it can do |
 | --- | --- | --- |
@@ -195,10 +193,11 @@ use these as they are or as a model for the shape of one.
 | `@crypt` | 130 a minute, a minor, eight bars. a dungeon floor, a drum on every half beat, off-beat chord stabs, bass bouncing an octave |
 | `@dusk` | 92 a minute, slow, major sevenths and ninths. long chords, a lead that sings. eight bars |
 | `@leap` | 150 a minute, c major, eight bars. a platformer. the lead leaps in thirds and octaves, the bass bounces root to fifth |
-| `@overdrive` | 172 a minute, e minor, eight bars. high energy, sixteenth notes in the bass, a lead that climbs. needs `@overdrive-dmg` because it uses the hit `t` |
+| `@overdrive` | 172 a minute, e minor, eight bars. high energy, sixteenth notes in the bass, a lead that climbs. uses the hit `t` |
 | `@tape` | 76 a minute, swung eighths written as `2/3` and `1/3`, sevenths and ninths. lo-fi. eight bars |
 
-all five loop. `@overdrive` works only with `@overdrive-dmg`.
+all five loop. among Game Boy voicings, use `@overdrive-dmg` for
+`@overdrive` because it defines the `t` hit.
 
 some pairs are refused because the sum of the four channels passes full scale
 and a clipped sample is wrong, so the render stops and names the peak.
@@ -209,7 +208,7 @@ the refused pairs are:
 | `@crypt` | `@dmg-echo` | the mix clips |
 | `@crypt` | `@overdrive-dmg` | the mix clips |
 | `@leap` | `@overdrive-dmg` | the mix clips |
-| `@overdrive` | any but `@overdrive-dmg` | the hit `t` is not defined |
+| `@overdrive` | any other Game Boy voicing | the hit `t` is undefined |
 
 the examples in this page have their own list of voicings that work.
 

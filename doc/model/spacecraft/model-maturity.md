@@ -1,24 +1,19 @@
-# Model maturity
+# spacecraft model inventory
 
-Every spacecraft and observatory is being brought to a minimum of 600
-physical components, with an engineering and material review alongside the
-count.
-
-`catalogue inventory` emits the current count, shortfall, physical bounds,
-limitations and references for each kind. Selectors restrict it to named
-kinds. Counts survive material batching, placement and prototype reuse;
-compound mirrors count their separate backed panels. Triangle subdivision
-never increases the count. Review remains pending even above the floor.
-
-Two shared plans provide the required presentation:
+use the catalogue to check a model’s component count, bounds, source
+references and limitations. the inventory reports the gap against the
+catalogue’s 600-component reference for instruments and spacecraft.
+it counts components before material batching. more triangles on a
+surface leave the component count unchanged.
 
 ```sh
-game run catalogue-stamped -- render --plan doc/catalogue-cove.json --out out/cove spitzer
-game run catalogue-stamped -- render --plan doc/catalogue-space.json --out out/space spitzer
+game run catalogue-inventory -- spitzer webb
+game run catalogue-render -- --plan doc/catalogue-cove.json --out out/cove spitzer
+game run catalogue-render -- --plan doc/catalogue-space.json --out out/space spitzer
 ```
 
-Build `catalogue-binary` through Game before using these commands. Each
-output directory retains the render settings and producer evidence.
+each render directory keeps its settings and producer evidence. the count
+and the recorded sources support review of a model’s shape and materials.
 
 The cove has a white swept wall, a checkerboard floor and the manufactory
 kind `human-scale-2m`. The figure is exactly two metres tall in scene units

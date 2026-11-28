@@ -283,12 +283,39 @@ func (made *Mesh) NormalAt(met Met) maths.Vec {
 // RestPointAt is the corresponding point on the undeformed surface,
 // using the same triangle and barycentric weights as the ray hit.
 func (made *Mesh) RestPointAt(met Met) (maths.Vec, bool) {
+	return made.VertexPointAt(met, made.rest)
+}
+
+// PosedSlope maps a scalar height gradient in the rest chart onto the hit's
+// posed tangent plane. Its dot product with a posed edge equals the rest
+// gradient's dot product with the corresponding rest edge.
+func (made *Mesh) PosedSlope(met Met, gradient maths.Vec) maths.Vec {
 	if len(made.rest) == nought {
+		return gradient
+	}
+	at := made.faces[met.face]
+	one, two, three := made.Corners(met.face)
+	a, b := two.Sub(one), three.Sub(one)
+	cross := a.Cross(b)
+	squared := cross.Dot(cross)
+	if !(squared > nought) {
+		return maths.Vec{}
+	}
+	rest := made.rest[at[first]]
+	du := gradient.Dot(made.rest[at[second]].Sub(rest))
+	dv := gradient.Dot(made.rest[at[third]].Sub(rest))
+	return b.Cross(cross).Scale(du / squared).Add(cross.Cross(a).Scale(dv / squared))
+}
+
+// VertexPointAt interpolates a field indexed by this mesh's vertices.
+// The caller supplies one value per vertex and a hit on this mesh.
+func (made *Mesh) VertexPointAt(met Met, field []maths.Vec) (maths.Vec, bool) {
+	if len(field) == nought || len(field) != len(made.points) {
 		return maths.V(nought, nought, nought), false
 	}
 	corners := made.faces[met.face]
-	atFirst, atSecond, atThird := made.rest[corners[first]],
-		made.rest[corners[second]], made.rest[corners[third]]
+	atFirst, atSecond, atThird := field[corners[first]],
+		field[corners[second]], field[corners[third]]
 	return atFirst.Scale(met.weights[first]).
 		Add(atSecond.Scale(met.weights[second])).
 		Add(atThird.Scale(met.weights[third])), true

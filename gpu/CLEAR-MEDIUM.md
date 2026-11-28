@@ -76,7 +76,7 @@ a device.
 
 A coordinated headless 1×1 device batch passed on an Apple M3 Max at
 source commit `4d29bd23045b364df20879af3cd8a39195631776` on branch
-`metal-clear-medium`. Command:
+`metal-clear-medium`. The recorded test command was:
 `game5 lane gpu -- go test -tags draw -p=1 -run '^TestMetalInitialClearMediumExtinctionMatchesCPU$' -count=1 -timeout=180s -v ./gpu`.
 
 The test included the legacy no-optics control, a zero-extinction optical

@@ -126,12 +126,7 @@ func (stage *staging) retain() *liveScene {
 			live.base.Volumes = append(live.base.Volumes, volume)
 		}
 	}
-	live.base.Lamps = nil
-	for i, lamp := range stage.world.Lamps {
-		if !stage.dynamicLamps[i] {
-			live.base.Lamps = append(live.base.Lamps, lamp)
-		}
-	}
+	live.base.KeepLamps(func(i int) bool { return !stage.dynamicLamps[i] })
 	live.base.Fields = slices.Clone(stage.world.Fields)
 	if stage.unretained != "" {
 		live.unsupported = stage.unretained

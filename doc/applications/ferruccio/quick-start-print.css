@@ -1,0 +1,25 @@
+/* Use the visual guide's Vaporwave print theme without its separate cover. */
+@page {
+  margin: 0.65in 0.75in 0.65in;
+  @top-right { content: "ferruccio quick start"; }
+}
+
+html { font-size: 10.8pt; line-height: 1.4; }
+
+h1 {
+  break-before: auto;
+  font-size: 33pt;
+  margin-bottom: 0.14in;
+  string-set: section "ferruccio";
+}
+
+h2 {
+  break-before: auto;
+  font-size: 20pt;
+  margin: 0.17in 0 0.1in;
+  padding-bottom: 0.05in;
+}
+
+h2#preview-and-render { break-before: page; }
+figure { margin: 0.1in 0; }
+figure img { max-height: 3.8in; }

@@ -39,7 +39,10 @@ var materialStruct = structure{"Material", []field{
 	floatField("foam_extra", "authored breakup band"),
 	intField("foam_seed", "low 32 bits of the authored ocean seed"),
 	floatField("glint", "the mean-square slope of Beckmann's highlight, "+
-		"both ways together; nought for GGX's by satin"),
+		"both ways together; nought for GGX's by satin; then the "+
+		"limb-darkening coefficient of a glowing ball"),
+	floatField("direct_sun", "unit direction and one plus artistic shadow fill"),
+	floatField("direct_sun_disc", "full angular diameter in radians"),
 }}
 
 // In optical-state renders only, Material.info.w carries a named medium ID.
@@ -120,7 +123,16 @@ func (encoded *scene) material(made *thing.Material) int {
 	row["foam_look"] = []float64{0, 0, 0, 0}
 	row["foam_extra"] = []float64{0, 0, 0, 0}
 	row["foam_seed"] = wholes(0)
-	row["glint"] = []float64{made.SlopeVariance}
+	row["glint"] = []float64{made.SlopeVariance, made.Limb}
+	row["direct_sun"] = []float64{0, 0, 0, 0}
+	count := made.DirectSunSamples
+	if count == 0 {
+		count = 8
+	}
+	row["direct_sun_disc"] = []float64{made.DirectSunSize, float64(count)}
+	if made.DirectSun != nil {
+		row["direct_sun"] = []float64{made.DirectSun.X, made.DirectSun.Y, made.DirectSun.Z, 1 + made.DirectSunFill}
+	}
 	if foam := made.WakeFoam; foam != nil && foam.Coverage > 0 {
 		seconds := encoded.at.Seconds()
 		if foam.FrozenTime {
@@ -169,6 +181,35 @@ func ticked(painted texture.Texture, moment time.Duration) texture.Texture {
 // are placed, or taken whole from the last frame's (see keptPool). The
 // trees of slayer's meshes are grown first, all at once (see growTrees).
 func (encoded *scene) things(world *thing.World, at time.Duration) error {
+	shadowedFace := false
+	for _, placed := range world.Things {
+		if placed.Hidden() || placed.Material == nil || placed.Material.DirectSun == nil {
+			continue
+		}
+		material := placed.Material
+		length := material.DirectSun.Len()
+		fill := material.DirectSunFill
+		size := material.DirectSunSize
+		count := material.DirectSunSamples
+		if material.Shine == nil || math.IsNaN(length) || math.IsInf(length, 0) || math.Abs(length-1) > 1e-9 || math.IsNaN(fill) || fill < 0 || fill > 1 || math.IsNaN(size) || math.IsInf(size, 0) || size < 0 || size > 10*maths.Degree || (count != 0 && (count < 8 || count > 64)) {
+			return unsupported{"precomputed direct sun needs a shining face and a finite unit direction"}
+		}
+		shadowedFace = true
+	}
+	if shadowedFace {
+		if len(world.Volumes) != 0 || len(world.Fields) != 0 {
+			return unsupported{"precomputed direct sun refuses participating volumes and fields"}
+		}
+		for _, placed := range world.Things {
+			if placed.Hidden() {
+				continue
+			}
+			material := placed.Material
+			if placed.Clear() || (material != nil && (material.Through > 0 || material.ClearMedium != nil)) {
+				return unsupported{"precomputed direct sun requires opaque shadow-casting surfaces"}
+			}
+		}
+	}
 	encoded.growTrees(world)
 	for _, placed := range world.Things {
 		if placed.Hidden() {
@@ -192,6 +233,18 @@ func (encoded *scene) place(placed *thing.Thing, at time.Duration) error {
 		return unsupported{"independent surface emission is CPU-only"}
 	}
 	if material := placed.Material; material != nil {
+		if material.Fibre != nil {
+			return unsupported{"CPU-only fibre scattering"}
+		}
+		if material.ThinTissue.Enabled() {
+			return unsupported{"CPU-only thin tissue transmission"}
+		}
+		if material.Subsurface.Enabled() {
+			return unsupported{"CPU-only surface subsurface diffusion"}
+		}
+		if material.Finish != nil {
+			return unsupported{"CPU-only procedural surface finish"}
+		}
 		if _, covered := material.Texture.(texture.Cover); covered {
 			return unsupported{"a ground cover, which only the processor " +
 				"renderer (--renderer cpu) reads by slope"}

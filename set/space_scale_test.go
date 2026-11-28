@@ -53,3 +53,17 @@ func TestGroundThingScaleIsAcceptedForExplicitVersionTwoPlacement(t *testing.T) 
 		t.Fatalf("ground scale %v %v", scale, ok)
 	}
 }
+
+func TestTypedPositionScaleRequiresSpace(t *testing.T) {
+	placement := stood(specimen("a", absoluteTree+"        scale: 2\n"))
+	space, err := readV2("  setting: space\n" + placement)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if scale, ok := space.Things()[0].Scale(); !ok || scale != 2 {
+		t.Fatalf("typed space scale %v %v", scale, ok)
+	}
+	if _, err := readV2("  setting: ground\n" + placement); err == nil || !strings.Contains(err.Error(), "scale") {
+		t.Fatalf("typed ground scale was accepted: %v", err)
+	}
+}

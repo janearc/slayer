@@ -1,0 +1,42 @@
+"$schema": https://github.com/janearc/slayer/schemas/ecosystem-v2.json
+# An invented soaring pose, lit and framed to inspect its silhouette. The
+# fragmentary Hatzegopteryx evidence and related-animal comparisons are in
+# doc/model/bioform/hatzegopteryx/SOURCES.md. This is not a known individual.
+scene:
+  name: Hatzegopteryx soaring study
+  seed: 7
+  setting: space
+  light: none
+  recipes:
+    soaring: {animal: {family: reptile, file: "@builtin", species: hatzegopteryx, study: soaring}}
+  set:
+    things:
+      animal: {recipe: soaring, seed: 7, east: 0, north: 0}
+  film: {width: 800, height: 800, rays: 2, exposure: 1, wide: 38}
+  cameras:
+    quarter:
+      location: {at: [9, -14, 8]}
+      orientation: {look_at: [0.5, 0, 2.7]}
+    side:
+      location: {at: [0.6, -17, 4]}
+      orientation: {look_at: [0.6, 0, 2.7]}
+    above:
+      location: {at: [0.6, 0, 19]}
+      orientation: {look_at: [0.6, 0, 2.7]}
+  world:
+    unit: 1
+    sky:
+      horizon: {srgb_linear: [0.16, 0.23, 0.31]}
+      zenith: {srgb_linear: [0.24, 0.35, 0.46]}
+      ground: {srgb_linear: [0.12, 0.16, 0.20]}
+      source: eye
+    suns:
+      key:
+        toward: [0.4, -0.5, 0.75]
+        colour: {srgb_linear: [1.6, 1.45, 1.25]}
+        source: eye
+    floods:
+      fill:
+        colour: {srgb_linear: [0.25, 0.31, 0.40]}
+        strength: 1
+        source: eye

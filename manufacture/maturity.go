@@ -216,8 +216,11 @@ func familyOf(how maker) string {
 	case scaleHuman:
 		return "scale reference"
 	case whaleSwim, whaleStill, reptileStudy, sealKind,
-		birdKind, fishRow, snakeKind, sauropodKind:
+		birdKind, fishRow, snakeKind, sauropodKind, adultHumanStudy,
+		adultHumanReachClip, adultIrisStudy, chestMaterialStudy, nativeChestStudy:
 		return "animal"
+	case tissueStudy:
+		return "material study"
 	case hatzGargoyleKind, gargoyleRow, gargoyleCorniceRow:
 		return "architectural ornament"
 	case bubblesRow:

@@ -1,24 +1,13 @@
-# Object constructors and scene entry points
+# object constructors
 
-This is the map into Slayer's current constructors. For every registered
-manufactory kind, [the catalogue menu](../cmd/catalogue/menu.yaml) records
-its name, group, description, limitations and advertised detail levels.
+use `game run catalogue-list` to find the name of a kind for a set or a
+Go scene. the [catalogue menu](../cmd/catalogue/menu.yaml) documents the
+kinds and their supported detail levels.
 
-Read the menu directly or run `game run catalogue-list` to see the current
-names and descriptions.
-
-`game run model-complexity` constructs each catalogue kind at each
-advertised detail, seed 1, and emits a JSON line per representation.
-Pass one or more kind names after `--` to measure a subset. A failing
-representation still gets a row and the command exits nonzero. These are
-construction and owned-geometry measurements, not a render, GPU memory
-measurement or peak working set. See [model resources](model-resources.md).
-
-`game run model-complexity-v9` is an opt-in, one-iteration construction
-benchmark for the historical 3,067-being finale. It reports construction time
-and Go allocations separately from owned/stored/reference geometry counts.
-It does not render, but constructing the full scene can use substantial
-memory; schedule it with the shared machine's current workload in mind.
+`game run catalogue-resources -- mcrn-larson` constructs the named kind
+at its advertised detail levels with seed 1 and reports geometry as JSON
+lines. omit the name to check the catalogue. see
+[model resources](model-resources.md) for what those counts measure.
 
 ## Shared construction and placement
 
@@ -36,16 +25,16 @@ registered kinds:
 | `WithSeason(kind, season)` | A supported vegetation recipe with a seasonal appearance; `SeasonNames()` lists the choices. |
 | `specimen.Prepare()` | Constructs and retains immutable local geometry for repeated placements; inspect `Resources()` and place with `Things(at)`. |
 
-A specimen's `Things(at)` and `Lights(at)` place its surfaces and
-attached light descriptions. `PlaceLights(descriptions, at)` places
-retained lights independently. These are placements, not different
-geometry recipes. [Making models](making-models.md) has a complete use
-example and explains units, materials and provenance.
+a specimen's `Things(at)` places its surfaces. `Lights(at)` transforms
+the attached light descriptions. `PlaceLights(descriptions, at)` works
+with retained descriptions. [making models](making-models.md) has a
+worked example and explains units, materials and provenance.
 
 ## Configurable factory recipes
 
-Each constructor validates its spec before returning a `Kind`. Then use
-`Sow` and `Make` or `MakeWithComplexity` as above.
+each factory validates its spec. pass the resulting kind to `Make` or
+`MakeWithComplexity` with a seed from `Sow`. `Spacecraft` and
+`SpacecraftFrom` return a pointer to the kind.
 
 | Constructor | Inputs and result |
 | --- | --- |
@@ -58,7 +47,7 @@ Each constructor validates its spec before returning a `Kind`. Then use
 | [Macrostructure](../manufacture/macrostructure.go) | `MacrostructureSpec` chooses terraced arcology, twisted spires or inhabited bridge, with footprint, height, twist, wildness and optional growth. `DefaultMacrostructure(style)` supplies a starting spec. |
 | [Landform](../manufacture/landform.go) | `LandformSpec` chooses an authored mountain or caldera and its dimensions and ruggedness. `DefaultLandform(style)` supplies a starting spec; `LandformElevation` samples the same checked seeded profile. |
 | [Burn](../manufacture/burner.go) | `BurnSpec` makes a checked volumetric flame, optional smoke and sparks, separate from fuel geometry. `Place` creates the time-aware volumes and light sources. |
-| [Cavitation cloud](../manufacture/cavitation_cloud.go) | `NewCavitationCloud(config, pose)` returns seeded, bounded map-space analytic gas spheres. Speed and authored duration set trail extent; rise, spread, count and radius are explicit controls. This is a geometry proxy, not solved cavitation. See [the Alfa cloud guide](model/boat/alfa-cavitation-cloud.md); `game run cavitation-cloud` emits a proof-scene YAML fragment and `game run check-cavitation-cloud` checks the constructor and generator. |
+| [Cavitation cloud](../manufacture/cavitation_cloud.go) | `NewCavitationCloud(config, pose)` makes seeded analytic gas spheres for a scene. Speed and authored duration set trail extent. `game run cavitation-cloud` emits a YAML fragment. See [the cloud guide](model/boat/alfa-cavitation-cloud.md) for the inputs and limits of this geometry model. |
 | [Clear cloud medium](../scene/medium/clear_cloud.go) | `NewClearCloud(field)` opts a finite density field into mixed named-water transport while inheriting the legacy water phase. `NewClearCloudWithHenyeyGreenstein(field, g)` selects an independent authored cloud HG phase, finite `-1 < g < 1`; explicit zero is isotropic, not Rayleigh. Density, bounds and clock remain those of the wrapped field. See [the Alfa cloud guide](model/boat/alfa-cavitation-cloud.md). |
 | [Propeller vapor medium](../scene/medium/propeller_cavitation.go) | `NewPropellerCavitation(config)` builds one bounded analytic field with an explicit blade count, onset, phase, advection, density breakup and pressure-recovery controls. The Alfa adapter authors five blades; other propellers reuse the constructor. Set YAML is `scene.world.vapor-cavities`; Puzzlemouth `cavitation field` emits a starter block. See [the cavitation guide](model/boat/alfa-propeller-cavitation.md). |
 
@@ -126,19 +115,15 @@ costs beyond the mesh storage shown by the model report.
 
 ## Sets and procedural scenes
 
-[Set recipes](../set/recipes.go) refer to registered kinds and can select
-a season or checked instrument parameters. The set and its placements supply
-seed, detail and placement separately. [Sets](sets.md) documents the file
-format, world, camera, terrain and placement vocabulary;
-[space coordinates](../set/SPACE-COORDINATES.md) defines positions and
-orientation. `set.Read` validates a set before construction.
+[set recipes](../set/recipes.go) can select checked parameters such as an
+instrument's aperture, a plant profile or a city grid. place the result
+in `scene.set.things` or `scene.set.stands`. the placement supplies the
+seed and can override detail. see [sets](sets.md) for the file format and
+how to check a scene before drawing.
 
-Named procedural scenes and their parameters come from their owning
-registry. `slayer list scenes` reads that registry at runtime, including
-scene descriptions and parameter help; [scene/named](../scene/named/named.go)
-defines the construction and registration contracts. Application-owned
-Heard scenes register through [slayer_scene.go](../improv/searching/slayer_scene.go);
-their scene-specific plans are documented in [the Heard README](../improv/searching/README.md).
+use `slayer list scenes` to see the procedural scenes the running binary
+offers. the [scene constructor reference](scene-constructor-reference.md)
+shows how a job names one and how to build a scene directly in Go.
 
 [Authored anatomy](model/bioform/authored-anatomy.md) describes the opt-in individual and
 small population constructors, their fields, shared meshes and limits.

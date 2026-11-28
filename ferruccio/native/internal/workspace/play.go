@@ -3,6 +3,7 @@ package workspace
 import (
 	"fmt"
 	"github.com/gogpu/ui/core/button"
+	"github.com/gogpu/ui/core/dialog"
 	"github.com/gogpu/ui/core/dropdown"
 
 	"github.com/gogpu/ui/event"
@@ -12,14 +13,17 @@ import (
 	"github.com/janearc/slayer/ferruccio/internal/draft"
 	"github.com/janearc/slayer/ferruccio/native/internal/appearance"
 	"github.com/janearc/slayer/ferruccio/native/internal/editor"
-	"github.com/janearc/slayer/ferruccio/native/internal/picking"
 	"math"
+	"slices"
 	"strings"
 	"time"
 )
 
 // playState retains the intention and selection independently of disclosure.
 type playState struct {
+	sourceReturn                                                         *button.Widget
+	placementSearchField                                                 widget.Widget
+	placementQuery, placementFilter                                      string
 	mode, selected, disclosure, renderedText                             string
 	selectionDoc                                                         *draft.Document
 	scaleDocument                                                        *draft.Document
@@ -34,11 +38,12 @@ type playState struct {
 	groupAreaID, groupAreaSource                                         string
 	groupAreaText                                                        [4]string
 	gaugeChoice, stockChoice                                             int
+	lensSource                                                           string
+	lensText                                                             [2]string
 	addName, addRecipeName, addSeed                                      string
 	addQuery, addFilter                                                  string
 	addBook                                                              string
 	addAt                                                                [3]string
-	geometry                                                             *picking.Scene
 }
 
 // setupPlay connects the world surface to real scene identity and source edits.
@@ -48,7 +53,15 @@ func (work *Workspace) setupPlay() {
 	work.play.mode = "move"
 	work.viewer.mode = "move"
 	work.viewer.selectionCurrent = func() bool {
-		if work.workingCurrent() || work.play.renderedText == work.state.document.Text() {
+		if work.working.provisional {
+			return false
+		}
+		if work.photographVisible() {
+			work.caption = chooseWorkingView
+			work.invalidate()
+			return false
+		}
+		if work.workingCurrent() {
 			return true
 		}
 		work.caption = work.retainedImageCaption("new preview pending · choose Look to examine the view")
@@ -59,8 +72,11 @@ func (work *Workspace) setupPlay() {
 		if work.workingCurrent() && len(work.working.scene.Batches) > 0 {
 			return ""
 		}
-		if !work.workingCurrent() && (work.play.geometry == nil || work.play.renderedText != work.state.document.Text()) {
+		if work.photographVisible() || !work.workingCurrent() {
 			return ""
+		}
+		if work.working.plan != nil {
+			return work.pickAuthoredMap(x, y).Name
 		}
 		id := work.workingPick(x, y)
 		objects, err := work.state.document.Objects()
@@ -75,12 +91,19 @@ func (work *Workspace) setupPlay() {
 		return ""
 	}
 	work.viewer.selectObject = func(x, y float64) bool {
-		if !work.workingCurrent() && (work.play.geometry == nil || work.play.renderedText != work.state.document.Text()) {
+		if work.working.provisional {
+			return false
+		}
+		if work.photographVisible() || !work.workingCurrent() {
 			return false
 		}
 		id := work.workingPick(x, y)
 		if id == "" {
 			return false
+		}
+		if work.working.plan != nil {
+			work.selectWorkingObject(id)
+			return true
 		}
 		objects, _ := work.state.document.Objects()
 		found := false
@@ -100,11 +123,13 @@ func (work *Workspace) setupPlay() {
 			}
 		}
 		if !found {
+			if strings.HasPrefix(id, "scene.set.things/") {
+				work.status = "This placement is read-only in the working view"
+				work.invalidate()
+			}
 			return false
 		}
-		work.play.selected = id
-		work.refreshLayout = true
-		work.invalidate()
+		work.selectWorkingObject(id)
 		return true
 	}
 	work.viewer.changeObject = func(x0, y0, x1, y1 float64) {
@@ -121,24 +146,10 @@ func (work *Workspace) setupPlay() {
 			work.problem(work.changePose(0, 0, (x1-x0)*180))
 			return
 		}
-		var east, north float64
-		var err error
-		if work.working.gesture != nil {
-			if object, ok := work.selectedObject(); ok && len(work.working.gesture.Batches) > 0 {
-				origin, originErr := gestureOrigin(work.working.gesture, object)
-				if originErr != nil {
-					work.problem(originErr)
-					return
-				}
-				east, north, err = work.working.gesture.DragHeight(origin.Y, x0, y0, x1, y1)
-			} else {
-				east, north, err = work.working.gesture.Drag(work.play.selected, x0, y0, x1, y1)
-			}
-		} else if work.play.geometry != nil {
-			east, north, err = work.play.geometry.Drag(work.play.selected, x0, y0, x1, y1)
-		} else {
+		if work.working.gesture == nil {
 			return
 		}
+		east, north, err := work.dragPlacement(work.working.gesture, x0, y0, x1, y1)
 		if err != nil {
 			work.problem(err)
 			return
@@ -149,6 +160,16 @@ func (work *Workspace) setupPlay() {
 	work.viewer.moveWorking = work.moveWorking
 	work.viewer.endWorking = work.endWorking
 	work.viewer.playKey = work.playKey
+}
+
+func (work *Workspace) selectWorkingObject(id string) {
+	work.fullCancellationNote = ""
+	work.play.selected = id
+	if work.working.plan != nil {
+		work.working.dirty = true
+	}
+	work.refreshLayout = true
+	work.invalidate()
 }
 
 // setPlayMode changes one explicit intention without changing the scene.
@@ -162,18 +183,28 @@ func (work *Workspace) setPlayMode(mode string) {
 
 // changePose creates one source-history entry and one debounced native draw.
 func (work *Workspace) changePose(east, north, heading float64) error {
+	if err := work.refuseMapEdit(); err != nil {
+		return err
+	}
 	if err := work.fullRenderRefusal("changing the scene"); err != nil {
 		return err
 	}
 	if work.play.selected == "" {
 		return fmt.Errorf("choose an object in the world first")
 	}
-	if _, ok := work.selectedGroup(); ok {
-		return fmt.Errorf("generated members are not separate placements; use Region where available")
+	if group, ok := work.selectedGroup(); ok {
+		if work.working.plan != nil {
+			return fmt.Errorf("a stand mark represents the whole group; use Region where available")
+		}
+		if heading != 0 {
+			return fmt.Errorf("generated groups do not have a turn angle")
+		}
+		return work.shiftGroupArea(group.ID, east, north)
 	}
+	object, hasObject := work.selectedObject()
+	base, current := work.poseBase()
 	if heading != 0 {
-		object, ok := work.selectedObject()
-		if !ok {
+		if !hasObject {
 			return fmt.Errorf("selected object is no longer present")
 		}
 		current, _ := object.Heading()
@@ -188,8 +219,17 @@ func (work *Workspace) changePose(east, north, heading float64) error {
 		}
 		heading = next - current
 	}
+	if work.working.plan != nil && hasObject && object.Grounded() && !object.AbsolutePosition() && (east != 0 || north != 0) {
+		at := object.Position()
+		at[0], at[1] = at[0]+east, at[1]+north
+		if err := work.checkTerrainPosition(at); err != nil {
+			return err
+		}
+	}
 	before := work.state.document.Text()
-	err := work.state.document.ChangePose(draft.PoseChange{ID: work.play.selected, East: east, North: north, Heading: heading, LengthUnit: "m", AngleUnit: "deg"})
+	work.rememberProvisional()
+	change := draft.PoseChange{ID: work.play.selected, East: east, North: north, Heading: heading, LengthUnit: "m", AngleUnit: "deg"}
+	err := work.state.document.ChangePose(change)
 	if err != nil {
 		return err
 	}
@@ -198,6 +238,9 @@ func (work *Workspace) changePose(east, north, heading float64) error {
 	}
 	if work.working.gesture == nil {
 		work.rememberWorking(work.working.scene)
+		if current && hasObject && work.working.plan == nil {
+			work.previewPose(base, object, change)
+		}
 	}
 	work.stopPreview()
 	work.editor.ApplyText(work.state.document.Text())
@@ -321,6 +364,12 @@ func (work *Workspace) selectedGroup() (draft.Group, bool) {
 	return work.play.selectionGroup, work.play.selectionValid && work.play.selectionGroupOK
 }
 
+const (
+	playDrawerWidth        = 490
+	playDrawerPadding      = 20
+	playDrawerContentWidth = playDrawerWidth - 2*playDrawerPadding
+)
+
 // playLayout makes the world the main surface and discloses machinery on request.
 func (work *Workspace) playLayout() widget.Widget {
 	idle := func() bool { return false }
@@ -328,14 +377,29 @@ func (work *Workspace) playLayout() widget.Widget {
 		primitives.Text("ferruccio").FontSize(work.size*headingSizeRatio).Color(appearance.Pink),
 		primitives.Expanded(work.scenePicker()),
 		work.action("Open…", false, idle, work.open),
-		work.action("Save…", false, idle, func() { work.save(false) }),
+		work.action("Save", false, idle, func() { work.save(false) }),
 		work.drawControl(),
 		work.action("Render fully", true, func() bool { return work.Running() }, work.openRenderSetup),
 		work.action("Source", work.play.disclosure == "source", idle, func() { work.toggleDisclosure("source") }),
 	).Gap(18).PaddingXY(24, 12).Background(appearance.Ground)
-	caption := primitives.HBox(primitives.Expanded(work.live(func() string { return work.caption })), work.action("View limitations…", false, func() bool { return work.working.notice == "" }, func() {
-		work.message("Working view limitations", work.working.notice)
-	})).Gap(12)
+	captionActions := []widget.Widget{work.action("View details…", false, func() bool {
+		return work.diagnostic == "" && work.workingNotice() == "" && !work.canRetryStaging()
+	}, work.showWorkingDetails)}
+	if len(work.jobMapMarks()) > 0 {
+		captionActions = append(captionActions, work.action("Open scene to edit", false, func() bool { return work.fullRunning }, work.openReferencedSet))
+	}
+	if work.working.inspection != nil {
+		captionActions = append(captionActions, work.action("Reset view", false, func() bool {
+			return work.photographVisible()
+		}, work.resetCameraInspection))
+	}
+	if work.working.detail != "" {
+		captionActions = append(captionActions, work.action("Scene map", false, idle, work.showSceneMap))
+	}
+	if work.canShowSceneDetail() {
+		captionActions = append(captionActions, work.action("Show selection in detail", false, idle, work.showSceneDetail))
+	}
+	caption := work.imageCaption(captionActions...)
 	world := primitives.VBox(primitives.Expanded(work.viewer), caption).Gap(8)
 	var center widget.Widget = world
 	if work.play.disclosure != "" {
@@ -358,10 +422,27 @@ func (work *Workspace) playLayout() widget.Widget {
 			detail = work.groupAreaPanel()
 		} else if work.play.disclosure == "add" {
 			detail = work.addRecipePanel()
+		} else if work.play.disclosure == "find placement" {
+			detail = work.placementSearch()
 		} else {
 			detail = work.construction()
 		}
-		panel := primitives.VBox(primitives.HBox(work.text(strings.Title(work.play.disclosure)).Color(appearance.Pink), primitives.Expanded(primitives.Box()), work.action("Return to world", false, idle, func() { work.play.disclosure = ""; work.rebuild() })).Gap(12), primitives.Expanded(detail)).Width(490).Gap(16).Padding(20).Background(appearance.Panel)
+		closeAction := func() {
+			work.play.disclosure = ""
+			work.rebuild()
+		}
+		source := work.play.disclosure == "source"
+		if source {
+			closeAction = work.returnToWorld
+		}
+		closeDrawer := work.action("Return to world", false, idle, closeAction)
+		if source {
+			work.play.sourceReturn = closeDrawer
+		}
+		header := primitives.HBox(work.text(strings.Title(work.play.disclosure)).Color(appearance.Pink),
+			primitives.Expanded(primitives.Box()), closeDrawer).Gap(12)
+		panel := primitives.VBox(header, primitives.Expanded(detail)).
+			Width(playDrawerWidth).Gap(16).Padding(playDrawerPadding).Background(appearance.Panel)
 		center = primitives.HBox(primitives.Expanded(world), panel).Gap(12)
 	}
 	railItems := []widget.Widget{
@@ -384,29 +465,76 @@ func (work *Workspace) playLayout() widget.Widget {
 			railItems = append(railItems, work.action("Region…", work.play.disclosure == "region", idle, func() { work.toggleDisclosure("region") }))
 		}
 	}
-	if _, ok := work.state.document.PhysicalFrame(); ok {
-		railItems = append(railItems, work.action("Physical film…", work.play.disclosure == "film", idle, func() { work.play.gaugeChoice = 0; work.toggleDisclosure("film") }))
-	}
 	if _, ok := work.state.document.StockChoice(); ok {
 		railItems = append(railItems, work.action("Stock…", work.play.disclosure == "stock", idle, func() { work.play.stockChoice = 0; work.toggleDisclosure("stock") }))
 	}
-	rail := primitives.HBox(railItems...).Gap(12).PaddingXY(24, 14).Background(appearance.Panel)
-	readout := primitives.HBox(primitives.Expanded(work.live(work.playReadout)), work.action("Add…", work.play.disclosure == "add", idle, func() { work.toggleDisclosure("add") }), work.action("Made from", work.play.disclosure == "construction", func() bool { return work.play.selected == "" }, func() { work.toggleDisclosure("construction") }), work.action("Describe · D", false, idle, work.describeView), work.themePicker(), work.action("Type size", false, idle, func() {
+	rail := primitives.HBox(railItems...).Gap(8).PaddingXY(16, 14).Background(appearance.Panel)
+	readoutItems := []widget.Widget{
+		primitives.Expanded(work.statusLine(work.playReadout)),
+		work.action("Add…", work.play.disclosure == "add", idle, func() { work.toggleDisclosure("add") }),
+	}
+	if _, ok := work.state.document.PhysicalFrame(); ok {
+		readoutItems = append(readoutItems, work.action("Physical film…", work.play.disclosure == "film", idle, func() {
+			work.play.gaugeChoice = 0
+			work.toggleDisclosure("film")
+		}))
+	}
+	readoutItems = append(readoutItems, work.action("Made from", work.play.disclosure == "construction", func() bool { return work.play.selected == "" }, func() { work.toggleDisclosure("construction") }), work.action("Describe · D", false, idle, work.describeView), work.themePicker(), work.action("Type size", false, idle, func() {
 		if work.size >= 24 {
 			work.size = 16
 		} else {
 			work.size += 2
 		}
 		work.rebuild()
-	})).Gap(18).PaddingXY(24, 8).Background(appearance.Ground)
-	return primitives.VBox(top, primitives.Expanded(center), rail, readout).Gap(8).Background(appearance.Ground)
+	}))
+	readout := primitives.HBox(readoutItems...).Gap(18).PaddingXY(24, 8).Background(appearance.Ground)
+	children := []widget.Widget{top, primitives.Expanded(center), rail}
+	if picker := work.workingFramePicker(); picker != nil {
+		children = append(children, picker)
+	}
+	if bar := work.renderProgressBar(); bar != nil {
+		children = append(children, primitives.HBox(bar, primitives.Expanded(work.statusLine(work.observedQueueText))).Gap(12).PaddingXY(24, 4).Background(appearance.Ground))
+	}
+	children = append(children, readout)
+	return primitives.VBox(children...).Gap(8).Background(appearance.Ground)
+}
+
+func (work *Workspace) showWorkingDetails() {
+	detail, notice := work.diagnostic, work.workingNotice()
+	if detail == work.working.notice {
+		detail = ""
+	}
+	switch {
+	case work.canRetryStaging():
+		title, failure := "Working view unavailable", work.working.failure
+		if retry := work.working.detailRetry; retry != nil {
+			title, failure = "Scene detail unavailable", retry.message
+		}
+		work.showMessagePage(title, failure, work.workingPrecisionNotice(), 0, []dialog.Action{
+			{Label: "Settings…", Variant: dialog.VariantOutlined, OnClick: work.requestSettings},
+			{Label: "Retry", OnClick: work.retryStaging},
+		})
+	case detail == "" || detail == notice:
+		work.showMessagePage("Working view limitations", "", notice, 0, nil)
+	case notice == "":
+		work.message("Current status", detail)
+	default:
+		work.showMessagePage("Working view details", detail, notice, 0, nil)
+	}
 }
 
 // toggleDisclosure preserves selection, view and source history on return.
 func (work *Workspace) toggleDisclosure(name string) {
 	if work.play.disclosure == name {
+		if name == "source" {
+			work.returnToWorld()
+			return
+		}
 		work.play.disclosure = ""
 	} else {
+		if name == "film" {
+			work.play.lensSource = ""
+		}
 		if name == "size" {
 			work.play.sizeObject = ""
 		}
@@ -420,35 +548,46 @@ func (work *Workspace) toggleDisclosure(name string) {
 		work.play.disclosure = name
 	}
 	work.rebuild()
+	if name == "find placement" && work.play.placementSearchField != nil {
+		work.ui.Window().Context().RequestFocus(work.play.placementSearchField)
+	}
+	if name == "source" && work.play.sourceReturn != nil {
+		work.ui.Window().Context().RequestFocus(work.play.sourceReturn)
+	}
 }
 
-// objectPicker exposes the same native selection as an accessible named control.
-func (work *Workspace) objectPicker() widget.Widget {
+// placementChoices supplies the named controls for map and staged views.
+func (work *Workspace) placementChoices() (labels, ids []string) {
+	if marks := work.jobMapMarks(); len(marks) > 0 {
+		for _, mark := range marks {
+			label := mark.Name
+			if work.working.plan.groups[mark.ID] {
+				label += " · group"
+			}
+			labels, ids = append(labels, label), append(ids, mark.ID)
+		}
+		return labels, ids
+	}
 	objects, _ := work.state.document.Objects()
 	groups, _ := work.state.document.Groups()
-	if len(objects)+len(groups) == 0 {
-		return work.text("Open a scene to explore")
-	}
-	labels := make([]string, 0, len(objects)+len(groups))
-	ids := make([]string, 0, len(objects)+len(groups))
-	selected := -1
-	for index, object := range objects {
+	labels = make([]string, 0, len(objects)+len(groups))
+	ids = make([]string, 0, len(objects)+len(groups))
+	for _, object := range objects {
 		labels = append(labels, object.Name())
 		ids = append(ids, object.ID())
-		if object.ID() == work.play.selected {
-			selected = index
-		}
 	}
 	for _, group := range groups {
-		if group.ID == work.play.selected {
-			selected = len(labels)
-		}
 		labels = append(labels, group.Name+" · group")
 		ids = append(ids, group.ID)
 	}
+	return labels, ids
+}
+
+func (work *Workspace) placementPicker(labels, ids []string) widget.Widget {
+	selected := slices.Index(ids, work.play.selected)
 	choice := dropdown.New(dropdown.Items(labels...), dropdown.Selected(selected), dropdown.PainterOpt(appearance.DropdownPainter{Theme: work.theme, Size: work.size}), dropdown.OnChange(func(index int, _ string) {
 		if index >= 0 && index < len(ids) {
-			work.play.selected = ids[index]
+			work.selectWorkingObject(ids[index])
 			work.rebuild()
 		}
 	}))
@@ -458,6 +597,12 @@ func (work *Workspace) objectPicker() widget.Widget {
 
 // playReadout keeps computation state, exact units and first-touch cues visible.
 func (work *Workspace) playReadout() string {
+	if work.viewer.ball != nil && work.viewer.ball.mapStart != nil {
+		return "Rotate map · Escape cancels"
+	}
+	if work.viewer.travel != nil && work.viewer.travel.mapStart != nil {
+		return "Pan map · Shift to zoom · Escape cancels"
+	}
 	if work.gesturing() && work.working.gesture != nil {
 		if work.viewer.travel != nil && work.viewer.travel.dragging {
 			return "Camera travel · drag left/right or approach/retreat · Shift to rise/fall · Escape cancels"
@@ -470,6 +615,9 @@ func (work *Workspace) playReadout() string {
 		}
 		for _, object := range work.working.scene.Objects {
 			if object.ID == work.play.selected {
+				if work.working.plan != nil {
+					return fmt.Sprintf("%s · E %.2f m   N %.2f m · release to commit", object.Name, object.At.Origin.X, -object.At.Origin.Z)
+				}
 				return fmt.Sprintf("%s · working E %.2f m   N %.2f m   Up %.2f m · release to commit", object.Name, object.At.Origin.X, -object.At.Origin.Z, object.At.Origin.Y)
 			}
 		}
@@ -480,6 +628,9 @@ func (work *Workspace) playReadout() string {
 	if work.cancel != nil || work.pending.document != nil {
 		return work.previewProgressText()
 	}
+	if work.photographVisible() {
+		return chooseWorkingView
+	}
 	if group, ok := work.selectedGroup(); ok {
 		text := group.Name + " · generated group · read-only"
 		if work.play.selectionRegion {
@@ -489,6 +640,17 @@ func (work *Workspace) playReadout() string {
 	}
 	object, ok := work.selectedObject()
 	if !ok {
+		if plan := work.working.plan; plan != nil {
+			if plan.readOnly {
+				for _, mark := range work.jobMapMarks() {
+					if mark.ID == work.play.selected {
+						return mark.Name + " · job scene selection · open scene to edit"
+					}
+				}
+				return "Open the job’s scene to edit its placements"
+			}
+			return "Choose a mark to select its authored placement"
+		}
 		return "Grab the ship · scroll to approach · ⌘Z undo"
 	}
 	at := object.Position()
@@ -498,7 +660,11 @@ func (work *Workspace) playReadout() string {
 		if !said {
 			turn = "Heading generated by scene"
 		}
-		return fmt.Sprintf("%s · E %.2f m   N %.2f m   Height above ground %.2f m · %s", object.Name(), at[0], at[1], at[2], turn)
+		height := "Height above ground"
+		if object.AbsolutePosition() {
+			height = "Up"
+		}
+		return fmt.Sprintf("%s · E %.2f m   N %.2f m   %s %.2f m · %s", object.Name(), at[0], at[1], height, at[2], turn)
 	}
 	return fmt.Sprintf("%s · E %.2f m   N %.2f m   Up %.2f m   Heading %.1f°", object.Name(), at[0], at[1], at[2], heading)
 }
@@ -507,7 +673,7 @@ func (work *Workspace) playReadout() string {
 func (work *Workspace) construction() widget.Widget {
 	if group, ok := work.selectedGroup(); ok {
 		if work.play.selectionRegion {
-			return work.paragraph(group.Name+" is a generated group. Use Region to change where its members are generated; members are not separate authored placements.", appearance.Ink)
+			return work.paragraph(group.Name+" is a generated group. Use arrow keys in Move mode to shift the region, or open Region to change its bounds.", appearance.Ink)
 		}
 		return work.paragraph(group.Name+" is a generated group. Its members are not separate authored placements; the group is read-only here.", appearance.Ink)
 	}
@@ -552,7 +718,7 @@ func (work *Workspace) returnToWorld() {
 	work.ui.Window().Context().RequestFocus(work.viewer)
 }
 
-// drawControl keeps a queued or running computation cancellable in the world view.
+// drawControl offers queue setup, preview or cancellation in the world view.
 func (work *Workspace) drawControl() widget.Widget {
 	if work.Running() {
 		return work.action("Stop", false, func() bool { return false }, func() {
@@ -560,6 +726,9 @@ func (work *Workspace) drawControl() widget.Widget {
 			work.caption = work.retainedImageCaption(work.status)
 			work.rebuild()
 		})
+	}
+	if work.options.Tools.Transport != "slayer" && work.renderTools().Queue == "" {
+		return work.action("Set render queue…", false, func() bool { return false }, work.requestSettings)
 	}
 	return work.action("Preview", false, func() bool { return !work.rendererConfigured() }, func() { work.problem(work.StartPreview()) })
 }

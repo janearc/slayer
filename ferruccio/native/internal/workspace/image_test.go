@@ -122,6 +122,20 @@ func TestImageViewGestureThresholdWheelBoundsAndAccessibilityKeys(t *testing.T) 
 	}
 }
 
+func TestImageViewUsesReleasePositionForWorkingGesture(t *testing.T) {
+	view := configuredNavigableImage()
+	ctx := widget.NewContext()
+	view.SetNavigateHandler(func(float64, float64, float64) {})
+	var seen geometry.Point
+	view.moveWorking = func() { seen = view.dragCurrent }
+	view.Event(ctx, mouse(event.MousePress, event.ButtonLeft, event.ButtonStateLeft, 10, 10))
+	view.Event(ctx, mouse(event.MouseDrag, event.ButtonLeft, event.ButtonStateLeft, 20, 20))
+	view.Event(ctx, mouse(event.MouseRelease, event.ButtonLeft, 0, 30, 25))
+	if seen != geometry.Pt(30, 25) {
+		t.Fatalf("working gesture ended at %v instead of the release position", seen)
+	}
+}
+
 func TestImageViewOverlayHonorsReadableFontFloor(t *testing.T) {
 	view := newImageView()
 	if view.fontSize != 16 {

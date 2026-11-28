@@ -6,14 +6,13 @@
 [still job](../../examples/jobs/city-grid-10000.yaml) uses the existing Slayer front door:
 
 ```sh
-game build
+game build slayer
 game run slayer -- draw doc/examples/jobs/city-grid-10000.yaml
-game run slayer -- draw doc/examples/jobs/city-grid-10000.yaml --camera 'traffic circle'
+game run slayer -- draw doc/examples/jobs/city-grid-10000.yaml --camera 'traffic circle' --out out/city-traffic-circle.png
 ```
 
-The second command uses the overview camera; the third examines an actual
-four-approach traffic circle. Output is `out/city-grid-10000.png`; choose
-`--out` to keep separate views. Cameras and world coordinates in the set
+the first draw uses the overview camera and writes `out/city-grid-10000.png`.
+the second frames a four-approach traffic circle. cameras and world coordinates in the set
 are east, north, up. The Go model uses x east, y up, z south. The footprint
 is approximately 3.2 kilometres square, with 128 metre street spacing.
 
@@ -34,8 +33,9 @@ while keeping most interior lots residential.
 `quick` has at most three broad glazing bands on each of two elevations.
 These bands suggest facade rhythm at city distance; they do not enumerate
 every floor's windows. `hull` keeps the same envelope and architectural
-massing without glazing. Other detail levels are refused. No attached
-lamps are generated. The example uses one authored distant sun.
+massing without glazing. `demo` adds street-level facades and rooftop
+detail with shared modules. see [the street-level model](../../../manufacture/city-detail.md).
+the example lights the city with one distant sun.
 
 A custom grid uses the same recipe and construction path:
 

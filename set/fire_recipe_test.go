@@ -154,3 +154,18 @@ func TestBothDocumentedFireStudiesRead(t *testing.T) {
 		}
 	}
 }
+
+func TestTypedSpaceFireRecipeScaleIsRefused(t *testing.T) {
+	source := strings.Replace(fireRecipeFixture(t), "ecosystem-v1.json", "ecosystem-v2.json", 1)
+	start, end := strings.Index(source, "  terrain:"), strings.Index(source, "  recipes:")
+	source = source[:start] + "  setting: space\n" + source[end:]
+	source = strings.Replace(source, "        east: 263812\n        north: 2148748\n",
+		"        position:\n          east: {value: 0, unit: m}\n          north: {value: 0, unit: m}\n          up: {value: 0, unit: m}\n", 1)
+	if _, err := set.Read("typed-fire.yaml", []byte(source)); err != nil {
+		t.Fatal(err)
+	}
+	source = strings.Replace(source, "        position:", "        scale: 2\n        position:", 1)
+	if _, err := set.Read("typed-fire.yaml", []byte(source)); err == nil || !strings.Contains(err.Error(), "scale is not supported for fire recipe placement") {
+		t.Fatalf("typed fire scale error = %v", err)
+	}
+}

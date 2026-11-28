@@ -1,25 +1,29 @@
 # Testing Slayer
 
-Start with the smallest check that exercises your change. Slayer includes
-quick host tests, real image/audio/device tests, an independent physics
-harness and geometry records. Running every package with every draw enabled
-is a deliberate expensive gate, not the first command for a contributor.
+complete [build setup](building.md), then choose the check that
+exercises your change.
 
-Complete [build setup](building.md) first.
+| command | scope |
+|---|---|
+| `game test -- ./job ./camera` | focused non-draw tests |
+| `game check` | formatting, vet and non-draw tests |
+| `game run test-draw` | draw-tier tests, one package at a time |
+| `game run test-all` | both tiers, with real draws |
+
+the [physics harness](../burning-trousers/README.md) checks the
+renderer against independent expectations.
 
 ## Draw tests
 
-Draw tests open devices, stage scenes, render images/audio/movies, use the
-source shelf or perform other slow work. Files use `//go:build draw`,
-combined with platform tags where needed. Some package-wide GPU suites
-have no tests in their plain build. Do not set `-tags=draw` globally: it
-enables expensive tests for every Go invocation that inherits it.
+the draw tier includes device tests, image and audio output, and
+scenes that need the source shelf. pass `-tags=draw` to the selected
+`game test` command. some suites also need a supported platform.
 
 ## Run a real GPU sample
 
-Metal needs macOS, the Xcode command-line tools and a usable device.
-Native queries need their supported ray-tracing API too. This small
-example exercises both software and native compositor passes:
+Metal needs macOS, the Xcode command-line tools and a usable
+device. native queries need Metal ray-tracing support. this
+compositor test exercises both paths.
 
 ```sh
 game test -- -tags=draw -count=1 -parallel=1 -timeout=5m -v ./gpu -run '^TestCompositePassTransport$'

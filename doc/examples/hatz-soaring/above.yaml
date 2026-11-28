@@ -1,0 +1,8 @@
+"$schema": https://github.com/janearc/slayer/schemas/job-v1.json
+scene: {set: scene.yaml}
+renderer: gpu-native
+shortcuts: {restir: off}
+camera: {name: above}
+outputs:
+  picture: ../../../out/2026-11-27-hatz-soaring-above/proof.png
+  raw: ../../../out/2026-11-27-hatz-soaring-above/light.pfm

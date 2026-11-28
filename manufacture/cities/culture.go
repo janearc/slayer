@@ -9,6 +9,7 @@ import (
 	"math/rand/v2"
 	"slices"
 	"strings"
+	"sync"
 
 	"github.com/janearc/libtheme-css/primitives/swatch"
 	"github.com/janearc/slayer/maths"
@@ -158,11 +159,44 @@ func readCultureFile(name string) (cultureFile, error) {
 	return file, nil
 }
 
-// loadCulture is the culture of a name: the common elements, over them
-// those of the culture it starts from if it says one, and over those its
-// own. It refuses the common file as a culture, a name there is no data
-// for, a culture that starts from a variant, and an element written twice.
+// embeddedCultures holds one lazy, checked definition per selectable file.
+var embeddedCultures = cultureLoaders()
+
+// cultureLoaders limits the cache keys to the embedded names.
+func cultureLoaders() map[string]func() (*culture, error) {
+	loaders := map[string]func() (*culture, error){}
+	for _, name := range cultureNames() {
+		loaders[name] = sync.OnceValues(func() (*culture, error) {
+			return readCulture(name)
+		})
+	}
+	return loaders
+}
+
+// loadCulture detaches a caller's elements from the embedded definition.
 func loadCulture(name string) (*culture, error) {
+	load, known := embeddedCultures[name]
+	if !known {
+		return readCulture(name)
+	}
+	data, err := load()
+	if err != nil {
+		return nil, err
+	}
+	elements := make(map[string]element, len(data.elements))
+	for key, each := range data.elements {
+		each.Options = slices.Clone(each.Options)
+		for index := range each.Options {
+			one := &each.Options[index]
+			one.Colour = slices.Clone(one.Colour)
+		}
+		elements[key] = each
+	}
+	return &culture{Name: data.Name, elements: elements}, nil
+}
+
+// readCulture checks and merges the common, inherited and own elements.
+func readCulture(name string) (*culture, error) {
 	if name == commonCulture {
 		return nil, fmt.Errorf("cities: %q is the elements every culture "+
 			"starts from, not a culture", name)

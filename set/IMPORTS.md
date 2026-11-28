@@ -1,10 +1,9 @@
 # Imported geometry on a set
 
-`scene.world.imports` places a checked Oakland asset beside native set
-pieces and manufactured things. The first version supports static glTF
-and GLB. It requires an explicit native material for every source slot.
-The importer never supplies a renderer or turns appearance values into
-claims about measured materials.
+`scene.world.imports` places static glTF or GLB geometry beside native
+pieces and manufactured things. each source slot needs an explicit
+native material. [the visitor beside the Larson](../sets/oakland-larson/README.md)
+is a complete example with a preflight command.
 
 ```yaml
 scene:
@@ -48,11 +47,5 @@ fresh job sees changed sources and has different light, picture and
 resume keys. An existing job retains its original geometry and identity;
 it never rereads new asset bytes under an old key.
 
-Jobs without imports keep their current lazy input handling.
-This addresses imported sources,
-not the separate backlog of every other transitive dataset in Slayer.
-
-Checks cover exact source closure, native binding refusals, coordinate
-and unit conversion, geometry sharing, changed-source cache identity,
-and snapshot consistency. A rendered human beside the existing Larson
-provides the final CPU/Metal comparison and app proof.
+the [Oakland contract](../oakland/DESIGN.md) describes the supported
+geometry and the files needed beside the asset.

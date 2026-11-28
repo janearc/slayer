@@ -1,0 +1,20 @@
+# Copy this template and supply your submitter name and operator paths.
+agent: render-submitter
+key: native-groom-v1-scalp-fibre-hairline
+command: /ABS/PINNED-SLAYER
+directory: /ABS/SLAYER-CHECKOUT
+lane: tests
+timeout_seconds: 1200
+inputs:
+  - /ABS/SCALP-GALLERY/scalp-fibre.yaml
+args:
+  - draw
+  - /ABS/SCALP-GALLERY/scalp-fibre.yaml
+  - --renderer
+  - cpu
+  - --camera
+  - hairline
+  - --fresh
+  - --out
+  - /ABS/SCALP-GALLERY/scalp-fibre-hairline.png
+pictures: 8

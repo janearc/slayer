@@ -413,7 +413,7 @@ geometry carrying light; they do not provide a general instrument kit.
 
 The older export `ConiferProper` is a reference constructor, not another
 named kind.
-[manufactory.md](manufactory.md) records the original design and history.
+[the manufactory](manufactory.md) maps out the construction APIs.
 
 [Redwood groves and their atmosphere](model/vegetation/redwood-atmosphere.md) records
 the transpiration and fog references for future ecosystem recipes,

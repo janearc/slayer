@@ -144,6 +144,10 @@ func NewRingGlow(ring Ring, thickness, radius float64, xrays Xrays,
 	return slab, shine, nil
 }
 
+// MarchesAtTheMiddle says a ring's glow, as a ring, is marched at the
+// middle of each step; see RingSlab.
+func (slab RingGlow) MarchesAtTheMiddle() bool { return true }
+
 // Density is the ring's, its ringlets', times the faintness.
 func (slab RingGlow) Density(point maths.Vec) float64 {
 	return slab.faint * slab.ring.at(point, slab.half)

@@ -53,19 +53,9 @@ jobs:
         if: failure()
         run: tail -n 40 bin/*.log
       - name: Check the image and bundled executables
+        # tools/ship-ready runs the same script before a release is tagged
         run: |
-          hdiutil verify bin/Ferruccio.dmg
-          mount="$RUNNER_TEMP/ferruccio-image"
-          mkdir -p "$mount"
-          hdiutil attach -readonly -nobrowse -mountpoint "$mount" bin/Ferruccio.dmg
-          trap 'hdiutil detach "$mount"' EXIT
-          app="$mount/Ferruccio.app"
-          (cd "$app" && shasum -a 256 -c Contents/Resources/SHA256SUMS)
-          for executable in Contents/MacOS/ferruccio Contents/MacOS/ferruccio-stage Contents/Resources/engine/slayer Contents/Resources/engine/azazel Contents/Resources/engine/game5; do
-            lipo "$app/$executable" -verify_arch arm64
-          done
-          go version -m "$app/Contents/Resources/engine/game5" | grep -E '^\s+mod\s+github.com/janearc/game\s'
-          shasum -a 256 bin/Ferruccio.dmg
+          sh ferruccio/scripts/check-dmg.sh bin/Ferruccio.dmg "$RUNNER_TEMP/ferruccio-image"
       - uses: actions/upload-artifact@v4
         with:
           name: Ferruccio-apple-silicon-${{ github.sha }}

@@ -1,0 +1,17 @@
+[
+  {
+    "id": "keep-offset",
+    "request": "Make a 100 by 84 preview with one ray along each side of a pixel. Keep the front camera and its aim exactly where they are.",
+    "expected": {"width":100,"height":84,"rays":1,"at":[-2,-11,3],"look_at":[2,1,2]}
+  },
+  {
+    "id": "raise-offset",
+    "request": "Make a 128 by 96 preview with two rays along each side of a pixel. Move the front camera three metres east and one metre up. Leave its aim unchanged.",
+    "expected": {"width":128,"height":96,"rays":2,"at":[1,-11,4],"look_at":[2,1,2]}
+  },
+  {
+    "id": "aim-offset",
+    "request": "Use a 112 by 80 film with two rays along each side of a pixel. Leave the front camera in place and aim one metre west and half a metre below the ball centre.",
+    "expected": {"width":112,"height":80,"rays":2,"at":[-2,-11,3],"look_at":[1,1,1.5]}
+  }
+]

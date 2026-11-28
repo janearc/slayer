@@ -1,0 +1,5 @@
+"$schema": https://github.com/janearc/slayer/schemas/job-v1.json
+scene: {set: ground-sea-low.yaml}
+renderer: cpu
+camera: {name: portrait}
+outputs: {picture: ../../../out/2026-11-27-ground-sea-low-portrait/proof.png}

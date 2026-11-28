@@ -1,44 +1,59 @@
-# howto-run-dis
+# Install Ferruccio
 
-ferruccio is an ordinary mac app. it is not signed with an apple developer
-key, so macos asks you to say that you mean to open it, once. this page is
-the whole of it.
+Ferruccio targets Apple silicon Macs and declares macOS 13.0 as its minimum.
+Some Slayer render modes have additional hardware and macOS requirements.
 
-you need a mac with apple silicon (m1 or later). the app is not built for
-intel macs.
+1. Open `Ferruccio.dmg`.
+2. Drag **Ferruccio** onto **Applications**.
+3. Open **Ferruccio** from **Applications**.
 
-## install
+If macOS blocks a copy you trust, open **System Settings** and check
+**Privacy & Security** for **Open Anyway**.
 
-1. open `Ferruccio.dmg`.
-2. drag `Ferruccio` onto `Applications`.
+## Open a scene
 
-## open it the first time
+Ferruccio opens the **Larson playground** scene. Use the **Examples** menu
+to choose **Oakland Larson study**, or **Open…** to choose your own Slayer
+set YAML. Use **Save** to keep your changes. The disk image's
+`Ferruccio Quick Start.pdf` walks through the first edit and render.
 
-1. open `Ferruccio` from `Applications`. macos will say it cannot verify
-   the app and will not open it. close that message. do not move the app
-   to the trash.
-2. open `System Settings`, then `Privacy & Security`.
-3. scroll to `Security`. it says `Ferruccio` was blocked. click
-   `Open Anyway`, enter your password, and click `Open`.
+## Render your scene
 
-macos remembers this. from then on `Ferruccio` opens like any other app.
+Choose **Preview** or **Render fully** when you are ready for a Slayer image.
+The app reuses a configured or discovered Azazel queue. If neither is
+available, the installed app initializes a private queue on first render
+and starts Azazel dispatch as needed. You can also choose an existing queue
+folder containing `queue.db` under **Settings** → **Render queue**.
 
-if you prefer the terminal, this clears the same flag:
+Choose **Show in Finder** below the image to select the finished PNG. Its
+`receipt.json` is in the same folder. **Settings** → **Render output** shows
+where new render folders go. The per-user fallback is
+`~/Library/Application Support/Ferruccio/Renders`.
 
-```sh
-xattr -dr com.apple.quarantine /Applications/Ferruccio.app
-```
+## Open a scene that uses external data
 
-## check what you downloaded
+If the working view cannot stage, open **View details…** to see the
+producer's error, including the dataset and path it looked for when a
+pinned file is missing. In **Settings…**, choose **Source shelf** for
+datasets pinned in `sources.yaml`, or **Scene data** for scene resources
+such as the `beachsurvey` folder. Settings shows the active value and
+where it came from. A command-line flag overrides the environment, and
+the environment overrides the saved setting.
 
-the release has a `Ferruccio.dmg.sha256` file beside the image. these two
-should print the same string:
+If you need to populate a shelf, use the original scene's data-provider
+instructions and keep its manifest and pins. A scene copied away from
+its original tree needs the corresponding `sources.yaml` beside it or in
+an ancestor folder. Once the required files are available, choose
+**View details…** → **Retry** to stage the same draft again.
+If scene detail fails, Ferruccio keeps the previous view and retries the
+same detail after you change the source shelf or scene data folder.
+
+## Verify the download
+
+If you received `Ferruccio.dmg.sha256` beside the image, compare its digest
+with the first field printed by `shasum`:
 
 ```sh
 shasum -a 256 Ferruccio.dmg
 cat Ferruccio.dmg.sha256
 ```
-
-## remove it
-
-drag `Ferruccio` from `Applications` to the trash.

@@ -70,9 +70,9 @@ func (model *orcaModel) orcaBind(bones *skeleton.Skeleton, spans []mammals.Span,
 		flipper))
 }
 
-// orcaBinding is, for every point of the rest skin, the bones that move
-// it and the share of each.
-func (model *orcaModel) orcaBinding() ([][]skeleton.Influence, error) {
+// orcaBinding binds the relieved geometry using the unrelieved points
+// to choose the weights, so scars and small ridges stay on the skin.
+func (model *orcaModel) orcaBinding() (*skeleton.Skin, error) {
 	model.bindingOnce.Do(func() {
 		bones, err := model.orcaSkeleton()
 		if err != nil {
@@ -81,11 +81,12 @@ func (model *orcaModel) orcaBinding() ([][]skeleton.Influence, error) {
 		}
 		spans := orcaAxis(bones)
 		rest := model.orcaRest()
-		binding := make([][]skeleton.Influence, len(rest.points))
-		for i, p := range rest.points {
-			binding[i] = model.orcaBind(bones, spans, p)
-		}
-		model.binding = binding
+		model.binding, model.bindingErr = bones.BindSkin(skeleton.SkinInput{
+			Points: rest.relieved,
+			Weigh: func(index int, _ maths.Vec) []skeleton.Influence {
+				return model.orcaBind(bones, spans, rest.points[index])
+			},
+		})
 	})
 	return model.binding, model.bindingErr
 }

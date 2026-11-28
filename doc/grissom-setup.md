@@ -1,7 +1,7 @@
 # Running Grissom
 
 Grissom looks at the sky, the earth, and the sky from a place on the
-earth. Its window lives in `cmd/grissom` for now. It draws triangles with
+earth. It draws triangles with
 Cocoa and Metal; this command does not run Slayer's ray tracer.
 
 Celestial-data has a named set for everything the viewer reads. Start
@@ -140,7 +140,7 @@ game run grissom -- draw \
 ```
 
 Create `out/` first. These application arguments require the forwarding
-fix described in the [Game workflow](developing.md#build-and-run); older
+fix described in [Building Slayer](building.md#build-and-run); older
 Game builds need a configured run with those fixed arguments.
 
 Grissom takes its command line through puzzlemouth: two dashes and
@@ -232,7 +232,7 @@ neighbouring steps a triangle's cover is a straight crossfade. That is a
 crossfade between fields a day apart, not where the cloud went. A film
 refuses `--weather-time`. Without `--weather` it is the earth turning.
 
-Two runs are in `.game`, in the form of `grissom-earth`, each reading the
+Two runs are in `.game5/runs/`, in the form of `grissom-earth`, each reading the
 earth, colourways and weather under `../local/data`:
 
 ```sh

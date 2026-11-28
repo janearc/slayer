@@ -16,7 +16,8 @@ static float propeller_at(device const float *card, float3 point) {
   float theta=card[propeller_omega]*(card[propeller_seconds]-s/card[propeller_slip])+6.283185307179586f*float(k)/float(blades);
   float2 d=float2(x,y)-card[propeller_radius]*float2(cos(theta),sin(theta));
   float r2=dot(d,d);
-  if(r2<=9*core*core)sum+=exp(-.5f*r2/(core*core));
+  // 2026-11-26: lowered by its value at the 3 sigma cut (exp(-4.5))
+  if(r2<=9*core*core)sum+=max(exp(-.5f*r2/(core*core))-0.011108997f,0.0f);
  }
  float start=wake_smooth(0.0f,2*core,s),end=1-wake_smooth(active-2*core,active,s);
  float pressure=max(0.0f,1-card[propeller_recovery]*s/card[propeller_deficit]);

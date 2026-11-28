@@ -18,6 +18,7 @@ import (
 	"github.com/janearc/slayer/ferruccio/native/internal/stagewire"
 	"github.com/janearc/slayer/manufacture"
 	"github.com/janearc/slayer/maths"
+	"github.com/janearc/slayer/scene/smoke"
 	"github.com/janearc/slayer/session/placement"
 	"github.com/janearc/slayer/set"
 )
@@ -404,6 +405,7 @@ func TestStreamedStagedPointerPreviewsAndCommitsMove(t *testing.T) {
 		t.Fatal("staged Larson has no authored batch")
 	}
 	before := snapshot.Scene.Batches[index].Places[0].Origin
+	beforeAnchor := snapshot.Scene.Origins["scene.set.things/larson"]
 	bounds := work.viewer.ScreenBounds()
 	start := geometry.Pt((bounds.Min.X+bounds.Max.X)/2, (bounds.Min.Y+bounds.Max.Y)/2)
 	end := geometry.Pt(start.X+100, start.Y+40)
@@ -415,17 +417,34 @@ func TestStreamedStagedPointerPreviewsAndCommitsMove(t *testing.T) {
 	if work.state.document.Text() != source || work.working.scene.Batches[index].Places[0].Origin == before {
 		t.Fatal("drag did not preview the staged batch without editing source")
 	}
+	shift := work.working.scene.Batches[index].Places[0].Origin.Sub(before)
+	if work.working.scene.Origins["scene.set.things/larson"].Sub(beforeAnchor.Add(shift)).Len() > 1e-8 || snapshot.Scene.Origins["scene.set.things/larson"] != beforeAnchor {
+		t.Fatal("drag did not update its provisional anchor independently")
+	}
 	work.ui.HandleEvent(event.NewMouseEvent(event.MouseRelease, event.ButtonLeft, 0, end, end, event.ModNone))
 	if work.state.document.Text() == source {
 		t.Fatal("release did not commit the staged object's move")
 	}
 	changed := work.state.document.Text()
-	focusPlayViewer(work)
-	work.ui.HandleEvent(event.NewKeyEvent(event.KeyPress, event.KeyZ, 'z', event.ModSuper))
+	started := make(chan struct{})
+	work.requestStaged(func(ctx context.Context, _, _, _ string) (*stagedView, error) {
+		close(started)
+		<-ctx.Done()
+		return nil, ctx.Err()
+	}, false)
+	defer work.closeStaged()
+	<-started
+	if !work.working.provisional || work.working.scene == nil || work.workingCurrent() || work.viewer.navigable {
+		t.Fatal("the committed pointer move was not retained as a non-selectable provisional view")
+	}
+	if work.working.scene.Batches[index].Places[0].Origin == before {
+		t.Fatal("the provisional view lost the pointer move")
+	}
+	work.undoCamera(work.ui.Window().Context(), false)
 	if work.state.document.Text() != source {
 		t.Fatal("one undo did not restore the staged move")
 	}
-	work.ui.HandleEvent(event.NewKeyEvent(event.KeyPress, event.KeyZ, 'Z', event.ModSuper|event.ModShift))
+	work.undoCamera(work.ui.Window().Context(), true)
 	if work.state.document.Text() != changed {
 		t.Fatal("redo did not restore the staged move")
 	}
@@ -460,7 +479,9 @@ func TestStreamedTurnPreviewMatchesRestagedGeometry(t *testing.T) {
 	work.viewer.dragCurrent = geometry.Pt(work.viewer.imageBounds().Width()*.15, 0)
 	work.moveWorking()
 	held := work.working.scene.Batches[index].Places[0]
-	work.viewer.changeObject(.5, .5, .65, .5)
+	// The held and released events use the same pixel displacement.
+	x1 := .5 + float64(work.viewer.dragCurrent.X)/float64(work.viewer.imageBounds().Width())
+	work.viewer.changeObject(.5, .5, x1, .5)
 	if work.state.document.Text() == source {
 		t.Fatal("turn did not change the source")
 	}
@@ -471,7 +492,7 @@ func TestStreamedTurnPreviewMatchesRestagedGeometry(t *testing.T) {
 	}
 	got := updated.Scene.Batches[index].Places[0]
 	if got.Origin.Sub(held.Origin).Len() > 1e-8 || got.Orientation.X.Sub(held.Orientation.X).Len() > 1e-8 || got.Orientation.Y.Sub(held.Orientation.Y).Len() > 1e-8 || got.Orientation.Z.Sub(held.Orientation.Z).Len() > 1e-8 {
-		t.Fatal("turn preview differs from restaged geometry")
+		t.Fatalf("turn preview differs from restaged geometry: held=%+v restaged=%+v", held, got)
 	}
 }
 
@@ -743,6 +764,54 @@ func TestPhysicalGaugeEditSavesAndStagesThroughProducer(t *testing.T) {
 	}
 }
 
+func TestPhysicalLensEditSavesAndStagesThroughProducer(t *testing.T) {
+	t.Setenv("SLAYER_CACHE", t.TempDir())
+	old := "film: {width: 640, height: 400, wide: 40, rays: 1, exposure: 1}"
+	rig := "film: {width: 640, rays: 1, frame: {width: 36, height: 24}, lens: {focal: 50, stop: 8, focus: first}, shutter: 0.5, glimpses: 2}"
+	source := strings.Replace(addRecipeFixture, old, rig, 1)
+	path := filepath.Join(t.TempDir(), "rig.yaml")
+	before, err := StageSnapshot(context.Background(), path, source, "set")
+	if err != nil {
+		t.Fatal(err)
+	}
+	document, err := draft.Open(path, []byte(source))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := document.SetPhysicalLens(draft.PhysicalLens{FocalMM: 100, FStop: 2.8}); err != nil {
+		t.Fatal(err)
+	}
+	if err := document.Save(path); err != nil {
+		t.Fatal(err)
+	}
+	raw, err := os.ReadFile(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	parsed, err := set.Read(path, raw)
+	if err != nil {
+		t.Fatal(err)
+	}
+	film, _ := parsed.Film()
+	authored, ok := film.Rig()
+	focal, stop, focus := authored.Lens()
+	if !ok || focal != 100 || stop != 2.8 || focus != "first" {
+		t.Fatalf("producer lens focal %v, f-stop %v, focus %q, rig %t", focal, stop, focus, ok)
+	}
+	after, err := StageSnapshot(context.Background(), path, string(raw), "set")
+	if err != nil {
+		t.Fatal(err)
+	}
+	// The eye and focus object are 70 metres apart. The inverse image
+	// distance for a thin lens is 1/focal - 1/subject distance.
+	const focusDistanceMM = 70_000
+	want := (1.0/100 - 1.0/focusDistanceMM) / (1.0/50 - 1.0/focusDistanceMM)
+	ratio := math.Tan(after.Scene.Lens.Wide/2) / math.Tan(before.Scene.Lens.Wide/2)
+	if math.Abs(ratio-want) > 1e-6 || after.Scene.Width != before.Scene.Width || after.Scene.Height != before.Scene.Height {
+		t.Fatalf("edited lens field-of-view ratio %v, want %v, frame %dx%d", ratio, want, after.Scene.Width, after.Scene.Height)
+	}
+}
+
 // TestFutianEditedTowerStages is an opt-in, non-rendering real-scene check.
 func TestFutianEditedTowerStages(t *testing.T) {
 	path := os.Getenv("FERRUCCIO_FUTIAN_SOURCE")
@@ -818,4 +887,180 @@ func TestFutianEditedTowerStages(t *testing.T) {
 		t.Fatal("edited tower's scale did not reach its staged instance")
 	}
 	t.Logf("Futian edited tower at %v with scale 2; %d shared batches", anchor, len(snapshot.Scene.Batches))
+}
+
+func TestStageSnapshotKeepsSkyOnlySceneWithVisibleLimitations(t *testing.T) {
+	t.Setenv("SLAYER_CACHE", t.TempDir())
+	path := filepath.Join(t.TempDir(), "sky.yaml")
+	source, _, _ := strings.Cut(stagedTestSet, "    materials:")
+	source += `    sky:
+      stars: {seed: 29, share: 0.08, size: 0.5, bright: 0.6}
+      source: eye
+`
+	snapshot, err := StageSnapshot(context.Background(), path, source, "legacy-set")
+	if err != nil {
+		t.Fatal(err)
+	}
+	var encoded bytes.Buffer
+	if err := stagewire.Write(&encoded, snapshot); err != nil {
+		t.Fatal(err)
+	}
+	decoded, err := stagewire.Read(&encoded)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(decoded.Scene.Batches) != 0 || decoded.Scene.Pick(.5, .5) != "" ||
+		decoded.Scene.Eye.Origin == (maths.Vec{}) || !strings.Contains(decoded.Notice, "Sky is not shown") ||
+		!strings.Contains(decoded.Notice, "No drawable surfaces in the working view") {
+		t.Fatalf("sky-only snapshot = %+v", decoded)
+	}
+}
+
+func TestStageSnapshotAndCacheKeepTheSameSkyGradient(t *testing.T) {
+	t.Setenv("SLAYER_CACHE", t.TempDir())
+	path := filepath.Join(t.TempDir(), "sky.yaml")
+	source, _, _ := strings.Cut(stagedTestSet, "    materials:")
+	source = strings.Replace(source, "scene:\n", `"$schema": https://github.com/janearc/slayer/schemas/ecosystem-v2.json
+scene:
+  name: Working gradient
+  setting: space
+  seed: 17
+  light: none
+`, 1)
+	source += `    sky:
+      horizon: {srgb_linear: [0.2, 0.3, 0.4]}
+      zenith: {srgb_linear: [0.1, 0.2, 0.7]}
+      ground: {srgb_linear: [0.5, 0.2, 0.1]}
+      source: eye
+`
+	snapshot, err := StageSnapshot(context.Background(), path, source, "set")
+	if err != nil {
+		t.Fatal(err)
+	}
+	var encoded bytes.Buffer
+	if err := stagewire.Write(&encoded, snapshot); err != nil {
+		t.Fatal(err)
+	}
+	decoded, err := stagewire.Read(&encoded)
+	if err != nil {
+		t.Fatal(err)
+	}
+	read, err := set.Read(path, []byte(source))
+	if err != nil {
+		t.Fatal(err)
+	}
+	cached, err := placement.NewDisplayCache().Scene(read)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if cached.SkyGradient == nil || decoded.Scene.SkyGradient == nil || *cached.SkyGradient != *decoded.Scene.SkyGradient ||
+		len(decoded.Scene.Batches) != 0 || decoded.Scene.Pick(.5, .5) != "" ||
+		!strings.Contains(decoded.Notice, workingSkyNotice) || !strings.Contains(localWorkingNotice(read, cached), workingSkyNotice) {
+		t.Fatalf("sky-only gradient cache and stage diverged: %v, %v, %q", cached.SkyGradient, decoded.Scene.SkyGradient, decoded.Notice)
+	}
+}
+
+func TestStageSnapshotShowsAuthoredOpenOceanAsCameraProxy(t *testing.T) {
+	t.Setenv("SLAYER_CACHE", t.TempDir())
+	path := filepath.Join(t.TempDir(), "open-sea.yaml")
+	const source = `"$schema": https://github.com/janearc/slayer/schemas/ecosystem-v2.json
+scene:
+  name: open sea
+  film: {width: 80, height: 60, rays: 1, wide: 45, exposure: 1}
+  cameras:
+    view:
+      location: {at: [400, -300, 2]}
+      orientation: {look_at: [400, -285, 0]}
+  world:
+    unit: 1
+    materials:
+      water:
+        clear: {through: 1, index: 1.33, gloss: 1, rank: 0}
+        source: eye
+    ocean:
+      material: water
+      unbounded: true
+      middle: [0, 0, 0]
+      sea:
+        wind: {value: 0, unit: m/s}
+        fetch: {value: 0, unit: m}
+        depth: {value: 0, unit: m}
+        toward: {value: 0, unit: rad}
+      seed: 7
+      time: {value: 0, unit: s}
+      source: eye
+`
+	snapshot, err := StageSnapshot(context.Background(), path, source, "set")
+	if err != nil {
+		t.Fatal(err)
+	}
+	var encoded bytes.Buffer
+	if err := stagewire.Write(&encoded, snapshot); err != nil {
+		t.Fatal(err)
+	}
+	decoded, err := stagewire.Read(&encoded)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(decoded.Scene.Batches) != 1 ||
+		!strings.Contains(decoded.Notice, "finite mean-level proxy around the camera; waves and coastline are not shown") {
+		t.Fatalf("authored open ocean snapshot = %+v", decoded)
+	}
+	if hit, ok := decoded.Scene.PickAt(.5, .9); !ok || hit.ID != "scene.world" || decoded.Scene.Pick(.5, .9) != "" {
+		t.Fatalf("water should be visible without a selectable identity: %+v", hit)
+	}
+	batch := decoded.Scene.Batches[0]
+	at := batch.Places[0]
+	eye := at.In(decoded.Scene.Eye.Origin)
+	low, high, ok := batch.Mesh.Bounds()
+	if !ok || !batch.HasBounds || math.Abs(eye.Y-2) > 1e-9 ||
+		math.Abs(eye.X-(low.X+high.X)/2) > 1e-9 || math.Abs(eye.Z-(low.Z+high.Z)/2) > 1e-9 ||
+		low.Y != 0 || high.Y != 0 {
+		t.Fatalf("sea proxy bounds %v %v do not enclose the authored eye projection from %v", low, high, eye)
+	}
+}
+
+func TestWorkingSnapshotShowsProducerSmokeGroundAndBall(t *testing.T) {
+	t.Setenv("SLAYER_CACHE", t.TempDir())
+	path := "../../../examples/first-picture.yaml"
+	source, err := os.ReadFile(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	snapshot, err := StageSnapshot(context.Background(), path, string(source), "job")
+	if err != nil {
+		t.Fatal(err)
+	}
+	fixture, ok := smoke.Get(1)
+	if !ok {
+		t.Fatal("smoke one is unavailable")
+	}
+	_, eye := fixture.Scene()
+	var encoded bytes.Buffer
+	if err := stagewire.Write(&encoded, snapshot); err != nil {
+		t.Fatal(err)
+	}
+	decoded, err := stagewire.Read(&encoded)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if decoded.Scene.Eye != eye || decoded.Scene.Lens.Wide != fixture.Wide || decoded.Scene.Width != 160 || decoded.Scene.Height != 90 {
+		t.Fatalf("starter framing differs from the smoke eye and job film: %+v", decoded.Scene)
+	}
+	batches := decoded.Scene.Batches
+	if len(batches) != 2 || batches[0].Mesh.Notice != "" || batches[1].Mesh.Notice == "" ||
+		!strings.Contains(decoded.Notice, "Infinite planes shown as finite working-view patches") {
+		t.Fatalf("smoke ground and ball snapshot = %+v", decoded)
+	}
+	ball, ok := decoded.Scene.PickAt(.5, .5)
+	if !ok || ball.Point.Y <= 0.5 || ball.ID != "scene.world" {
+		t.Fatalf("smoke ball did not remain in front of the ground: %+v", ball)
+	}
+	ground, ok := decoded.Scene.PickAt(.15, .9)
+	if !ok || math.Abs(ground.Point.Y) > 1e-9 || ground.ID != "scene.world" || decoded.Scene.Pick(.15, .9) != "" {
+		t.Fatalf("smoke ground should be visible and read-only: %+v", ground)
+	}
+	if focus := sharedFocus(batches[:1], decoded.Scene.Eye); focus != decoded.Scene.Focus {
+		t.Fatalf("ground proxy moved the working focus: %v, want %v", decoded.Scene.Focus, focus)
+	}
 }

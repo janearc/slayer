@@ -22,6 +22,7 @@ import (
 type placedThing struct {
 	thing *thing.Thing
 	placement
+	subsurface subsurfaceLight
 }
 
 // placement caches a surface or volume transform, effective scale, and
@@ -31,6 +32,7 @@ type placement struct {
 	at                  maths.Subspace
 	scale               float64
 	paint, shine, rough texture.Texture
+	directSunWays       []maths.Vec
 }
 
 // newPlacement evaluates a transform and optional material at the render time.
@@ -41,6 +43,10 @@ func newPlacement(at maths.Subspace, material *thing.Material,
 		put.paint = ticked(material.Texture, moment)
 		put.shine = ticked(material.Shine, moment)
 		put.rough = ticked(material.Rough, moment)
+		if material.DirectSun != nil && material.DirectSunSize > 0 && (material.DirectSunSamples == 0 || (material.DirectSunSamples >= 8 && material.DirectSunSamples <= 64)) {
+			sun := film.Sun{Toward: *material.DirectSun, Size: material.DirectSunSize, Disc: true}
+			put.directSunWays = sun.SpreadCount(material.DirectSunSamples)
+		}
 	}
 	return put
 }
@@ -194,6 +200,31 @@ func (scene *staged) refusal() error {
 			return fmt.Errorf("trace: clear-medium in-scattering produced an unrepresentable source or path")
 		}
 	}
+	shadowedFace := false
+	for _, each := range scene.crowd.things {
+		material := each.thing.Material
+		if material != nil && material.DirectSun != nil {
+			length := material.DirectSun.Len()
+			fill := material.DirectSunFill
+			size := material.DirectSunSize
+			count := material.DirectSunSamples
+			if material.Shine == nil || math.IsNaN(length) || math.IsInf(length, 0) || math.Abs(length-1) > 1e-9 || math.IsNaN(fill) || fill < 0 || fill > 1 || math.IsNaN(size) || math.IsInf(size, 0) || size < 0 || size > 10*maths.Degree || (count != 0 && (count < 8 || count > 64)) {
+				return fmt.Errorf("trace: precomputed direct sun needs a shining face and a finite unit direction")
+			}
+			shadowedFace = true
+		}
+	}
+	if shadowedFace {
+		if len(scene.volumes) != 0 {
+			return fmt.Errorf("trace: precomputed direct sun refuses participating volumes")
+		}
+		for _, each := range scene.crowd.things {
+			material := each.thing.Material
+			if each.thing.Clear() || (material != nil && (material.Through > 0 || material.ClearMedium != nil)) {
+				return fmt.Errorf("trace: precomputed direct sun requires opaque shadow-casting surfaces")
+			}
+		}
+	}
 	for _, each := range scene.crowd.things {
 		material := each.thing.Material
 		if material != nil && material.WakeFoam != nil && material.WakeFoam.Coverage > 0 &&
@@ -224,7 +255,8 @@ func (scene *staged) refusal() error {
 // later additions do not enter this render. Geometry, media, and materials
 // remain shared and must not change until rendering finishes.
 type staged struct {
-	seconds float64
+	fibreFloods []film.Flood
+	seconds     float64
 	// volumeSky is a fixed full-sphere quadrature for isotropic scattering.
 	// Empty keeps the legacy source term and lamp normalization.
 	volumeSky []maths.Vec
@@ -323,7 +355,8 @@ func reflectingSpread(things []placedThing) float64 {
 	var boxes []maths.Box
 	for i := range things {
 		m := things[i].thing.Material
-		if m != nil && m.Colour == (maths.Light{}) && m.Texture == nil && m.Gloss <= 0 && m.Radiant == nil {
+		if m != nil && m.Colour == (maths.Light{}) && m.Texture == nil &&
+			m.Gloss <= 0 && m.Radiant == nil && m.Fibre == nil && !m.ThinTissue.Enabled() {
 			continue
 		}
 		boxes = append(boxes, worldBox(&things[i]))
@@ -457,6 +490,10 @@ func (scene *staged) transmit(from, toward maths.Vec,
 	if scene.crowd.blocked(maths.Ray{At: from, Dir: toward}, far) {
 		return maths.Light{}
 	}
+	return scene.volumeTransmission(from, toward, far)
+}
+
+func (scene *staged) volumeTransmission(from, toward maths.Vec, far float64) maths.Light {
 	passed := paintedClear(scene.volumes, from, toward, far)
 	if !scene.gassy {
 		return passed

@@ -12,9 +12,11 @@ func (work *Workspace) previewRequest(now time.Time) preview.Request {
 	request := preview.Request{
 		Path: work.state.path, Text: work.state.document.Text(), Specimen: work.specimen,
 		OutputRoot: work.evidenceFolder(), DirectoryPrefix: previewDirectoryPrefix(now, work.options.Tools.Agent),
+		Profile: preview.Profile{Camera: work.working.cameraName, CameraWide: work.working.cameraWide, CameraPathRecipe: work.working.cameraPath},
 	}
 	if work.composition == "play" {
-		request.Profile = work.ownRender(preview.Profile{Width: 640, Height: 400})
+		request.Profile.Width, request.Profile.Height = 640, 400
+		request.Profile = work.ownRender(request.Profile)
 	}
 	return request
 }

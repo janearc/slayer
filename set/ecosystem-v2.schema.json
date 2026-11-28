@@ -35,6 +35,7 @@
   "title": "Slayer scene and edit, v2",
   "description": "The scene format slayer is growing into: every key of v1, held to the reader by its parity test, and the keys the reader does not take yet. v2 adds a date, one anchor for a scene, the globe beyond a terrain patch, scenes set in space, things in orbit or placed relative to one another, an attitude, an instrument eye, a sky of catalogued stars, a star as a body with its corona, the lantern, culture orbitals and a nebula as kinds, camera moves relative to things, and an edit of shots cut to a song's timeline. The reader takes v2 and keeps each key no stage draws yet, and hillside refuses a set that holds one, by the key's name. The first key drawn is a setting in space: manufactured things placed by east, north and height, a fixed camera and the sun as one distant lamp (hillside/afloat.go). The rest is the specification the stages grow into, one key at a time.",
   "$defs": {
+    "giantPaint": {"type": "array", "minItems": 3, "maxItems": 3, "items": {"type": "number", "minimum": 0, "maximum": 1}},
     "scene": {
       "type": "object",
       "properties": {
@@ -1093,8 +1094,63 @@
       ],
       "additionalProperties": false
     },
+    "poseClip": {
+      "type": "object",
+      "properties": {
+        "timing": {"enum": ["linear", "smooth"]},
+        "keys": {
+          "type": "array", "minItems": 1, "maxItems": 256,
+          "items": {
+            "type": "object",
+            "properties": {
+              "at": {
+                "type": "object",
+                "properties": {"value": {"type": "number", "minimum": 0, "maximum": 86400}, "unit": {"const": "s"}},
+                "required": ["value", "unit"], "additionalProperties": false
+              },
+              "turns": {"type": "object", "propertyNames": {"minLength": 1}, "additionalProperties": {"$ref": "#/$defs/poseAngles"}},
+              "root-offset": {"$ref": "#/$defs/poseOffset"},
+              "root-turns": {"$ref": "#/$defs/poseAngles"}
+            },
+            "required": ["at"], "additionalProperties": false
+          }
+        },
+        "attachments": {
+          "type": "object", "maxProperties": 16, "propertyNames": {"minLength": 1},
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "bone": {"type": "string", "minLength": 1},
+              "kind": {"type": "string", "minLength": 1},
+              "offset": {"$ref": "#/$defs/poseOffset"},
+              "turns": {"$ref": "#/$defs/poseAngles"},
+              "scale": {"type": "number", "minimum": 0.0001, "maximum": 100}
+            },
+            "required": ["bone", "kind"], "additionalProperties": false
+          }
+        }
+      },
+      "required": ["keys"], "additionalProperties": false
+    },
+    "poseAngles": {
+      "type": "array", "minItems": 3, "maxItems": 3,
+      "items": {"type": "number", "minimum": -360, "maximum": 360}
+    },
+    "poseOffset": {
+      "type": "array", "minItems": 3, "maxItems": 3,
+      "items": {"type": "number", "minimum": -100000, "maximum": 100000}
+    },
     "recipe": {
       "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "kind": {"enum": ["adult-human-neutral", "adult-human-reaching", "adult-human-male-study", "adult-human-details", "adult-human-cheek-scar", "adult-human-auricle", "adult-human-auricle-thin-skin", "adult-human-groom-fibre", "adult-human-groom-medium", "adult-human-groom-medium-layered", "adult-human-groom-medium-field", "adult-human-groom-medium-field-wisps", "adult-human-body-hair", "adult-human-facial-hair", "adult-human-vellus-study", "adult-human-wider-stance"]},
+            "pose-clip": {"$ref": "#/$defs/poseClip"}
+          },
+          "required": ["kind", "pose-clip"],
+          "additionalProperties": false
+        },
         {
           "type": "object",
           "properties": {
@@ -1164,9 +1220,17 @@
                 }
               ],
               "additionalProperties": false
-            }
+            },
+            "pose-clip": {"$ref": "#/$defs/poseClip"}
           },
           "required": ["animal"],
+          "allOf": [{
+            "if": {"required": ["pose-clip"]},
+            "then": {"properties": {"animal": {
+              "properties": {"family": {"const": "whale"}, "representation": {"const": "skin"}},
+              "not": {"required": ["pose"]}
+            }}}
+          }],
           "additionalProperties": false
         },
         {
@@ -1872,6 +1936,43 @@
             "mcrn-larson",
             "mcrn-larson-landed",
             "human-scale-2m",
+            "adult-human-neutral",
+            "adult-human-reaching",
+            "adult-human-reach-clip",
+            "adult-human-male-study",
+            "adult-human-details",
+            "adult-human-cheek-scar",
+            "adult-human-auricle",
+            "adult-human-auricle-thin-skin",
+            "adult-human-thin-skin",
+            "adult-human-groom-fibre",
+            "adult-human-groom-medium",
+            "adult-human-groom-medium-layered",
+            "adult-human-groom-medium-field",
+            "adult-human-groom-medium-field-wisps",
+            "adult-human-body-hair",
+            "adult-human-facial-hair",
+            "adult-human-vellus-study",
+            "adult-human-wider-stance",
+            "adult-human-iris-brown",
+            "adult-human-iris-hazel",
+            "adult-human-iris-blue",
+            "adult-chest-light-low-contrast",
+            "adult-chest-light-high-contrast",
+            "adult-chest-light-high-chroma",
+            "adult-chest-medium-low-contrast",
+            "adult-chest-medium-high-contrast",
+            "adult-chest-medium-high-chroma",
+            "adult-chest-dark-low-contrast",
+            "adult-chest-dark-high-contrast",
+            "adult-chest-dark-high-chroma",
+            "adult-chest-study-broad",
+            "adult-chest-study-long",
+            "adult-chest-study-asymmetric",
+            "tissue-study-opaque",
+            "tissue-study-2mm",
+            "tissue-study-4mm",
+            "tissue-study-8mm",
             "hatz-gargoyle",
             "street",
             "city-rowhouse",
@@ -2410,6 +2511,43 @@
             "mcrn-larson",
             "mcrn-larson-landed",
             "human-scale-2m",
+            "adult-human-neutral",
+            "adult-human-reaching",
+            "adult-human-reach-clip",
+            "adult-human-male-study",
+            "adult-human-details",
+            "adult-human-cheek-scar",
+            "adult-human-auricle",
+            "adult-human-auricle-thin-skin",
+            "adult-human-thin-skin",
+            "adult-human-groom-fibre",
+            "adult-human-groom-medium",
+            "adult-human-groom-medium-layered",
+            "adult-human-groom-medium-field",
+            "adult-human-groom-medium-field-wisps",
+            "adult-human-body-hair",
+            "adult-human-facial-hair",
+            "adult-human-vellus-study",
+            "adult-human-wider-stance",
+            "adult-human-iris-brown",
+            "adult-human-iris-hazel",
+            "adult-human-iris-blue",
+            "adult-chest-light-low-contrast",
+            "adult-chest-light-high-contrast",
+            "adult-chest-light-high-chroma",
+            "adult-chest-medium-low-contrast",
+            "adult-chest-medium-high-contrast",
+            "adult-chest-medium-high-chroma",
+            "adult-chest-dark-low-contrast",
+            "adult-chest-dark-high-contrast",
+            "adult-chest-dark-high-chroma",
+            "adult-chest-study-broad",
+            "adult-chest-study-long",
+            "adult-chest-study-asymmetric",
+            "tissue-study-opaque",
+            "tissue-study-2mm",
+            "tissue-study-4mm",
+            "tissue-study-8mm",
             "hatz-gargoyle",
             "street",
             "alfa-hero",
@@ -3994,13 +4132,114 @@
               },
               "aurora": {
                 "type": "boolean"
+              },
+              "generate": {
+                "$ref": "#/$defs/generated-planet"
+              },
+              "flowing": {
+                "type": "object",
+                "properties": {
+                  "made_up": {"const": true},
+                  "deck": {"$ref": "#/$defs/planet/properties/deck"},
+                  "chart": {"$ref": "#/$defs/planet/properties/chart"},
+                  "shadow_fill": {"type": "number", "minimum": 0, "maximum": 1},
+                  "sun_disc_degrees": {"type": "number", "minimum": 0, "maximum": 10},
+                  "sun_disc_samples": {"type": "integer", "minimum": 8, "maximum": 64},
+                  "columns": {"$ref": "#/$defs/planet/properties/columns"},
+                  "zones": {"$ref": "#/$defs/planet/properties/zones"},
+                  "storms": {"$ref": "#/$defs/planet/properties/storms"},
+                  "weather": {"$ref": "#/$defs/planet/properties/weather"}
+                },
+                "required": ["made_up", "deck", "columns", "zones", "weather"],
+                "additionalProperties": false
+              },
+              "circles": {
+                "type": "string"
+              },
+              "phase": {
+                "type": "number",
+                "minimum": -360,
+                "maximum": 360
               }
             },
             "required": [
-              "template",
-              "middle",
               "detail"
             ],
+            "oneOf": [
+              {
+                "required": [
+                  "template"
+                ]
+              },
+              {
+                "required": [
+                  "generate"
+                ]
+              }
+            ],
+            "additionalProperties": false
+          }
+        },
+        "binaries": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "generate": {
+                "type": "object",
+                "properties": {
+                  "primary": {
+                    "type": "object",
+                    "properties": {
+                      "mass": {"type": "number", "minimum": 0, "maximum": 300},
+                      "age": {"type": "number", "minimum": 0, "maximum": 14000000000}
+                    },
+                    "required": ["mass", "age"],
+                    "additionalProperties": false
+                  },
+                  "companion": {
+                    "type": "object",
+                    "properties": {
+                      "mass": {"type": "number", "minimum": 0, "maximum": 300},
+                      "temperature": {"type": "number", "minimum": 0, "maximum": 200000},
+                      "radius": {"type": "number", "minimum": 0, "maximum": 2000}
+                    },
+                    "required": ["mass", "temperature", "radius"],
+                    "additionalProperties": false
+                  },
+                  "separation": {"type": "number", "minimum": 0, "maximum": 1000000},
+                  "eccentricity": {"type": "number", "minimum": 0, "maximum": 0.99},
+                  "inclination": {"type": "number", "minimum": -180, "maximum": 180},
+                  "drop": {
+                    "type": "object",
+                    "properties": {
+                      "mass": {"type": "number", "minimum": 0, "maximum": 300},
+                      "temperature": {"type": "number", "minimum": 0, "maximum": 200000},
+                      "age": {"type": "number", "minimum": 0, "maximum": 14000000000},
+                      "distance": {"type": "number", "minimum": 0, "maximum": 1000000},
+                      "phase": {"type": "number", "minimum": -360, "maximum": 360},
+                      "made_up": {"type": "boolean"}
+                    },
+                    "required": ["mass", "temperature", "age", "distance"],
+                    "additionalProperties": false
+                  }
+                },
+                "required": ["primary", "companion", "separation", "eccentricity"],
+                "additionalProperties": false
+              },
+              "middle": {
+                "$ref": "#/$defs/triple"
+              },
+              "drop_at": {
+                "$ref": "#/$defs/triple"
+              },
+              "time": {"type": "number", "minimum": 0, "maximum": 14000000000}
+            },
+            "oneOf": [
+              {"required": ["middle"]},
+              {"required": ["drop_at"]}
+            ],
+            "required": ["generate", "time"],
             "additionalProperties": false
           }
         },
@@ -4024,6 +4263,25 @@
               "colour",
               "source"
             ],
+            "additionalProperties": false
+          }
+        },
+        "cloud-decks": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "base": {"$ref": "#/$defs/triple"},
+              "size": {"$ref": "#/$defs/triple"},
+              "colour": {"$ref": "#/$defs/colour"},
+              "coverage": {"type": "number", "exclusiveMinimum": 0, "maximum": 1},
+              "extinction": {"type": "number", "exclusiveMinimum": 0},
+              "scale": {"type": "number", "exclusiveMinimum": 0},
+              "feather": {"type": "number", "minimum": 0},
+              "seed": {"type": "integer", "minimum": 0},
+              "source": {"type": "string"}
+            },
+            "required": ["base", "size", "colour", "coverage", "extinction", "scale", "seed", "source"],
             "additionalProperties": false
           }
         },
@@ -4235,6 +4493,200 @@
           }
         }
       },
+      "additionalProperties": false
+    },
+    "generated-planet": {
+      "type": "object",
+      "properties": {
+        "mass": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 26600
+        },
+        "makeup": {
+          "type": "object",
+          "properties": {
+            "metal": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "rock": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "ice": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "gas": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            }
+          },
+          "required": [
+            "metal",
+            "rock",
+            "ice",
+            "gas"
+          ],
+          "additionalProperties": false
+        },
+        "day": {
+          "type": "number",
+          "minimum": -1000000,
+          "maximum": 1000000
+        },
+        "tilt": {
+          "type": "number",
+          "minimum": -180,
+          "maximum": 180
+        },
+        "distance": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 10000000000000.0
+        },
+        "flux": {
+          "description": "the light the planet gets, in the Earth's, said in place of a distance by a body that goes round a lava drop",
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 1000000
+        },
+        "sun": {
+          "type": "object",
+          "properties": {
+            "mass": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 300
+            },
+            "luminosity": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1000000000000.0
+            }
+          },
+          "required": [
+            "mass",
+            "luminosity"
+          ],
+          "additionalProperties": false
+        },
+        "age": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 14000000000.0
+        },
+        "seed": {
+          "$ref": "#/$defs/seed"
+        },
+        "locked": {
+          "type": "boolean"
+        },
+        "ground_look": {
+          "description": "Made-up rocky ground appearance: ocean fraction and painted variation and ridge contrast; not displaced geometry.",
+          "type": "object",
+          "properties": {
+            "ocean": {"type": "number", "minimum": 0, "maximum": 1},
+            "variation": {"type": "number", "minimum": 0, "maximum": 1},
+            "ridge_contrast": {"type": "number", "minimum": 0, "maximum": 1},
+            "made_up": {"const": true}
+          },
+          "required": ["ocean", "variation", "ridge_contrast", "made_up"],
+          "additionalProperties": false
+        },
+        "air_look": {
+          "description": "Made-up appearance for the existing single exponential air shell; colour is linear RGB tint.",
+          "type": "object",
+          "properties": {
+            "height_km": {"type": "number", "exclusiveMinimum": 0, "maximum": 100000},
+            "loss_per_km": {"type": "number", "minimum": 0, "maximum": 100000},
+            "colour": {"type": "array", "minItems": 3, "maxItems": 3, "items": {"type": "number", "minimum": 0, "maximum": 1}},
+            "made_up": {"const": true}
+          },
+          "required": ["height_km", "loss_per_km", "colour", "made_up"],
+          "additionalProperties": false
+        },
+        "giant_gas": {
+          "description": "Made-up depth and opacity for the existing giant gas density ramp; depth is a share of radius.",
+          "type": "object",
+          "properties": {
+            "depth": {"type": "number", "exclusiveMinimum": 0, "maximum": 1},
+            "opacity": {"type": "number", "minimum": 0, "maximum": 100000},
+            "made_up": {"const": true}
+          },
+          "required": ["depth", "opacity", "made_up"],
+          "additionalProperties": false
+        },
+        "giant_look": {
+          "description": "Made-up, authored gas bands and storms; latitudes are sine latitude, longitudes and turns radians, paints linear RGB.",
+          "type": "object",
+          "properties": {
+            "paints": {"type": "array", "minItems": 1, "maxItems": 32, "items": {"$ref": "#/$defs/giantPaint"}},
+            "roil": {"type": "number", "minimum": 0, "maximum": 1},
+            "shear": {"type": "number", "minimum": 1, "maximum": 100},
+            "grain": {"type": "number", "minimum": 0.001, "maximum": 1},
+            "fine": {"type": "number", "minimum": 0, "maximum": 1},
+            "mottle": {"type": "number", "minimum": 0, "maximum": 1},
+            "jets": {"type": "integer", "minimum": 0, "maximum": 64},
+            "spots": {"type": "array", "maxItems": 64, "items": {
+              "type": "object", "properties": {
+                "lat": {"type": "number", "minimum": -0.99, "maximum": 0.99},
+                "lon": {"type": "number", "minimum": -3.141592653589793, "maximum": 3.141592653589793},
+                "size": {"type": "number", "minimum": 0.001, "maximum": 1},
+                "stretch": {"type": "number", "minimum": 0.1, "maximum": 10},
+                "turn": {"type": "number", "minimum": -10, "maximum": 10},
+                "detail": {"type": "number", "minimum": 0, "maximum": 1},
+                "seed": {"$ref": "#/$defs/seed"},
+                "paint": {"$ref": "#/$defs/giantPaint"}
+              }, "required": ["lat", "lon", "size", "stretch", "turn", "paint"], "additionalProperties": false
+            }},
+            "streets": {"type": "array", "maxItems": 16, "items": {
+              "type": "object", "properties": {
+                "lat": {"type": "number", "minimum": -0.9, "maximum": 0.9},
+                "count": {"type": "integer", "minimum": 1, "maximum": 32},
+                "size": {"type": "number", "minimum": 0.001, "maximum": 0.1},
+                "turn": {"type": "number", "minimum": -10, "maximum": 10},
+                "seed": {"$ref": "#/$defs/seed"},
+                "paint": {"$ref": "#/$defs/giantPaint"}
+              }, "required": ["lat", "count", "size", "turn", "seed", "paint"], "additionalProperties": false
+            }},
+            "made_up": {"const": true}
+          },
+          "required": ["paints", "roil", "shear", "grain", "fine", "mottle", "jets", "made_up"],
+          "additionalProperties": false
+        },
+        "clouds": {
+          "description": "Art-directed cloud shell: heights in km, coverage as a share, extinction per km; zero cover clears the sky.",
+          "type": "object",
+          "properties": {
+            "base": {"type": "number", "minimum": 0, "maximum": 100000},
+            "top": {"type": "number", "minimum": 0, "maximum": 100000},
+            "cover": {"type": "number", "minimum": 0, "maximum": 1},
+            "loss": {"type": "number", "minimum": 0, "maximum": 100000},
+            "weather": {"enum": ["bands", "soft-bands"]},
+            "storm_turn": {"type": "number", "minimum": 0, "maximum": 10},
+            "made_up": {"const": true}
+          },
+          "required": ["base", "top", "cover", "loss", "made_up"],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "mass",
+        "makeup",
+        "tilt",
+        "age",
+        "seed"
+      ],
+      "oneOf": [
+        {"required": ["distance"]},
+        {"required": ["flux"]}
+      ],
       "additionalProperties": false
     },
     "share": {

@@ -4,9 +4,9 @@ The old single-precision Moller-Trumbore distance calculation lost accuracy
 on long, thin triangles, so the CPU could light a face the GPU shadowed.
 That displacement could put the next ray inside its own surface.
 
-The kernel now translates each triangle into the ray frame, shears along
-the dominant direction and computes compensated edge determinants. This
-follows the approach already used in mesh/meet.go.
+the kernel translates each triangle into the ray frame, shears along
+the dominant direction and computes compensated edge determinants.
+`mesh/meet.go` uses the same approach.
 
 The source is Sven Woop, Carsten Benthin and Ingo Wald,
 [Watertight Ray/Triangle Intersection, JCGT 2(1), 2013][paper].
@@ -15,9 +15,6 @@ The paper also uses a rare double-precision fallback and conservative
 hierarchy bounds. This float-only implementation does not establish that
 full guarantee. Slayer's grazing rejection, edge slack, exclusive distance
 interval and secondary-ray offsets remain unchanged.
-
-No larger bias, framebuffer tolerance or instrument geometry hides the
-original discrepancy.
 
 [paper]: https://jcgt.org/published/0002/01/05/
 

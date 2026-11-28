@@ -51,7 +51,10 @@ func (work *Workspace) InstallMenu() {
 		AddItem(gogpu.MenuItem{Title: "Hide Others", Role: gogpu.RoleHideOthers}).
 		AddItem(gogpu.MenuItem{Title: "Show All", Role: gogpu.RoleShowAll}).
 		AddItem(gogpu.MenuItem{Separator: true}).
-		AddItem(gogpu.MenuItem{Title: "Quit Ferruccio", Role: gogpu.RoleQuit}))
+		AddItem(gogpu.MenuItem{Title: "Quit Ferruccio", Role: gogpu.RoleQuit, Action: func() {
+			work.wantQuit.Store(true)
+			work.host.RequestRedraw()
+		}}))
 }
 
 // noteMissingCache, at launch on the Slayer road, says in one plain line that
@@ -161,6 +164,9 @@ func (work *Workspace) settingRow(entry settings.Entry) widget.Widget {
 	note := settingNote(entry)
 	if entry.Source == settings.Unset && entry.Key.Name == settings.Queue && work.options.Tools.Queue != "" {
 		note = "Found the existing shared queue. Choose another queue to use it instead."
+		if work.options.PrepareQueue != nil {
+			note = "Ferruccio creates this queue on the first render. You can choose another queue."
+		}
 	}
 	if entry.Source == settings.Unset && entry.Key.Name == settings.Evidence && work.options.Evidence != "" {
 		note = "Using the default output folder. Choose another folder to use it instead."
@@ -207,7 +213,11 @@ const settingsRowGap = 12
 // paragraph is text wrapped to the sheet's width, one line to a text widget,
 // since the toolkit's own text widget draws a long line whole.
 func (work *Workspace) paragraph(text string, colour widget.Color) widget.Widget {
-	lines := wrapMessageLines(text, work.runesIn(settingsSheetWidth-2*settingsSheetPadding))
+	return work.paragraphAtWidth(text, colour, settingsSheetWidth-2*settingsSheetPadding)
+}
+
+func (work *Workspace) paragraphAtWidth(text string, colour widget.Color, width float32) widget.Widget {
+	lines := wrapMessageLines(text, work.runesIn(width))
 	children := make([]widget.Widget, len(lines))
 	for index, line := range lines {
 		children[index] = work.text(line).Color(colour)
@@ -231,6 +241,9 @@ func (work *Workspace) settingValue(entry settings.Entry) string {
 	case entry.Value != "":
 		return entry.Value
 	case entry.Key.Name == settings.Queue && work.options.Tools.Queue != "":
+		if work.options.PrepareQueue != nil {
+			return work.options.Tools.Queue + " (default)"
+		}
 		return work.options.Tools.Queue + " (detected)"
 	case entry.Key.Name == settings.Evidence && work.options.Evidence != "":
 		return work.options.Evidence + " (default)"
@@ -329,8 +342,16 @@ func (work *Workspace) saveSetting(name settings.Name, value string) {
 	}
 	work.status = "Settings saved"
 	if name == settings.Cache || name == settings.Shelf || name == settings.Data || name == settings.Processors {
-		work.working.source = ""
+		if work.working.gpu != nil {
+			work.working.gpu.ForgetStable()
+		}
+		if !work.refreshStagedDetail() {
+			work.working.source = ""
+		}
 		work.working.rollback = nil
+		work.working.preview = nil
+		work.working.poseHistory = nil
+		work.working.provisional = false
 	}
 	work.refreshRenderBlocked(work.state.document.Check() == nil)
 	work.requestSettings()

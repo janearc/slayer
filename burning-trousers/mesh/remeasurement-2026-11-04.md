@@ -26,11 +26,5 @@ The full run took 31.562 seconds with two Go CPU slots. The adjacent
 names. This remeasures acceptance margins for these inputs; it does not
 establish all seeds, complexity levels or a biological shape reference.
 
-Reproduce from the repository with no other rendering job active:
-
-```sh
-GOMAXPROCS=2 GOFLAGS=-p=1 game run check-mesh
-```
-
-Full project acceptance still uses `game check`. The harness's import and
-history guards remain unchanged; these harness edits are committed alone.
+The adjacent log records the test selection. The original checkout used
+the historical `check-mesh` Game recipe.

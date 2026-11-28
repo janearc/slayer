@@ -1,0 +1,6 @@
+$schema: https://github.com/janearc/slayer/schemas/job-v1.json
+scene: {set: nadir-clear.yaml}
+camera: {name: pole}
+renderer: gpu-native
+film: {width: 800, height: 800, rays: 2, exposure: 0.003}
+outputs: {picture: ../../out/studies/2026-11-27-cloud-nadir-clear/proof.png}

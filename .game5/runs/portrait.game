@@ -1,0 +1,2 @@
+portrait . :: go run ./studies/portrait
+portrait-check . :: go test -cover ./bioforms/pigment ./bioforms/diffusion ./bioforms/assembly ./studies/portrait

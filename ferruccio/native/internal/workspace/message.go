@@ -14,6 +14,7 @@ import (
 
 const (
 	messageDefaultDialogHeight float32 = 160
+	workingDetailsDialogWidth  float32 = 1040
 	messageMinDialogHeight     float32 = 120
 	messageContentWidthInset   float32 = 48 // pinned dialog surface uses 24px on each side
 	messageContentHeight       float32 = 48 // pinned dialog surface reserves 52px title and 60px actions
@@ -24,23 +25,32 @@ const (
 )
 
 // message presents complete error details in short wrapped pages with copy access.
-func (work *Workspace) message(title, text string) {
-	work.showMessagePage(title, text, 0)
+func (work *Workspace) message(title, text string, extra ...dialog.Action) {
+	work.showMessagePage(title, text, "", 0, extra)
 }
 
 // showMessagePage builds the selected page and its copy/navigation actions.
-func (work *Workspace) showMessagePage(title, text string, page int) {
+func (work *Workspace) showMessagePage(title, text, notice string, page int, extra []dialog.Action) {
 	fontSize := work.size
 	if fontSize <= 0 {
 		fontSize = 16
 	}
 	pageLines := messagePageLines(fontSize, work.ui.Window().WindowSize().Height)
-	maxRunes := work.messageLineRunes(fontSize)
-	lines := wrapMessageLines(text, maxRunes)
-	pages := messagePageCount(len(lines), pageLines)
-	if pages < 1 {
-		pages = 1
+	dialogWidth := appearance.DialogPainter{Theme: work.theme, Size: work.size}.DialogMaxWidth()
+	copyText := text
+	groups := []string{text}
+	if notice != "" {
+		dialogWidth = workingDetailsDialogWidth
+		groups = strings.SplitAfter(notice, " · ")
+		if text != "" {
+			groups = append([]string{text + "\n"}, groups...)
+			copyText += "\n\n"
+		}
+		copyText += notice
 	}
+	maxRunes := work.messageLineRunes(fontSize, dialogWidth)
+	pageRows := paginateMessageGroups(groups, maxRunes, pageLines)
+	pages := len(pageRows)
 	if page < 0 {
 		page = 0
 	}
@@ -51,42 +61,51 @@ func (work *Workspace) showMessagePage(title, text string, page int) {
 	if pages > 1 {
 		pageTitle += " · " + messagePageLabel(page, pages)
 	}
-	actions := make([]dialog.Action, 0, 4)
+	actions := make([]dialog.Action, 0, 4+len(extra))
+	// Keep navigation in the same right-aligned positions when a dialog
+	// adds actions. GoGPU estimates click widths from label byte counts.
+	actions = append(actions, extra...)
+	requestedPage := page
 	if page > 0 {
-		previous := page - 1
 		actions = append(actions, dialog.Action{Label: "Back", Variant: dialog.VariantOutlined, OnClick: func() {
-			work.showMessagePage(title, text, previous)
+			requestedPage = page - 1
 		}})
 	}
 	actions = append(actions, dialog.Action{Label: "Copy", Variant: dialog.VariantOutlined, OnClick: func() {
-		widget.ClipboardWrite(text)
+		widget.ClipboardWrite(copyText)
 	}})
 	if page+1 < pages {
-		next := page + 1
 		actions = append(actions, dialog.Action{Label: "Next", Variant: dialog.VariantOutlined, OnClick: func() {
-			work.showMessagePage(title, text, next)
+			requestedPage = page + 1
 		}})
 	}
 	actions = append(actions, dialog.Action{Label: "Close", Variant: dialog.VariantOutlined})
 
 	body := &messageBody{
 		WidgetBase: *widget.NewWidgetBase(),
-		lines:      messagePage(lines, page, pageLines),
+		lines:      pageRows[page],
 		fontSize:   fontSize,
 	}
 	dialog.New(
 		dialog.Title(pageTitle),
+		dialog.MaxWidth(dialogWidth),
 		dialog.Content(body),
 		dialog.Actions(actions...),
+		dialog.OnClose(func() {
+			// Removing the old dialog removes overlays above it. Show the
+			// requested page only after the old dialog closes.
+			if requestedPage != page {
+				work.showMessagePage(title, text, notice, requestedPage, extra)
+			}
+		}),
 		dialog.PainterOpt(appearance.DialogPainter{Theme: work.theme, Size: work.size}),
 	).Show(work.ui.Window().Context())
 	work.host.RequestRedraw()
 }
 
 // messageLineRunes keeps each rendered row within the dialog's content width.
-func (work *Workspace) messageLineRunes(fontSize float32) int {
+func (work *Workspace) messageLineRunes(fontSize, dialogWidth float32) int {
 	windowWidth := work.ui.Window().WindowSize().Width
-	dialogWidth := appearance.DialogPainter{Theme: work.theme, Size: work.size}.DialogMaxWidth()
 	availableWidth := windowWidth * 0.9
 	if dialogWidth > availableWidth {
 		dialogWidth = availableWidth
@@ -146,6 +165,26 @@ func wrapMessageLines(text string, width int) []string {
 		lines = append(lines, string(runes))
 	}
 	return lines
+}
+
+// paginateMessageGroups keeps each limitation on one page when it fits.
+func paginateMessageGroups(groups []string, width, rowsPerPage int) [][]string {
+	pages := [][]string{nil}
+	for _, group := range groups {
+		lines := wrapMessageLines(group, width)
+		current := len(pages) - 1
+		if len(pages[current])+len(lines) <= rowsPerPage {
+			pages[current] = append(pages[current], lines...)
+			continue
+		}
+		if len(pages[current]) == 0 {
+			pages = pages[:current]
+		}
+		for i := 0; i < messagePageCount(len(lines), rowsPerPage); i++ {
+			pages = append(pages, messagePage(lines, i, rowsPerPage))
+		}
+	}
+	return pages
 }
 
 // messagePageCount returns the number of bounded pages needed for wrapped rows.

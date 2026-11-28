@@ -49,11 +49,16 @@ func scaleSession(t *testing.T, path, source string) (*Session, job.Job) {
 	return opened, wanted
 }
 
+func scaledTypedSpace(source string) string {
+	return strings.Replace(source, "        east: 10\n        north: 5\n        height: {value: 3, unit: m}\n",
+		"        position:\n          east: {value: 10, unit: m}\n          north: {value: 5, unit: m}\n          up: {value: 3, unit: m}\n        scale: 2\n", 1)
+}
+
 func TestSpaceScaleReachesStagedGeometryAndJobKey(t *testing.T) {
 	t.Setenv("SLAYER_CACHE", t.TempDir())
 	path := filepath.Join(t.TempDir(), "scene.yaml")
 	base, oldJob := scaleSession(t, path, scaleScene)
-	scaled, newJob := scaleSession(t, path, strings.Replace(scaleScene, "        east: 10\n", "        scale: 2\n        east: 10\n", 1))
+	scaled, newJob := scaleSession(t, path, scaledTypedSpace(scaleScene))
 	if oldJob.Key() == newJob.Key() {
 		t.Fatal("scale did not change the job key")
 	}
@@ -78,7 +83,7 @@ func TestSpaceScaleMovesAttachedLightsButPreservesIntensity(t *testing.T) {
 	source := strings.Replace(scaleScene, "kind: can", "kind: spotlight", 1)
 	path := filepath.Join(t.TempDir(), "scene.yaml")
 	base, _ := scaleSession(t, path, source)
-	scaled, _ := scaleSession(t, path, strings.Replace(source, "        east: 10\n", "        scale: 2\n        east: 10\n", 1))
+	scaled, _ := scaleSession(t, path, scaledTypedSpace(source))
 	oldWorld := base.source.(stillFramer).world
 	newWorld := scaled.source.(stillFramer).world
 	if len(oldWorld.Lamps) == 0 || len(oldWorld.Lamps) != len(newWorld.Lamps) {

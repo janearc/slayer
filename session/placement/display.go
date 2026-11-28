@@ -22,6 +22,7 @@ type DisplayMesh struct {
 	Edges              []uint32
 	Notice, Diagnostic string
 	hitter             shape.Hitter
+	materialLimits     MaterialLimits
 }
 
 // Detached returns the immutable display data without private exact hit
@@ -44,13 +45,25 @@ type DisplayObject struct {
 
 // DisplayScene is a mutable view over immutable shared object-local meshes.
 type DisplayScene struct {
-	Objects       []DisplayObject
-	Batches       []StagedBatch
-	Origins       map[string]maths.Vec `json:"origins,omitempty"`
-	Eye           maths.Subspace
-	Focus         maths.Vec
-	Lens          film.Pinhole
-	Width, Height int
+	Objects             []DisplayObject
+	Batches             []StagedBatch
+	Origins             map[string]maths.Vec   `json:"origins,omitempty"`
+	Lights              []DisplayLight         `json:"lights,omitempty"`
+	VolumeBounds        []DisplayVolumeBound   `json:"volume_bounds,omitempty"`
+	SkyGradient         *DisplaySkyGradient    `json:"sky_gradient,omitempty"`
+	GiantBoundaries     []DisplayGiantBoundary `json:"giant_boundaries,omitempty"`
+	GlobeOutlines       []DisplaySphereOutline `json:"globe_outlines,omitempty"`
+	OmittedVolumeBounds int                    `json:"omitted_volume_bounds,omitempty"`
+	Eye                 maths.Subspace
+	Focus               maths.Vec
+	Lens                film.Pinhole
+	Width, Height       int
+
+	// FarClippedWorldSurfaces counts complete native world surfaces in a cached body scene.
+	FarClippedWorldSurfaces int  `json:"-"`
+	GiantAtmospheres        int  `json:"-"`
+	WorkingSkyOmitted       bool `json:"-"`
+	SplitWorldVertices      bool `json:"-"`
 }
 
 // DisplayCache retains manufactured geometry independently of object pose/camera.

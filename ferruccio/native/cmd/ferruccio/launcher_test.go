@@ -170,6 +170,8 @@ func (check *launcherCheck) buildBundle(name string,
 	slayer := filepath.Join(check.directory, "outside", check.hostile.slayer)
 	files := []string{"starter/source.yaml", "starter/preview.png",
 		"starter/receipt.json", "ferruccio/examples/one.yaml",
+		"ferruccio/examples/larson-camp-visitor.glb",
+		"ferruccio/examples/larson-camp-visitor-LICENSE.txt",
 		"sets/one.yaml", "sources.yaml"}
 	for _, file := range files {
 		path := filepath.Join(root, file)

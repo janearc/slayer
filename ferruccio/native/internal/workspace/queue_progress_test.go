@@ -5,8 +5,8 @@ import (
 	"errors"
 	"github.com/gogpu/ui/event"
 	"github.com/gogpu/ui/geometry"
+	"github.com/gogpu/ui/uitest"
 	"github.com/gogpu/ui/widget"
-	"github.com/janearc/slayer/ferruccio/native/internal/picking"
 	"strings"
 	"testing"
 	"time"
@@ -30,6 +30,19 @@ func TestQueuedPreviewWithStaleWorkerShowsWhatToCheck(t *testing.T) {
 	}
 	if work.cancel == nil || work.output != "" {
 		t.Fatal("stale worker evidence cancelled the request or accepted an image")
+	}
+}
+
+func TestStatusOutageShowsRetryWithoutClaimingTheJobIsRunning(t *testing.T) {
+	work := playWorkspace(t)
+	_, cancel := context.WithCancel(context.Background())
+	t.Cleanup(cancel)
+	work.cancel = cancel
+	work.applyProgress(renderProgress{generation: work.generation, update: preview.Update{
+		Sequence: 100, State: "unavailable", Held: "Queue status unavailable · retrying",
+	}})
+	if !strings.Contains(work.playReadout(), "Queue status unavailable · retrying") || strings.Contains(work.playReadout(), "Running") || work.cancel == nil || work.output != "" {
+		t.Fatalf("outage misrepresented: %s", work.playReadout())
 	}
 }
 
@@ -67,6 +80,66 @@ func TestQueueProgressTickRetainsTheDisplayedWorld(t *testing.T) {
 		if update.State == "running" && !strings.Contains(work.playReadout(), "Running") {
 			t.Fatal("running state is absent from the footer")
 		}
+	}
+}
+
+func TestRenderProgressChangesWithoutAcceptingPixels(t *testing.T) {
+	work := playWorkspace(t)
+	_, cancel := context.WithCancel(context.Background())
+	t.Cleanup(cancel)
+	work.cancel = cancel
+	work.progress = make(chan renderProgress, 4)
+	for _, update := range []preview.Update{
+		{State: "running", Sequence: 7, Progress: preview.Progress{Phase: "Staging · things", Done: 50, Total: 100}},
+		{State: "running", Sequence: 7, Progress: preview.Progress{Phase: "Rendering"}},
+		{State: "running", Sequence: 7, Progress: preview.Progress{Phase: "Rendering", Done: 90, Total: 90}},
+	} {
+		work.progress <- renderProgress{generation: work.generation, update: update}
+		work.Tick()
+		if work.queueProgress != update.Progress || work.renderProgressBar() == nil || work.output != "" {
+			t.Fatalf("progress was not displayed independently of output: %+v", update)
+		}
+	}
+	if !strings.Contains(work.playReadout(), "100%") || !strings.Contains(work.playReadout(), "finishing") || !strings.Contains(work.playReadout(), "waiting for completed pixels") {
+		t.Fatalf("complete rows were mistaken for accepted pixels: %s", work.playReadout())
+	}
+	work.ui.Window().HandleResize(1280, 800)
+	work.rebuild()
+	bar := libraryWidget(work.root, "Render progress")
+	if bar == nil {
+		t.Fatal("the play view has no visible render progress bar")
+	}
+	if label := bar.(interface{ AccessibilityLabel() string }).AccessibilityLabel(); label != "Rendering: 90 of 90" {
+		t.Fatalf("progress accessibility label = %q", label)
+	}
+	work.ui.Window().Frame()
+	bounds := bar.(interface{ ScreenBounds() geometry.Rect }).ScreenBounds()
+	if bounds.IsEmpty() || bounds.Min.X < 0 || bounds.Max.X > 1280 || bounds.Min.Y < 0 || bounds.Max.Y > 800 {
+		t.Fatalf("render progress bar is outside the window: %v", bounds)
+	}
+}
+
+type progressContext struct {
+	*uitest.MockContext
+	frames int
+}
+
+func (ctx *progressContext) ScheduleAnimationFrame() { ctx.frames++ }
+
+func TestUncountedProgressDoesNotScheduleFrames(t *testing.T) {
+	work := playWorkspace(t)
+	_, cancel := context.WithCancel(context.Background())
+	t.Cleanup(cancel)
+	work.cancel, work.queueState = cancel, "running"
+	bar := work.renderProgressBar()
+	if bar == nil {
+		t.Fatal("observed running state has no activity marker")
+	}
+	ctx := &progressContext{MockContext: uitest.NewMockContext()}
+	bar.Layout(ctx, geometry.Loose(geometry.Sz(100, 100)))
+	bar.Draw(ctx, &uitest.MockCanvas{})
+	if ctx.frames != 0 {
+		t.Fatalf("unknown queue progress requested %d extra frames", ctx.frames)
 	}
 }
 
@@ -125,6 +198,42 @@ func TestQueueStopCancelsOwnRequestWithoutAcceptingLateProgress(t *testing.T) {
 	work.finishPreview(renderResult{generation: generation, observation: preview.Update{State: "cancelled", Sequence: 1, Terminal: true}, err: context.Canceled})
 	if work.Running() || work.status != "Preview cancellation confirmed" {
 		t.Fatal("completed cancelled worker remained outstanding")
+	}
+}
+
+func TestFullRenderStopNamesTheFullRender(t *testing.T) {
+	work := playWorkspace(t)
+	_, cancel := context.WithCancel(context.Background())
+	t.Cleanup(cancel)
+	work.cancel, work.fullRunning = cancel, true
+	work.output = "previous-preview.png"
+	pixels := work.viewer.source
+	generation := work.generation
+	work.StopPreview()
+	if !strings.Contains(work.playReadout(), "cancelling full render") ||
+		!strings.Contains(work.status, "full render") {
+		t.Fatalf("full render cancellation status = %q / %q", work.status, work.playReadout())
+	}
+	work.finishPreview(renderResult{
+		full: true, generation: generation, err: context.Canceled,
+		observation: preview.Update{State: "cancelled", Sequence: 41, Terminal: true},
+	})
+	if work.Running() || work.status != "Full render cancellation confirmed" ||
+		!strings.Contains(work.caption, work.status) || work.viewer.source != pixels ||
+		work.output != "previous-preview.png" {
+		t.Fatalf("full render cancellation outcome = %q / %q", work.status, work.caption)
+	}
+	work.working.displayed = true
+	work.working.source, work.working.path = work.state.document.Text(), work.state.path
+	work.Tick()
+	if caption := work.workingCaption(); caption != work.status {
+		t.Fatalf("working frame replaced full cancellation with %q", caption)
+	}
+	if err := work.SetWorkingMode("solid"); err != nil {
+		t.Fatal(err)
+	}
+	if caption := work.workingCaption(); caption == work.status {
+		t.Fatal("a new working-view action did not clear the cancellation note")
 	}
 }
 
@@ -282,13 +391,8 @@ func TestQueueSameJobSequenceFollowsOwnerStateAndHeldChanges(t *testing.T) {
 // Current background drags retain the existing camera-look fallback.
 func TestQueueCurrentBackgroundMissStillLooksAround(t *testing.T) {
 	work := playWorkspace(t)
-	scene, err := picking.New(work.state.document.Text(), 1.6)
-	if err != nil {
-		t.Fatal(err)
-	}
-	work.play.geometry = scene
-	work.play.renderedText = work.state.document.Text()
-	if scene.Pick(.01, .01) != "" {
+	installPlayWorkingView(t, work)
+	if work.workingPick(.01, .01) != "" {
 		t.Fatal("test background point unexpectedly hits a native object")
 	}
 	drawWholePlayRoot(t, work)

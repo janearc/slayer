@@ -1,3 +1,68 @@
+## slayer v0.1.9 
+
+this release moves us closer to constructing whole planetary systems and
+choosing where to look within them. it also gives ferruccio more of the
+tools needed to work with a scene, and adds native people and articulated
+animals. the planetary system work is still in progress: a single set
+containing every Caprica body, its flock and all of its cameras is not yet
+the delivered interface.
+
+- Added: set constructors for generated rocky planets and gas giants,
+  binary stars, and lava-drop systems with locked planets. Generated worlds
+  gain coast and biome colouring, atmosphere and cloud controls, banded gas
+  and opt-in spherical relief. Finite local cloud decks have feathered
+  boundaries. `coastcams` helps choose camera positions near coasts.
+
+- Added: an experimental flowing gas giant for fixed, metre-scale stills,
+  with one directional sun and shadows from static bodies. Optional samples
+  across a distant solar disc soften opaque shadow boundaries; shadow fill
+  is an artistic control. This path still refuses binary or additional
+  lights, films, shutters and moving cameras. See
+  [the flowing-giant notes](doc/flowing-giant-multiple-bodies.md).
+
+- Added: the Caprica look-book inputs and planetary studies, including
+  Azure's Hatzegopteryx flock. These are authored studies. The restored-scale
+  [binary system draft](sets/caprica-binary/README.md) remains unassessed;
+  its comet pieces, haze and illuminated polar crown are visual choices,
+  not a simulation of comet deposition or atmospheric evolution.
+
+- Added: two native adult-human anatomy families, articulated eyes,
+  procedural skin and rooted grooms. Set YAML can animate supported human
+  and orca joint clips and attach props to named bones. Live pose clips and
+  the opt-in skin diffusion, thin-tissue and fibre studies use the CPU
+  renderer; the densest grooms exceed the catalogue face limit. See the
+  [human notes](doc/model/bioform/human/README.md) and
+  [pose clips](doc/model/bioform/pose-clips.md).
+
+- Changed: ferruccio can open its playground and examples, browse surveyed
+  sets on a map, search and edit supported objects, and retry after missing
+  shelf data is repaired. Its working view has camera, film-frame, light
+  and volume context; it is a preview, with disclosed proxy and precision
+  limits, not the final render. Full stills retain supported authored
+  camera paths, zoom and time, and provide output and progress details.
+  The packaged app can start a private Azazel queue or use an existing one.
+  Ferruccio submits stills; inspecting a film in the working view does not
+  submit a film render. See the [quick start](doc/applications/ferruccio/quick-start.md),
+  [working view](doc/applications/ferruccio/WORKING-VIEW.md) and
+  [full still notes](ferruccio/internal/preview/FULL-RENDER.md).
+
+- Added: exact totals of 1–64 samples per pixel, including eligible native
+  Metal pinhole stills, and the 1080 × 960 `half-portrait` film preset.
+  Existing region, lens and renderer restrictions still apply. `rays`
+  remains a per-side count: `rays: 3` is nine samples per pixel. See
+  [jobs and film](job/README.md).
+
+- Fixed: ReSTIR shader insertion after the surface-lighting interface
+  changed. The catalogue now lists the native human and material studies;
+  historical seeded scavenged scenes keep their original candidate order.
+  Set schema checks and snake-pattern checks now account for the newer
+  flowing-body, cloud-deck and warped-coat controls.
+
+- Changed: planetary examples and study jobs use portable output locations
+  instead of machine-specific paths. The build's research citations can be
+  fetched with `game run sources-fetch -- --research`; `SLAYER_SHELF`,
+  `SLAYER_DATA` and `SLAYER_CACHE` can point at shared data and caches.
+
 ## slayer v0.1.8 25 nov 2026
 
 - i am still not a potato
@@ -3502,8 +3567,7 @@ out where they belong; this inventory is not a fresh test or release verdict.
 
 - Checked the phone JONSWAP/TMA references against retained original pages.
   Labelled the rounded peak fit as model glue while preserving numeric values.
-  Donelan/Banner and the complete TMA piecewise-cap attribution remain pending;
-  see [the source check](doc/phone-source-checks.md).
+  Donelan/Banner and the complete TMA piecewise-cap attribution remain pending.
 - Imported `titan` and `oceantex` as CPU references, preserving original file
   hashes. Titan provides a geographic
   height-provider boundary, seeded finer detail and measured/generated

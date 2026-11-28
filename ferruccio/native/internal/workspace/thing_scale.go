@@ -15,17 +15,17 @@ import (
 // canScaleThing checks source placement and the current constructor's motion.
 func (work *Workspace) canScaleThing() bool {
 	object, ok := work.selectedObject()
-	live := &work.working
 	if !ok || !object.ScaleEditable() {
 		return false
 	}
 	if work.play.scaleDocument == work.state.document && work.play.scaleID == object.ID() && work.play.scalePath == work.state.path && work.state.document.Matches(work.play.scaleSource) {
 		return true
 	}
-	if live.parsed == nil || !work.state.document.Matches(live.source) || live.path != work.state.path {
+	parsed := work.authoringSet()
+	if parsed == nil {
 		return false
 	}
-	for _, thing := range live.parsed.Things() {
+	for _, thing := range parsed.Things() {
 		if "scene.set.things/"+thing.Name() != object.ID() {
 			continue
 		}
@@ -36,7 +36,7 @@ func (work *Workspace) canScaleThing() bool {
 		var err error
 		if thing.Recipe() == "" {
 			row, err = manufacture.KindNamed(thing.Kind())
-		} else if recipe, found := live.parsed.Recipe(thing.Recipe()); found {
+		} else if recipe, found := parsed.Recipe(thing.Recipe()); found {
 			var made *manufacture.Kind
 			made, err = recipe.Construction()
 			if err == nil && made != nil {
@@ -97,7 +97,11 @@ func (work *Workspace) changeThingScale(factor float64) error {
 	if !work.canScaleThing() {
 		return fmt.Errorf("this placement cannot use a uniform size factor")
 	}
+	object, _ := work.selectedObject()
+	previous, _ := object.SizeScale()
+	base, current := work.poseBase()
 	before := work.state.document.Text()
+	work.rememberProvisional()
 	if err := work.state.document.SetThingScale(work.play.selected, factor); err != nil {
 		return err
 	}
@@ -105,6 +109,9 @@ func (work *Workspace) changeThingScale(factor float64) error {
 		return nil
 	}
 	work.rememberWorking(work.working.scene)
+	if current {
+		work.previewScale(base, object, factor/previous)
+	}
 	work.stopPreview()
 	work.editor.ApplyText(work.state.document.Text())
 	work.play.scaleDocument, work.play.scaleID, work.play.scaleSource, work.play.scalePath = work.state.document, work.play.selected, work.state.document.Text(), work.state.path

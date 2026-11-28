@@ -19,11 +19,8 @@ func (plan *Plan) writeRecipe(tools Tools, request queueRequest) error {
 		return err
 	}
 	renderer := "producer settings (no client override)"
-	if profile.CPURenderer && plan.Kind != "catalogue" {
-		renderer = "cpu (explicit request override)"
-	}
-	if profile.GPU && plan.Kind != "catalogue" {
-		renderer = "gpu (explicit request override)"
+	if override := profile.rendererOverride(); override != "" && plan.Kind != "catalogue" {
+		renderer = override + " (explicit request override)"
 	}
 	quality := profile.quality() + " (explicit request flag)"
 	if plan.Kind == "catalogue" {
@@ -37,7 +34,11 @@ func (plan *Plan) writeRecipe(tools Tools, request queueRequest) error {
 	if profile.Full && profile.Samples > 0 {
 		sampling = fmt.Sprintf("samples: %d per pixel", profile.Samples)
 	}
-	fmt.Fprintf(&text, "Requested image: %dx%d; %s.\nRequested quality: %s\nRequested renderer: %s\nLane: %s\nTimeout: %d seconds.\n", profile.Width, profile.Height, sampling, quality, renderer, request.Lane, request.TimeoutSeconds)
+	width, height := profile.OutputSize()
+	fmt.Fprintf(&text, "Requested image: %dx%d; %s.\nRequested quality: %s\nRequested renderer: %s\nLane: %s\nTimeout: %d seconds.\n", width, height, sampling, quality, renderer, request.Lane, request.TimeoutSeconds)
+	if profile.Full {
+		fmt.Fprintf(&text, "Requested primary samples: %s across %d shutter glimpse(s).\n", profile.PrimarySamples(), profile.Glimpses())
+	}
 	fmt.Fprintf(&text, "\nSource document: %q\nSource text SHA256: %s\nExecuted frozen YAML: %q\n", plan.Source, plan.Digest, plan.Input)
 	fmt.Fprintln(&text, "Audit YAML: scene.yaml")
 	fmt.Fprintln(&text, "Exact request and declared inputs: azazel-request.json")

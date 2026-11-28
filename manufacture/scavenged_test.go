@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"math"
 	"math/rand/v2"
+	"slices"
 	"testing"
 
 	"github.com/janearc/slayer/manufacture/cities"
@@ -280,8 +281,12 @@ func TestAScavengedClusterNeedsASownSeed(t *testing.T) {
 	}
 }
 
-func TestWithNoPartsTheCatalogueIsDrawnFromLessTheClusterItself(t *testing.T) {
+func TestWithNoPartsDrawUsesTheHistoricalCandidates(t *testing.T) {
 	rng := newDraws(1)
+	candidates, err := scavengedCandidates()
+	if err != nil {
+		t.Fatal(err)
+	}
 	for range 50 {
 		name, err := drawKind(ClusterAsk{}, rng)
 		if err != nil {
@@ -289,6 +294,9 @@ func TestWithNoPartsTheCatalogueIsDrawnFromLessTheClusterItself(t *testing.T) {
 		}
 		if name == ClusterKind {
 			t.Fatal("a cluster drew itself")
+		}
+		if !slices.Contains(candidates, name) {
+			t.Fatalf("drew %q outside the historical candidate list", name)
 		}
 		if _, err := scavengedModel(name); err != nil {
 			t.Fatalf("drew %q: %v", name, err)

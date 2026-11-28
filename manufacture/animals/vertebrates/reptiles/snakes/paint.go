@@ -4,6 +4,7 @@ import (
 	"math"
 
 	"github.com/janearc/slayer/maths"
+	"github.com/janearc/slayer/maths/noise"
 )
 
 // snakePaint reads spatial markings in the static animal's local coordinates.
@@ -22,8 +23,6 @@ func smooth(a, b, x float64) float64 {
 	return u * u * (3 - 2*u)
 }
 
-func periodic(x float64) float64 { return x - math.Floor(x) - .5 }
-
 // Within softens borders by the requested local-space pixel footprint.
 func (paint snakePaint) Within(at maths.Vec, footprint float64) maths.Light {
 	p := paint.profile
@@ -36,13 +35,25 @@ func (paint snakePaint) Within(at maths.Vec, footprint float64) maths.Light {
 	angle := math.Atan2(at.Z/(wide*p.Length), at.Y/(high*p.Length))
 	turn := angle / math.Pi
 	phase := along * p.Pattern.Repeat
+	// The second field bends the reach across the back independently.
+	// Fade both offsets before the flank islands and the angular seam.
+	warp := p.Pattern.Warp
+	if warp.Strength > 0 {
+		dorsal := 1 - smooth(.36, .56, math.Abs(turn))
+		phase += 1.36 * dorsal * warp.At(at, footprint)
+		warp.Seed = noise.Mix(warp.Seed ^ 0x7475726e)
+		turn += .75 * dorsal * warp.At(at, footprint)
+	}
 	// Width is in pattern-cell units; the cap keeps a distant view bounded.
 	feather := math.Min(.35, math.Max(.015, math.Max(0, footprint)*p.Pattern.Repeat/p.Length))
 	marks := bodyMarks(p.Pattern.Kind, phase, turn, feather)
 	colour := blend(p.Pattern.Base, p.Pattern.Edge, marks.border*p.Pattern.Contrast)
 	colour = blend(colour, p.Pattern.Mark, marks.dark*p.Pattern.Contrast)
 	colour = blend(colour, p.Pattern.Belly, marks.pale*p.Pattern.Contrast)
-	// A pale underside remains legible even where a dorsal mark crosses it.
+	// Mottle the coat before applying the pale underside and the facial
+	// details. The field reads the unwrapped local point in metres.
+	mottle := p.Pattern.Mottle.At(at, footprint)
+	colour = blend(colour.Scale(1+min(0, mottle)), p.Pattern.Belly, max(0, mottle))
 	belly := 1 - smooth(-.62, -.38, at.Y/(high*p.Length))
 	colour = blend(colour, p.Pattern.Belly, belly)
 

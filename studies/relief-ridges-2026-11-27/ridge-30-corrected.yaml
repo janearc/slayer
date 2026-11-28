@@ -1,0 +1,62 @@
+"$schema": https://github.com/janearc/slayer/schemas/ecosystem-v2.json
+# a copy, without its comments, of the lava drop recipes' caprica-2.yaml, so
+# that a test holds drop_at and the camera "drop" to the distance that
+# caprica's flux gives (TestTheLavaDropSetStandsWhereItsFluxPutsCaprica).
+scene:
+  name: caprica round the lava drop
+  seed: 7
+  setting: space
+  light: none
+  film: {width: 400, height: 400, rays: 2, exposure: 0.003, wide: 40}
+  cameras:
+    grazing:
+      title: grazing view across the terminator
+      location: {at: [383969, 3594902, 5453657]}
+      orientation: {look_at: [525101, 3539946, 5355874]}
+    day:
+      title: caprica's convective deck toward the terminator
+      location: {at: [9080000, -2430000, 3500000]}
+      orientation: {look_at: [5261000, -3684000, 3000000]}
+    quarter:
+      title: caprica at quarter phase
+      location: {at: [-22826400, 7411200, 0]}
+      orientation: {look_at: [0, 0, 0]}
+    pole:
+      title: from caprica's north pole
+      location: {at: [0, 0, 6434000]}
+      orientation: {look_at: [-893770, -436100, 6538530]}
+    drop:
+      title: the lava drop, 70000 km off
+      location: {at: [-322096923, -987288119, 23100000]}
+      orientation: {look_at: [-374139656, -1027940256, 0]}
+  world:
+    unit: 1
+    sky:
+      stars: {seed: 29, share: 0.01, size: 0.3, bright: 1.5}
+      source: eye
+    binaries:
+      pair:
+        generate:
+          primary: {mass: 2.45, age: 1.2e7}
+          companion: {mass: 0.62, temperature: 25000, radius: 0.0122}
+          separation: 9.2
+          eccentricity: 0.16
+          drop: {mass: 0.1, temperature: 3000, age: 1.0e9, distance: 48, phase: 8, made_up: true}
+        drop_at: [-374139656, -1027940256, 0]
+        time: 4
+    bodies:
+      caprica:
+        generate:
+          mass: 1
+          makeup: {metal: 0.32, rock: 0.6798, ice: 0.0002, gas: 0}
+          tilt: 0
+          flux: 1
+          age: 4.5e9
+          seed: 1
+          locked: true
+          air_look: {height_km: 8.5, loss_per_km: 0.0003, colour: [0.5, 0.7, 1], made_up: true}
+          relief: {scale_km: 10, ridge_km: 30, made_up: true}
+          clouds: {base: 2, top: 9, cover: 0, loss: 0.5, made_up: true}
+        circles: pair
+        phase: 70
+        detail: 5

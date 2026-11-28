@@ -1,21 +1,60 @@
 # Native regression run
 
-Run ferruccio regress --out EXISTING_PARENT --examples DIR unwrapped. It creates one new evidence directory and serial proof child windows from the same executable. Existing authoring windows stay open. No run is claimed merely by adding this command.
+Run the suite directly so Azazel can admit its jobs. It opens serial Metal
+proof windows in background mode, leaving other authoring windows alone.
+Its PNGs are widget exports from the native draw path.
 
-Supply the normal runtime flags, including Slayer, Game, Game home, source shelf and evidence paths. --starter DIR may seed the Larson trackball case. --sets DIR, --venus FILE, --kilauea FILE and --full-case FILE select explicit inputs. --dry-run starts no child.
+```sh
+bin/ferruccio regress --out /path/to/existing-output-folder \
+  --examples ferruccio/examples --sets sets \
+  --slayer /path/to/slayer --azazel /path/to/azazel \
+  --azazel-queue /path/to/queue --evidence /path/to/existing-output-folder
+```
 
-The nine cases cover Larson, Webb and service court in wire and held-trackball modes; the authored small full-render-check.yaml; and Venus/Kilauea full probes. Terrain probes retain original YAML and change only parsed film dimensions to 160×100 with one ray. No original scene or renderer code changes. Missing sources are unavailable, never passed. Webb remains a regression for its previously corrected viewport defect.
+Use an existing queue and worker. `--dry-run` starts no child. See
+`bin/ferruccio regress --help` for optional source and runtime paths.
 
-Each case retains original and executed source, hashes, exact arguments, child log, capture receipts and result. Held source must stay unchanged until release; release must change it. Ordinary working-mode proofs require a ready GPU viewport. --full invokes StartFullRender with the authored film; gesture release continues normal refinement.
+The baseline checks working views and held trackball gestures, plus full
+stills for a small example and bounded terrain cases. `--inventory` adds
+wire and bounded full probes for up to 20 additional set sources.
+Bounded probes copy the input and set raster film to 160 × 100 and one ray
+per side. Physical rigs are unavailable to those probes.
 
-The child has a four-minute cleanup watchdog. The parent allows thirty more seconds before recording a timeout failure. Cases continue after ordinary failures. An outer timeout leaves renderer quiescence unconfirmed, blocks all later cases and starts no more children. summary.json updates atomically after each case. Nonzero child exit, malformed/missing PNG or receipt, timeout, and unavailable input all prevent a successful run result.
+Each case retains its original and executed source, hashes, child log,
+capture receipts and result. Read `summary.json` first. Unavailable inputs
+and invalid or missing outputs fail the run. If a timed-out child cannot
+confirm cleanup, later cases are skipped. A render can succeed even when
+the working view lacks support for part of its scene.
 
-Boundary labels preserve uncertainty: exact unsupported geometry diagnostics identify the Ferruccio live-geometry adapter limit; explicit pipeline/readback errors identify the GoGPU/Metal boundary; renderer logs identify the Slayer renderer/input boundary. Ambiguous failures remain unresolved until traced.
+## Working-view latency
 
-With --inventory, the runner appends wire and bounded full probes for each direct sets/*.yaml source absent from the baseline source paths. Inputs are sorted and compared by absolute path. At most 20 sets sources are admitted; a larger inventory is refused explicitly rather than silently truncated. Every added full probe uses parsed film160×100/rays1 and preserves original/executed hashes. Sources without a supported film fail explicitly. Copied sources.yaml pins retain their exact bytes and their hash is recorded alongside the input mode. An unsupported wire adapter is a Ferruccio geometry limitation, not evidence of a Slayer renderer defect.
+Launch Ferruccio with `SLAYER_METRICS_ADDR=127.0.0.1:9401` and keep it open
+while you measure. Stage the scene, then continuously drag the Orbit or
+Travel control for several seconds. Drag a supported placement separately.
+Scrape `http://127.0.0.1:9401/metrics` immediately before and after each pass
+and compare the histogram counts, sums and buckets.
 
-Regression children start with GoGPU background mode: macOS activation is prohibited and the initial window is never shown. They retain their Metal device. Captures call the canonical window Frame and DrawTo path after UI rebuilds; hiding before layout or drawing an unlaid-out replacement tree does not establish a working control. Receipts distinguish native window creation from visible presentation. The shared Slayer symlink is resolved once per suite, and the resolved shared binary is used by all cases. Copied source manifests preserve exact source context.
+- `ferruccio_working_draw_attempt_seconds` measures host time inside each
+  draw call. It includes polls that do not yet return pixels.
+- `ferruccio_working_cull_seconds` measures host placement and visibility
+  selection, excluding buffer preparation and geometry uploads.
+- `ferruccio_working_upload_prepare_seconds` measures host-side mesh upload,
+  camera uniform writes, and instance preparation.
+- `ferruccio_working_encode_seconds` and `ferruccio_working_submit_seconds`
+  measure command encoding and queue submission separately. These phase
+  histograms record new draws, excluding subsequent readback polls.
+- `ferruccio_working_frame_seconds` measures completed working frames from
+  geometry placement through GPU readback.
+- `ferruccio_working_motion_to_pixels_seconds` measures from the last
+  accepted held drag update entering the transform handler to installing
+  its working pixels in the viewer.
+- `ferruccio_working_motion_frame_interval_seconds` measures time between
+  completed motion frames within one drag. Pause-free drags make this a
+  measure of the working view's cadence under input.
+- `ferruccio_working_motion_coalesced_total` counts superseded updates.
+  `ferruccio_working_readback_late_total` counts calls where pixels are
+  still pending.
 
-Terrain full renders passing does not imply interactive terrain geometry or light/camera gizmos are implemented.
-
-Physical film rigs (frame, lens, shutter or glimpses) are unavailable to bounded full probes. The harness preserves their original source and reports the Ferruccio regression harness boundary before rewriting YAML or starting a proof child. It does not inject raster height into authored optics. The native full profile currently also requires explicit raster width/height/rays, so this refusal does not imply Slayer cannot render the original physical film. The earlier inventory moonrise failure came from the harness adding height to a physical film contract; it is not a Slayer defect. Ordinary raster films still receive only160×100/rays1 overrides.
+Use a fresh process for a cold scene and repeat the passes in the same
+process for warm resident geometry. Record stage time and window dimensions
+separately. These measurements end in the app, before window presentation.

@@ -68,6 +68,13 @@ func displayShot(read set.Set) (*DisplayScene, error) {
 	if !read.InSpace() || !read.HasSeed() || len(read.Unrendered()) != 0 {
 		return nil, fmt.Errorf("working display needs supported native space placements and an explicit seed (%s)", displayShotFaults(read))
 	}
+	if world, has := read.World(); has {
+		for _, body := range world.Bodies() {
+			if _, flowing := body.Flowing(); flowing {
+				return nil, fmt.Errorf("flowing globes require producer staging")
+			}
+		}
+	}
 	settings, has := read.Film()
 	width, height, _ := settings.Size()
 	if !has || width <= 0 || height <= 0 {

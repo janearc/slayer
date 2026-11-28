@@ -1,21 +1,16 @@
 # Finish samples a band at a time
 
-Metal already dispatches the picture in bands of at most 64 sample rows.
-Previously it copied all those bands into one Go raw-sample array before
-pixel averaging. That array grows with width, height, samples per pixel
-and the shading-record size, even though the GPU output buffer is small.
-
-The new `Kernel.GridBands` keeps input buffers for the call and returns
+the Metal trace dispatches in bounded bands of sample rows.
+`Kernel.GridBands` keeps input buffers for the call and returns
 one reusable band to a synchronous consumer. The GPU renderer finishes
 that band's sky and textures, adds its samples to the final pixels and
 then permits the raw band to be overwritten.
 
 ## Sampling contract
 
-The shader, camera rays, global row offsets, samples and integration
-rules are unchanged by this host-only slice. A pixel retains its old
-down-then-across summation order even when a band splits its sample rows.
-Coverage is averaged and nearest depth is retained as before.
+a pixel retains down-then-across summation order even when a band
+splits its sample rows. the finisher averages coverage and retains
+nearest depth.
 
 Band callbacks arrive in order. The finisher refuses skipped, overlapping
 or malformed bands. Callback errors release retained buffers and return
@@ -25,8 +20,8 @@ The band row count still bounds each GPU command. It does not grow to
 match an unusually large supersampling side. Finishing uses the current
 Go CPU allowance instead of starting a worker for every hardware core.
 
-The old full-array `Kernel.Grid` remains available to callers that need
-its result. The tracer now uses the streaming consumer.
+`Kernel.Grid` is the full-array interface. the tracer uses the
+streaming interface.
 
 ## Memory and accounting
 
@@ -59,4 +54,4 @@ CPU finishing happens between dispatches. Its measured wall time is
 separated from dispatch/readback wall time; GPU timestamps remain nested
 inside dispatch time. Native-query counters accumulate across all bands.
 
-This does not reduce the number of rays or mist samples being traced.
+sample counts still follow the job’s tracing settings.

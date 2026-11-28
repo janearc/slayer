@@ -22,11 +22,15 @@ type WorkingView struct {
 
 // SharedWorkingView keeps geometry shared alongside the staged camera.
 type SharedWorkingView struct {
-	World         placement.StagedInstances
-	Origins       map[string]maths.Vec
-	Eye           maths.Subspace
-	Lens          film.Pinhole
-	Width, Height int
+	World           placement.StagedInstances
+	Origins         map[string]maths.Vec
+	Lights          []placement.DisplayLight
+	VolumeBounds    []placement.DisplayVolumeBound
+	GiantBoundaries []placement.DisplayGiantBoundary
+	SkyGradient     *placement.DisplaySkyGradient
+	Eye             maths.Subspace
+	Lens            film.Pinhole
+	Width, Height   int
 	// RigProxy is a pinhole view of a physical rig without blur or exposure.
 	RigProxy bool
 }
@@ -51,7 +55,7 @@ func (session *Session) WorkingViewShared(index int) (SharedWorkingView, error) 
 	if err != nil {
 		return SharedWorkingView{}, err
 	}
-	staged, err := placement.WorkingInstances(world, session.times[index])
+	staged, err := placement.WorkingInstancesFrom(world, session.times[index], eye.Origin)
 	if err != nil {
 		return SharedWorkingView{}, err
 	}
@@ -60,7 +64,13 @@ func (session *Session) WorkingViewShared(index int) (SharedWorkingView, error) 
 	for name, origin := range session.given.authoredOrigins {
 		origins["scene.set.things/"+name] = origin
 	}
-	return SharedWorkingView{World: staged, Origins: origins, Eye: eye, Lens: lens, Width: width, Height: height, RigProxy: proxy}, nil
+	return SharedWorkingView{
+		World: staged, Origins: origins, Lights: placement.WorkingLights(world),
+		VolumeBounds:    placement.WorkingVolumeBounds(world, session.times[index]),
+		GiantBoundaries: placement.WorkingGiantBoundaries(world, session.times[index]),
+		SkyGradient:     placement.WorkingSkyGradient(world.Sky),
+		Eye:             eye, Lens: lens, Width: width, Height: height, RigProxy: proxy,
+	}, nil
 }
 
 // WorkingView inspects one staged frame without rendering it.

@@ -1,0 +1,10 @@
+$schema: https://github.com/janearc/slayer/schemas/job-v1.json
+# Matched to V15 except 4 rays per side (16 pixel samples).
+scene: {set: azure-flock-twilight-v15.yaml}
+renderer: gpu-native
+shortcuts: {restir: off}
+film: {width: 960, height: 600, rays: 4, wide: 65}
+camera: {name: flock}
+outputs:
+  picture: ../../out/2026-11-27-azure-flock-twilight-v15-sampled/proof.png
+  raw: ../../out/2026-11-27-azure-flock-twilight-v15-sampled/light.pfm

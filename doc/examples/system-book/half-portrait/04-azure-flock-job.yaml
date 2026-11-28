@@ -1,0 +1,9 @@
+"$schema": https://github.com/janearc/slayer/schemas/job-v1.json
+scene: {set: flock/azure-flock-twilight-v15.yaml}
+renderer: gpu-native
+shortcuts: {restir: off}
+film: {width: 1080, height: 960, rays: 3, wide: 65}
+camera: {name: flock}
+outputs:
+  picture: ../../../../out/2026-11-27-system-half-04-azure-flock/proof.png
+  raw: ../../../../out/2026-11-27-system-half-04-azure-flock/light.pfm

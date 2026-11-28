@@ -2,6 +2,7 @@ package medium
 
 import (
 	"errors"
+	"math"
 	"time"
 
 	"github.com/janearc/slayer/maths"
@@ -26,6 +27,18 @@ type Cloud struct {
 	base, top float64
 	seconds   float64
 	thin      thinning
+	feather   float64
+}
+
+// Feather smoothly fades density to zero at every face of the finite box.
+// Zero preserves the original field. Width must fit within half each side.
+func (cloud *Cloud) Feather(width float64) error {
+	size := cloud.box.Max.Sub(cloud.box.Min)
+	if !weatherFinite(width) || width < 0 || 2*width > math.Min(size.X, math.Min(size.Y, size.Z)) {
+		return errors.New("medium: cloud feather must fit within half the shortest box side")
+	}
+	cloud.feather = width
+	return nil
 }
 
 // Toward makes the deck's cover greatest over a point, by its x and z, and
@@ -93,8 +106,14 @@ func (cloud *Cloud) Density(at maths.Vec) float64 {
 	}
 	threshold := weatherOne - share
 	patch := cloud.patch(at)
-	return cloud.weather.Extinction * maths.Smooth(
+	density := cloud.weather.Extinction * maths.Smooth(
 		threshold-mistTuning.shoulder, threshold+mistTuning.shoulder, patch)
+	if cloud.feather > 0 {
+		edge := math.Min(math.Min(at.X-box.Min.X, box.Max.X-at.X),
+			math.Min(math.Min(at.Y-box.Min.Y, box.Max.Y-at.Y), math.Min(at.Z-box.Min.Z, box.Max.Z-at.Z)))
+		density *= maths.Smooth(0, cloud.feather, edge)
+	}
+	return density
 }
 
 // patch is the deck's noise at a point, carried by the wind, from nought

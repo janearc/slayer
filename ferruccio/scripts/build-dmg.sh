@@ -20,6 +20,7 @@ trap 'rm -rf "$tmp"' EXIT HUP INT TERM
 mkdir "$tmp/content"
 cp -R bin/Ferruccio.app "$tmp/content/Ferruccio.app"
 cp doc/applications/ferruccio/howto-run-dis.md "$tmp/content/howto-run-dis.md"
+cp "doc/applications/ferruccio/Ferruccio Quick Start.pdf" "$tmp/content/"
 ln -s /Applications "$tmp/content/Applications"
 # on GitHub's macOS runners, hdiutil create fails now and then with
 # "Resource busy" while the system scans the new files; a second try

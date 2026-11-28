@@ -62,3 +62,31 @@ func TestImplicitV2GroundOffersStandRegion(t *testing.T) {
 		t.Fatal("default terrain did not expose its stand area")
 	}
 }
+
+func TestSetGroupAreaReplacesHexadecimalCoordinates(t *testing.T) {
+	source := strings.Replace(poseSource, "setting: space", "setting: ground", 1)
+	source = strings.Replace(source, "  world:\n", `    stands:
+      grove:
+        kind: yurt
+        count: 3
+        seed: 4
+        habit: scatter
+        area: {west: 0x10, south: 2, east: 30, north: 40} # Keep region note.
+  world:
+`, 1)
+	document := poseDraft(t, source)
+	id := "scene.set.stands/grove"
+	if err := document.Check(); err != nil {
+		t.Fatalf("hexadecimal coordinate is valid YAML: %v", err)
+	}
+	want := [4]float64{10, 20, 80, 90}
+	if err := document.SetGroupArea(id, want); err != nil {
+		t.Fatal(err)
+	}
+	if got, ok := document.GroupArea(id); !ok || got != want {
+		t.Fatalf("area = %v, %v", got, ok)
+	}
+	if !strings.Contains(document.Text(), "# Keep region note.") {
+		t.Fatal("region comment lost")
+	}
+}

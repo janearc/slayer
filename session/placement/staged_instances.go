@@ -5,7 +5,7 @@ import (
 	"reflect"
 	"time"
 
-	"github.com/janearc/slayer/arid"
+	"github.com/janearc/slayer/globe"
 	"github.com/janearc/slayer/maths"
 	"github.com/janearc/slayer/scene/shape"
 	"github.com/janearc/slayer/scene/thing"
@@ -26,7 +26,15 @@ type StagedBatch struct {
 type StagedInstances struct {
 	Batches                []StagedBatch
 	Volumes, Fields, Lamps int
+	GiantAtmospheres       int
+	GlobeOutlines          []DisplaySphereOutline
+	GlobeOutlinesOmitted   int
 	OmittedSeas            int
+	OmittedPlanes          int
+	PlaneProxies           int // Number of read-only plane patches at the end of Batches.
+	UnsupportedSurfaces    map[string]int
+	MaterialLimits         MaterialLimits
+	Sky, Haze, Glow        bool
 }
 
 type stagedMeshKey struct {
@@ -43,27 +51,82 @@ type stagedBatchKey struct {
 // WorkingInstances keeps shared mesh members and their actual transforms.
 // It is a read-only staging representation, not a claim of editable picking.
 func WorkingInstances(world *thing.World, at time.Duration) (StagedInstances, error) {
+	return WorkingInstancesFrom(world, at, maths.Vec{})
+}
+
+// WorkingInstancesFrom uses the eye to frame infinite plane patches and
+// to frame an open sea when no finite geometry supplies a preview extent.
+func WorkingInstancesFrom(world *thing.World, at time.Duration, eye maths.Vec) (StagedInstances, error) {
 	if world == nil {
 		return StagedInstances{}, fmt.Errorf("staged world is unavailable")
 	}
-	result := StagedInstances{Volumes: len(world.Volumes), Fields: len(world.Fields), Lamps: len(world.Lamps)}
+	result := StagedInstances{
+		Volumes: len(world.Volumes), Fields: len(world.Fields), Lamps: len(world.Lamps),
+		GiantAtmospheres: WorkingGiantAtmospheres(world),
+		Sky:              world.Sky != nil, Haze: world.Haze.Density != 0, Glow: world.Glow != nil,
+	}
 	cache := make(map[stagedMeshKey]*DisplayMesh)
 	batches := make(map[stagedBatchKey]int)
 	var seas []stagedSea
-	var add func(shape.Shape, maths.Subspace, maths.Light, thing.AuthorRef, bool) error
-	add = func(solid shape.Shape, place maths.Subspace, colour maths.Light, author thing.AuthorRef, authored bool) error {
+	var planes []StagedBatch
+	var add func(shape.Shape, maths.Subspace, *thing.Material, thing.AuthorRef, bool) error
+	add = func(solid shape.Shape, place maths.Subspace, material *thing.Material, author thing.AuthorRef, authored bool) error {
 		if solid == nil || (reflect.ValueOf(solid).Kind() == reflect.Ptr && reflect.ValueOf(solid).IsNil()) || !shape.ValidPlacement(place) {
 			return fmt.Errorf("staged instance has invalid geometry or placement")
 		}
-		if group, ok := solid.(*shape.MeshGroup); ok {
+		colour := maths.Light{}
+		if material != nil {
+			colour = material.Colour
+			if colour == (maths.Light{}) {
+				colour = material.Glow
+			}
+		}
+		switch surfaceCoverage[reflect.TypeOf(solid)] {
+		case finitePlaneProxy:
+			batch, shown, err := planeAroundEye(place, eye, colour, material)
+			if err != nil {
+				return err
+			}
+			if shown {
+				planes = append(planes, batch)
+			} else {
+				result.OmittedPlanes++
+			}
+			return nil
+		case unclassifiedSurface, omittedSurface:
+			if ball, ok := solid.(globe.Globe); ok {
+				scale := place.Scale
+				if scale == 0 {
+					scale = 1
+				}
+				outline := DisplaySphereOutline{Centre: place.Origin, Radius: ball.Radius() * scale}
+				if outline.Valid() {
+					if len(result.GlobeOutlines) < GlobeOutlineLimit {
+						result.GlobeOutlines = append(result.GlobeOutlines, outline)
+					} else {
+						result.GlobeOutlinesOmitted++
+					}
+				}
+			}
+			if result.UnsupportedSurfaces == nil {
+				result.UnsupportedSurfaces = make(map[string]int)
+			}
+			result.UnsupportedSurfaces[reflect.TypeOf(solid).String()]++
+			return nil
+		case meanSeaProxy:
+			seas = append(seas, stagedSea{At: place, Colour: colour, Author: author, Authored: authored})
+			return nil
+		case groupSurface:
+			group := solid.(*shape.MeshGroup)
 			for i := 0; i < group.MemberCount(); i++ {
 				member := group.Member(i)
-				if err := add(member.Mesh, member.Space.Within(place), colour, author, authored); err != nil {
+				if err := add(member.Mesh, member.Space.Within(place), material, author, authored); err != nil {
 					return err
 				}
 			}
 			return nil
 		}
+		result.MaterialLimits |= materialLimits(material)
 		key := stagedMeshKey{shape: solid, colour: colour}
 		comparable := reflect.TypeOf(solid).Comparable()
 		var display *DisplayMesh
@@ -71,7 +134,7 @@ func WorkingInstances(world *thing.World, at time.Duration) (StagedInstances, er
 			display = cache[key]
 		}
 		if display == nil {
-			builder := newDisplayBuilder()
+			builder := newStagedDisplayBuilder(solid)
 			builder.heightFields = true
 			if err := builder.surface(solid, maths.Local(), colour); err != nil {
 				return err
@@ -102,43 +165,28 @@ func WorkingInstances(world *thing.World, at time.Duration) (StagedInstances, er
 		if part.Hidden() {
 			continue
 		}
-		colour := maths.Light{}
-		if part.Material != nil {
-			colour = part.Material.Colour
-			if colour == (maths.Light{}) {
-				colour = part.Material.Glow
-			}
-		}
 		author, authored := world.AuthorOf(part)
-		if sea, isSea := part.Shape.(*arid.Sea); isSea {
-			if sea == nil || !shape.ValidPlacement(part.At(at)) {
-				return StagedInstances{}, fmt.Errorf("staged sea %d is unavailable", index)
-			}
-			seas = append(seas, stagedSea{At: part.At(at), Colour: colour, Author: author, Authored: authored})
-			continue
-		}
-		if err := add(part.Shape, part.At(at), colour, author, authored); err != nil {
+		if err := add(part.Shape, part.At(at), part.Material, author, authored); err != nil {
 			return StagedInstances{}, fmt.Errorf("staged surface %d: %w", index, err)
 		}
 	}
-	if len(result.Batches) == 0 {
-		return StagedInstances{}, fmt.Errorf("native working display contains no surfaces")
-	}
 	low, high, ok := stagedBounds(result.Batches)
-	if len(seas) > 0 {
-		for _, sea := range seas {
-			if !ok {
-				result.OmittedSeas++
-				continue
-			}
-			batch, err := finiteSea(sea, low, high)
-			if err != nil {
-				return StagedInstances{}, err
-			}
-			proxy := []StagedBatch{batch}
-			stagedBounds(proxy)
-			result.Batches = append(result.Batches, proxy[0])
+	for _, sea := range seas {
+		var batch StagedBatch
+		var err error
+		if ok {
+			batch, err = finiteSea(sea, low, high)
+		} else {
+			batch, err = seaAroundEye(sea, eye)
 		}
+		if err != nil {
+			return StagedInstances{}, err
+		}
+		result.Batches = append(result.Batches, batch)
+		stagedBounds(result.Batches[len(result.Batches)-1:])
 	}
+	stagedBounds(planes)
+	result.PlaneProxies = len(planes)
+	result.Batches = append(result.Batches, planes...)
 	return result, nil
 }

@@ -77,6 +77,7 @@ var (
 // every answer is the same before it and after. So one mesh can stand
 // in many places at once, and be asked from many goroutines.
 type Mesh struct {
+	fibres   *FibreField
 	rest     []maths.Vec
 	points   []maths.Vec
 	faces    []face
@@ -278,6 +279,15 @@ func (made *Mesh) CornerNormals(i int) ([triangleCorners]maths.Vec, bool) {
 
 // Points is a copy of the mesh's corners, by their places.
 func (made *Mesh) Points() []maths.Vec { return slices.Clone(made.points) }
+
+// VertexNormals copies the mesh's supplied normals in vertex order when
+// the mesh is shaded smooth.
+func (made *Mesh) VertexNormals() []maths.Vec {
+	if !made.smooth {
+		return nil
+	}
+	return slices.Clone(made.normals)
+}
 
 // Faces is a copy of the mesh's faces, each three places in Points.
 func (made *Mesh) Faces() [][triangleCorners]int {

@@ -48,6 +48,50 @@ type Wisp struct {
 	seed                         float64
 }
 
+// LocalCloudDeck is an authored finite cloud field in metre world units.
+// The base is its centre at the bottom; size is east, north and height.
+type LocalCloudDeck struct {
+	name                                       string
+	base, size                                 [3]float64
+	colour                                     Colour
+	coverage, extinction, scale, seed, feather float64
+}
+
+func (made LocalCloudDeck) Name() string     { return made.name }
+func (made LocalCloudDeck) Base() maths.Vec  { return fromMap(made.base) }
+func (made LocalCloudDeck) Size() [3]float64 { return made.size }
+func (made LocalCloudDeck) Colour() Colour   { return made.colour }
+func (made LocalCloudDeck) Feather() float64 { return made.feather }
+func (made LocalCloudDeck) Weather() (float64, float64, float64, uint64) {
+	return made.coverage, made.extinction, made.scale, uint64(made.seed)
+}
+
+func (reading reader) localCloudDecks(_, value *yaml.Node) error {
+	return reading.each(value, func(name, block *yaml.Node) error {
+		made := LocalCloudDeck{name: name.Value}
+		var source string
+		over := math.SmallestNonzeroFloat64
+		err := reading.keys(block, map[string]step{
+			"base":       reading.three(&made.base, -farthest, farthest),
+			"size":       reading.three(&made.size, over, farthest),
+			"colour":     reading.colour(&made.colour),
+			"coverage":   reading.number(&made.coverage, over, 1),
+			"extinction": reading.number(&made.extinction, over, brightest),
+			"scale":      reading.number(&made.scale, over, farthest),
+			"seed":       reading.whole(&made.seed, 0, mostSeed),
+			"feather":    reading.number(&made.feather, 0, farthest),
+			"source":     reading.source(&source),
+		}, nil)
+		if err == nil {
+			err = reading.all(block, "a local cloud deck", "base", "size", "colour", "coverage", "extinction", "scale", "seed", "source")
+		}
+		if err == nil {
+			reading.set.world.cloudDecks = append(reading.set.world.cloudDecks, made)
+		}
+		return err
+	})
+}
+
 // Name is the wisp's name.
 func (made Wisp) Name() string { return made.name }
 

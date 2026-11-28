@@ -1,0 +1,3 @@
+# the absolute folder for reusable work. set it in the shell or in
+# personal Game config. commands that use a cache validate the path.
+SLAYER_CACHE where slayer keeps what it can work out again

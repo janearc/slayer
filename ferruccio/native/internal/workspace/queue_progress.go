@@ -1,6 +1,13 @@
 package workspace
 
-import "github.com/janearc/slayer/ferruccio/internal/preview"
+import (
+	"fmt"
+
+	"github.com/gogpu/ui/primitives"
+	"github.com/gogpu/ui/widget"
+	"github.com/janearc/slayer/ferruccio/internal/preview"
+	"github.com/janearc/slayer/ferruccio/native/internal/appearance"
+)
 
 // renderProgress is an immutable observation of one durable own-job identity.
 type renderProgress struct {
@@ -32,12 +39,14 @@ func (work *Workspace) applyProgress(progress renderProgress) {
 	if queueLabel(update.State) == "" {
 		return
 	}
-	if work.queueObserved && update.State == work.queueState && update.Held == work.queueHeld {
+	if work.queueObserved && update.State == work.queueState && update.Held == work.queueHeld && update.Progress == work.queueProgress {
 		return
 	}
 	work.queueObserved = true
 	work.queueSequence = update.Sequence
 	work.queueState, work.queueHeld = update.State, update.Held
+	work.queueProgress = update.Progress
+	work.refreshLayout = true
 	label := work.observedQueueText()
 	work.status = label
 	work.caption = work.retainedImageCaption(label)
@@ -51,6 +60,8 @@ func queueLabel(state string) string {
 		return "Queued"
 	case "waiting":
 		return "Waiting for render admission"
+	case "unavailable":
+		return "Checking queue"
 	case "running":
 		return "Running"
 	case "succeeded":
@@ -71,7 +82,45 @@ func (work *Workspace) observedQueueText() string {
 	if work.queueHeld != "" {
 		label += " · " + work.queueHeld
 	}
+	if work.queueState == "running" && work.queueProgress.Phase != "" {
+		progress := work.queueProgress
+		label += " · " + progress.Phase
+		if progress.Total > 0 {
+			label += fmt.Sprintf(" · %d%% (%d/%d)", int(float64(progress.Done)/float64(progress.Total)*100), progress.Done, progress.Total)
+			if progress.Phase == "Rendering" && progress.Done == progress.Total {
+				label += " · finishing"
+			}
+		}
+	}
 	return label
+}
+
+// renderProgressBar shows the observed phase, never inferred elapsed time.
+func (work *Workspace) renderProgressBar() widget.Widget {
+	progress := work.queueProgress
+	if work.cancel == nil || work.queueState != "running" {
+		return nil
+	}
+	if progress.Total <= 0 {
+		return activeRenderMarker()
+	}
+	const width float32 = 160
+	filled := width * float32(progress.Done) / float32(progress.Total)
+	bar := primitives.HBox().Width(width).Height(10).Background(appearance.Raised)
+	if filled > 0 {
+		bar = primitives.HBox(primitives.Box().Width(filled).Height(10).Background(appearance.Cyan)).Width(width).Height(10).Background(appearance.Raised)
+	}
+	bar.Label(fmt.Sprintf("%s: %d of %d", progress.Phase, progress.Done, progress.Total))
+	bar.SetID("Render progress")
+	return bar
+}
+
+// activeRenderMarker reports work without redrawing at an animation cadence.
+func activeRenderMarker() *primitives.BoxWidget {
+	marker := primitives.Box().Width(10).Height(10).Rounded(5).Background(appearance.Cyan)
+	marker.Label("Render active · progress total unavailable")
+	marker.SetID("Render progress")
+	return marker
 }
 
 // retainedImageCaption distinguishes queue metadata from newly accepted pixels.
@@ -112,6 +161,9 @@ func (work *Workspace) startAutomaticPreview() {
 func (work *Workspace) previewProgressText() string {
 	if work.cancel != nil {
 		if work.cancelRequested {
+			if work.fullRunning {
+				return work.retainedImageCaption("cancelling full render request")
+			}
 			return work.retainedImageCaption("cancelling previous preview request")
 		}
 		if work.queueObserved {
@@ -123,6 +175,13 @@ func (work *Workspace) previewProgressText() string {
 		return work.retainedImageCaption("submitting preview request")
 	}
 	return "Change pending · waiting for input to settle"
+}
+
+func cancellationRenderName(full bool) string {
+	if full {
+		return "Full render"
+	}
+	return "Preview"
 }
 
 // finishCancellation labels only the client's verified own-process outcome.
@@ -140,13 +199,17 @@ func (work *Workspace) finishCancellation(result renderResult) {
 			work.diagnostic += "\n" + work.log.read()
 		}
 	} else {
+		name := cancellationRenderName(result.full)
 		switch result.observation.State {
 		case "cancelled":
-			work.status = "Preview cancellation confirmed"
+			work.status = name + " cancellation confirmed"
+			if result.full {
+				work.fullCancellationNote = work.status
+			}
 		case "succeeded":
-			work.status = "Preview completed before cancellation"
+			work.status = name + " completed before cancellation"
 		case "failed":
-			work.status = "Preview job failed"
+			work.status = name + " job failed"
 		default:
 			work.status = queueLabel(result.observation.State)
 		}

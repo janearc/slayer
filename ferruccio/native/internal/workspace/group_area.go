@@ -27,14 +27,18 @@ func (work *Workspace) groupAreaPanel() widget.Widget {
 			work.play.groupAreaText[i] = strconv.FormatFloat(n, 'g', -1, 64)
 		}
 	}
-	items := []widget.Widget{work.paragraph("Metres east and north from the terrain's southwest corner. Changing the region regenerates the group; members may move or change. Areas beyond the terrain may have fewer members.", appearance.Ink)}
+	guidance := "Metres east and north of the terrain's southwest corner. Edits regenerate the group. Off-terrain bounds may yield fewer members."
+	items := []widget.Widget{work.paragraphAtWidth(guidance, appearance.Ink, playDrawerContentWidth)}
 	var fields [4]*textfield.Widget
 	for i, name := range []string{"West", "South", "East", "North"} {
 		index := i
 		field := textfield.New(textfield.InitialValue(work.play.groupAreaText[index]), textfield.A11yLabel(name+" metres"), textfield.PainterOpt(appearance.TextFieldPainter{Size: work.size}), textfield.OnChange(func(text string) { work.play.groupAreaText[index] = text }))
 		field.SetID(name + " metres")
 		fields[index] = field
-		items = append(items, work.text(name+" · metres"), field)
+		label := primitives.VBox(work.text(name)).Width(84)
+		row := primitives.HBox(label, primitives.Expanded(field)).Gap(12).
+			CrossAlign(primitives.CrossAxisCenter)
+		items = append(items, row)
 	}
 	items = append(items, work.action("Set region", true, func() bool { return false }, func() {
 		for i, field := range fields {
@@ -62,8 +66,21 @@ func (work *Workspace) submitGroupArea() error {
 		}
 		area[i] = number
 	}
+	return work.applyGroupArea(func() error {
+		return work.state.document.SetGroupArea(group.ID, area)
+	})
+}
+
+// shiftGroupArea moves the authored region without resizing it.
+func (work *Workspace) shiftGroupArea(id string, east, north float64) error {
+	return work.applyGroupArea(func() error {
+		return work.state.document.ShiftGroupArea(id, east, north)
+	})
+}
+
+func (work *Workspace) applyGroupArea(edit func() error) error {
 	before := work.state.document.Text()
-	if err := work.state.document.SetGroupArea(group.ID, area); err != nil {
+	if err := edit(); err != nil {
 		return err
 	}
 	if work.state.document.Text() == before {

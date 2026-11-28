@@ -16,6 +16,7 @@ import (
 
 	"github.com/janearc/slayer/film"
 	"github.com/janearc/slayer/materials"
+	"github.com/janearc/slayer/materials/fibre"
 	"github.com/janearc/slayer/maths"
 	"github.com/janearc/slayer/maths/noise"
 	"github.com/janearc/slayer/scene/medium"
@@ -49,11 +50,37 @@ type Material struct {
 	// Texture overrides Colour with spatially varying local-space
 	// reflectance.
 	Texture texture.Texture
+	// Subsurface spreads a share of visible diffuse light across a smooth,
+	// opaque mesh. It is optional and currently supported by the CPU tracer.
+	Subsurface Subsurface
+	// ThinTissue reserves a share of diffuse reflection for CPU transmission
+	// across nearly parallel sides of a closed mesh.
+	ThinTissue ThinTissue
+	// Fibre opts a shaft-frame mesh into CPU visible-light fibre scattering.
+	Fibre *fibre.Model
 	// Glow is uniform emitted light, independent of illumination.
 	Glow maths.Light
+	// Limb, when above nought, is the linear limb-darkening coefficient
+	// of an emitting ball: Glow is then its light at the centre of the
+	// disc, and the light at an angle to the normal is Glow times
+	// LimbShare. It darkens Glow only, not a Shine texture.
+	Limb float64
 	// Shine overrides Glow with local-space emission, such as lava or a hot
 	// disc.
 	Shine texture.Texture
+	// DirectSun points toward the directional sun already included in Shine.
+	// The tracer gates that contribution by opaque shadow visibility. It does
+	// not model extended-star penumbrae or spectral transmission.
+	DirectSun *maths.Vec
+	// DirectSunFill retains an authored share of Shine where DirectSun is
+	// blocked. This invented fill is not scattered light or a penumbra.
+	DirectSunFill float64
+	// DirectSunSize is the full angular diameter in radians of a distant,
+	// uniformly bright disc. Zero uses the original point-direction shadow.
+	DirectSunSize float64
+	// DirectSunSamples is the deterministic angular visibility sample count;
+	// zero selects the original eight directions.
+	DirectSunSamples int
 	// IndependentEmission adds a surface's emitted light without reducing it
 	// by reflection or transmission. This is an explicit CPU-only approximation
 	// for emitters carried at a transparent boundary. Without it, emission is
@@ -117,6 +144,9 @@ type Material struct {
 	// Its square is the GGX width; see Microfacet. It does not blur
 	// what the surface mirrors.
 	Satin float64
+	// Finish varies visible shading relief and Satin in the paint chart.
+	// The CPU renderer evaluates it without displacing the geometry.
+	Finish texture.Finish
 	// SlopeVariance, when above nought, is the mean-square slope, both
 	// ways across the surface together, of tiny faces too small for its
 	// shape to carry. Its highlights then take Beckmann's lobe of that
@@ -607,7 +637,8 @@ func Sun(toward maths.Vec, strength maths.Light) Lamp {
 type World struct {
 	// authors records optional source identity for staged surface pointers.
 	// It is staging metadata and is not read by the renderer.
-	authors map[*Thing]AuthorRef
+	authors     map[*Thing]AuthorRef
+	lampAuthors map[int]AuthorRef
 	// VolumeIllumination's zero value lights painted media by lamps alone.
 	VolumeIllumination VolumeIllumination
 	// RayOriginReference's zero value keeps the geometry-derived heuristic.
@@ -747,4 +778,34 @@ func (world *World) AddField(added Field) *Field {
 // Lamp appends an emitter to the world.
 func (world *World) Lamp(added Lamp) {
 	world.Lamps = append(world.Lamps, added)
+}
+
+// AuthoredLamp appends a lamp and records its source for stage inspection.
+func (world *World) AuthoredLamp(added Lamp, author AuthorRef) {
+	if world.lampAuthors == nil {
+		world.lampAuthors = make(map[int]AuthorRef)
+	}
+	world.lampAuthors[len(world.Lamps)] = author
+	world.Lamp(added)
+}
+
+// LampAuthor returns the source of a lamp in the staged world's lamp list.
+func (world *World) LampAuthor(index int) AuthorRef {
+	return world.lampAuthors[index]
+}
+
+// KeepLamps rebuilds the lamp list and carries authorship with each retained lamp.
+func (world *World) KeepLamps(keep func(int) bool) {
+	before, authors := world.Lamps, world.lampAuthors
+	world.Lamps, world.lampAuthors = nil, nil
+	for i, lamp := range before {
+		if !keep(i) {
+			continue
+		}
+		if author, ok := authors[i]; ok {
+			world.AuthoredLamp(lamp, author)
+		} else {
+			world.Lamp(lamp)
+		}
+	}
 }

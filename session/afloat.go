@@ -11,8 +11,10 @@ import (
 	"github.com/janearc/slayer/manufacture"
 	"github.com/janearc/slayer/manufacture/cities"
 	"github.com/janearc/slayer/maths"
+	"github.com/janearc/slayer/scene/thing"
 	"github.com/janearc/slayer/session/placement"
 	"github.com/janearc/slayer/set"
+	"github.com/janearc/slayer/stage"
 )
 
 // The stage for a set that says setting: space: the manufactory's craft
@@ -27,8 +29,8 @@ import (
 //
 // The sky is black unless the set's world half hangs one. The light is
 // the sun as one distant lamp at any altitude, as bright as sunlight at
-// the earth at the film's exposure; or none. What stands on ground, a
-// planet, a burning thing and a recipe other than a spacecraft are refused.
+// the earth at the film's exposure; or none. A fire recipe can stand at
+// an explicit position. Ground-dependent features and a planet are refused.
 //
 // A stand in space grows on a flat world ground at height 0, the level a
 // thing with height 0 stands at, and offers its places by its within
@@ -232,19 +234,19 @@ func hangsASky(read set.Set) bool {
 // sunned lights a scene in space by its sun: one distant lamp from the
 // sun's way, wherever it stands, as bright as sunlight at the earth at
 // the film's exposure, tinted as the sun says.
-func (stage *staging) sunned(read set.Set) error {
-	sun, has := read.Sunlit()
+func (making *staging) sunned(read set.Set) error {
+	sun, toward, has := stage.SpaceSun(read)
 	if !has {
 		return fmt.Errorf("%s: light: sun says no sun: where it stands",
-			stage.given.set)
+			making.given.set)
 	}
-	lamp, err := emit.NewDistant(skyward(sun.Where()),
-		tintedSun(sun, sunlightAtEarth*stage.given.exposure))
+	lamp, err := emit.NewDistant(toward,
+		tintedSun(sun, sunlightAtEarth*making.given.exposure))
 	if err != nil {
 		return err
 	}
-	stage.world.Lamp(lamp)
-	stage.made.lamps++
+	making.world.AuthoredLamp(lamp, thing.AuthorRef{Collection: "scene", Name: "sun"})
+	making.made.lamps++
 	return nil
 }
 
@@ -254,14 +256,21 @@ func (stage *staging) sunned(read set.Set) error {
 func (stage *staging) craft(each set.Thing) error {
 	for _, part := range craftParts {
 		if part.name == "recipe" && each.Recipe() != "" {
-			if recipe, found := stage.recipes.Recipe(each.Recipe()); found && (recipe.IsPlant() || recipe.IsAnimal() || recipe.IsAlga() || recipe.HasTreeProfiles()) {
-				continue
+			if recipe, found := stage.recipes.Recipe(each.Recipe()); found {
+				_, burns := recipe.Fire()
+				if burns || recipe.IsPlant() || recipe.IsAnimal() || recipe.IsAlga() ||
+					recipe.HasTreeProfiles() || recipe.HasPoseClip() {
+					continue
+				}
 			}
 		}
 		if part.says(each) {
 			return fmt.Errorf("a craft in space says %s, which is not "+
 				"drawn there", part.name)
 		}
+	}
+	if each.Kind() == fireKind {
+		return stage.afloatFire(each)
 	}
 	one, err := stage.stockedCraft(each)
 	if err != nil {
@@ -290,6 +299,23 @@ func (stage *staging) craft(each set.Thing) error {
 		return err
 	}
 	stage.recordThingAuthor(start, each.Name())
+	return nil
+}
+
+// afloatFire places a fire field at an explicit position without terrain.
+func (stage *staging) afloatFire(each set.Thing) error {
+	if _, scaled := each.Scale(); scaled {
+		return fmt.Errorf("scale is not yet supported for a fire recipe")
+	}
+	at := afloatAt(each).Origin
+	if stage.radii == nil {
+		stage.radii = map[string]float64{}
+	}
+	if _, err := stage.putFireRecipe(each.Recipe(), each.Seed(), 0, at, each.Name()); err != nil {
+		return err
+	}
+	stage.places[each.Name()] = at
+	stage.note(each.Name(), stage.reportedKind(each.Kind(), each.Recipe()), at)
 	return nil
 }
 

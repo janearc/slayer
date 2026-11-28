@@ -25,3 +25,28 @@ successful producer result.
 A job document remains editable; until the working view can stage jobs, it
 states that limitation instead of trying to validate the job as a set. An
 invalid job reports its validation error instead.
+
+## Saving a copy in another directory
+
+Save As keeps a job's scene inputs resolved to the same files or folders.
+Only the job's `scene.set`, `scene.play` and `scene.frames` path values
+are rebased. A relative output path still follows the saved job. The
+original files and same-directory saves keep their authored paths.
+
+Apply the same relocation to the editor's undo and redo snapshots when
+the copy succeeds, so history changes remain meaningful in the new
+directory. An unreadable draft can still be saved verbatim. A failed
+write leaves the current source, destination and history as they were.
+
+A set's imported geometry must stay inside its scene folder. When saving
+a set to a new folder, copy the producer-verified entry files and buffers
+at their existing relative paths. Keep the import declarations as written.
+Accept existing identical resources and refuse conflicts before writing
+the YAML. Remove new resources if the save fails. Recheck the destination
+with Slayer's set reader before saving. A source link that cannot resolve
+inside the new folder causes the copy to fail.
+
+An unfinished set remains recoverable when the YAML or the source reader
+cannot check its imports. Save the draft as written and report that its
+dependencies could not be checked or copied. Destination conflicts still
+refuse the copy before writing YAML.

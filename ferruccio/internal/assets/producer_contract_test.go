@@ -13,6 +13,7 @@ func TestProducerContractsMatchSlayer(t *testing.T) {
 		"native-larson.yaml":         "manufacture/saucer-choices.yaml",
 		"native-larson-landed.yaml":  "manufacture/saucer-landed.yaml",
 		"native-human.yaml":          "manufacture/human-scale.yaml",
+		"job-presets.yaml":           "job/presets.yaml",
 		"job.schema.json":            "job/job.schema.json",
 		"ecosystem.schema.json":      "set/ecosystem.schema.json",
 		"ecosystem-v2.schema.json":   "set/ecosystem-v2.schema.json",

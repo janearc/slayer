@@ -20,7 +20,6 @@ import (
 	"github.com/gogpu/ui/core/button"
 	"github.com/gogpu/ui/core/dialog"
 	"github.com/gogpu/ui/core/dropdown"
-	"github.com/gogpu/ui/core/progress"
 	"github.com/gogpu/ui/core/splitview"
 	"github.com/gogpu/ui/primitives"
 	"github.com/gogpu/ui/theme/devtools"
@@ -30,7 +29,6 @@ import (
 	"github.com/janearc/slayer/ferruccio/internal/preview"
 	"github.com/janearc/slayer/ferruccio/native/internal/appearance"
 	"github.com/janearc/slayer/ferruccio/native/internal/editor"
-	"github.com/janearc/slayer/ferruccio/native/internal/picking"
 	"github.com/janearc/slayer/ferruccio/native/internal/stagewire"
 	"github.com/janearc/slayer/internal/observability"
 )
@@ -46,6 +44,8 @@ type Options struct {
 	// PreferQueueClient allows the bundled client to defer to a queue's own
 	// installed client. An explicitly selected client is never replaced.
 	PreferQueueClient bool
+	// PrepareQueue initializes the selected queue when the app owns its setup.
+	PrepareQueue func(context.Context, string, string) error
 	// Settings is where the person's settings are read and saved.
 	Settings SettingsSource
 }
@@ -65,12 +65,14 @@ type Workspace struct {
 	results                             chan renderResult
 	progress                            chan renderProgress
 	queueState, queueHeld               string
+	queueProgress                       preview.Progress
 	queueSequence                       uint64
 	queueObserved                       bool
 	acceptedGeneration                  uint64
 	acceptedText, acceptedPath          string
 	cancel                              context.CancelFunc
 	cancelRequested                     bool
+	fullCancellationNote                string
 	fullRunning                         bool
 	unresolvedJob                       uint64
 	unresolvedPlan                      *preview.Plan
@@ -83,6 +85,7 @@ type Workspace struct {
 	closing, closeHook                  bool
 	lastCheck                           time.Time
 	needsCheck                          bool
+	openCheck                           *draft.Document
 	exampleDraft                        bool
 	study                               string
 	specimen                            string
@@ -99,6 +102,7 @@ type Workspace struct {
 	// next tick to open the sheet, from any thread; sheet is the one open.
 	settings               SettingsSource
 	wantSettings           atomic.Bool
+	wantQuit               atomic.Bool
 	wantOpen               atomic.Bool
 	wantSave               atomic.Bool
 	protecting             bool
@@ -106,8 +110,10 @@ type Workspace struct {
 	renderSetupOpen        bool
 	renderSetupLoading     bool
 	renderSetupError       string
+	renderSubmitError      string
 	renderSetupPath        string
 	renderSetupSource      string
+	renderSetupFolder      string
 	renderCameraSourcePath string
 	renderCameraSourceHash [32]byte
 	renderCameraError      string
@@ -119,10 +125,8 @@ type Workspace struct {
 	renderPresets          []stagewire.FilmPreset
 	renderPresetResults    chan presetResult
 	renderPresetCancel     context.CancelFunc
-	renderAuthored         preview.Profile
-	renderSampling         preview.Profile
-	renderAuthoredError    error
-	renderSamplingError    error
+	renderFilm             preview.FullFilm
+	renderFilmError        error
 	// drawn says what drew the most recent Export.
 	drawn Drawn
 }
@@ -130,7 +134,6 @@ type Workspace struct {
 type renderResult struct {
 	full        bool
 	observation preview.Update
-	geometry    *picking.Scene
 	plan        *preview.Plan
 	err         error
 	generation  uint64
@@ -160,7 +163,7 @@ func New(host *gogpu.App, ui *app.App, options Options) (*Workspace, error) {
 	} else if options.Examples != "" {
 		example := "first-picture.yaml"
 		if work.composition == "play" {
-			example = "ferruccio-playground.yaml"
+			example = playgroundExample
 		}
 		if err := work.example(example); err != nil {
 			return nil, err
@@ -174,6 +177,9 @@ func New(host *gogpu.App, ui *app.App, options Options) (*Workspace, error) {
 	}
 	work.selectSpecimen()
 	work.editor = editor.New(work.state.document.Text(), func(text string) {
+		if work.viewer != nil && work.viewer.dragging {
+			work.cancelViewportGesture()
+		}
 		work.stopPreview()
 		work.state.document.Replace(text)
 		work.needsCheck = true
@@ -186,6 +192,7 @@ func New(host *gogpu.App, ui *app.App, options Options) (*Workspace, error) {
 	work.editor.SetEscapeHandler(work.returnToWorld)
 	work.viewer = newImageView()
 	work.viewer.settingsHandler = work.requestSettings
+	work.viewer.refuseCamera = work.refuseCameraGesture
 	work.editor.SetSettingsHandler(work.requestSettings)
 	work.viewer.SetNavigateHandler(func(yaw, pitch, zoom float64) {
 		work.problem(work.Navigate(yaw, pitch, zoom))
@@ -226,23 +233,12 @@ func (work *Workspace) Tick() {
 			if work.closing {
 				return true
 			}
-			work.protect(func() {
-				work.clearNavigation()
-				work.closeStaged()
-				work.closeRenderSetup()
-				if work.cancel != nil {
-					work.closing = true
-					work.cancel()
-					work.status = "Stopping the preview before closing…"
-					work.invalidate()
-				} else {
-					work.closing = true
-					work.releaseExample()
-					work.host.Quit()
-				}
-			})
+			work.requestClose()
 			return false
 		})
+	}
+	if work.wantQuit.Swap(false) && !work.closing {
+		work.requestClose()
 	}
 	if work.needsCheck && time.Since(work.lastCheck) > 250*time.Millisecond {
 		work.needsCheck = false
@@ -275,6 +271,26 @@ func (work *Workspace) Tick() {
 	work.updateWorking()
 }
 
+// requestClose uses the same draft protection and cleanup for the window
+// close control and the application menu's Quit command.
+func (work *Workspace) requestClose() {
+	work.protect(func() {
+		work.clearNavigation()
+		work.closeStaged()
+		work.closeRenderSetup()
+		if work.cancel != nil {
+			work.closing = true
+			work.cancel()
+			work.status = "Stopping the preview before closing…"
+			work.invalidate()
+		} else {
+			work.closing = true
+			work.releaseExample()
+			work.host.Quit()
+		}
+	})
+}
+
 // StartPreview freezes current text and invokes the same tested Slayer adapter.
 func (work *Workspace) StartPreview() error { return work.startRender(false) }
 
@@ -292,29 +308,18 @@ func (work *Workspace) startRenderWithPreset(full bool, preset *stagewire.FilmPr
 	if err := work.refuseWhileUnresolved(); err != nil {
 		return err
 	}
-	if !work.rendererConfigured() {
-		return fmt.Errorf("configure the preview queue, renderer and shared render destination before drawing")
-	}
-	tools := work.renderTools()
-	if err := work.refuseWithoutCache(tools); err != nil {
-		return err
-	}
 	request := work.previewRequest(time.Now())
 	if full {
-		request.Profile = work.ownRender(preview.Profile{Full: true})
-		if work.renderSetupOpen {
-			request.Profile.CPURenderer = work.renderBackendChoice == 0
-			request.Profile.GPU = work.renderBackendChoice == 1
-			request.Profile.Samples = work.renderSamplesChoice
-		}
-		if preset != nil {
-			request.Profile.SizePreset = preset.Name
-			request.Profile.Width, request.Profile.Height = preset.Width, preset.Height
-		}
-		if work.renderSetupOpen && work.renderCameraChoice > 0 && work.renderCameraChoice <= len(work.renderCameras) {
-			request.Profile.Camera = work.renderCameras[work.renderCameraChoice-1]
-		}
+		request.Profile = work.fullRenderProfile(preset)
+		request.OutputRoot = work.fullRenderDestination()
 		request.DirectoryPrefix = strings.Replace(request.DirectoryPrefix, "-preview-", "-full-", 1)
+	}
+	tools := work.renderTools()
+	if !work.rendererConfiguredAt(tools, request.OutputRoot) {
+		return fmt.Errorf("configure the preview queue, renderer and shared render destination before drawing")
+	}
+	if err := work.refuseWithoutCache(tools); err != nil {
+		return err
 	}
 	measured := observability.Enabled()
 	var prepareStarted time.Time
@@ -338,6 +343,7 @@ func (work *Workspace) startRenderWithPreset(full bool, preset *stagewire.FilmPr
 	work.diagnostic = ""
 	work.log.reset()
 	work.queueState, work.queueHeld = "", ""
+	work.queueProgress = preview.Progress{}
 	work.queueSequence, work.queueObserved = 0, false
 	work.status = "Preparing preview"
 	if full {
@@ -352,14 +358,13 @@ func (work *Workspace) startRenderWithPreset(full bool, preset *stagewire.FilmPr
 	work.caption = work.retainedImageCaption(work.status)
 	work.refreshLayout = true
 	work.invalidate()
-	play := work.composition == "play"
 	go func() {
 		var started time.Time
 		if measured {
 			started = time.Now()
 		}
 		var observation preview.Update
-		err := preview.RunObserved(ctx, tools, plan, work.log, func(update preview.Update) {
+		err := runPreparedPreview(ctx, tools, plan, work.log, work.options.PrepareQueue, func(update preview.Update) {
 			observation = update
 			select {
 			case work.progress <- renderProgress{update: update, generation: generation}:
@@ -377,19 +382,25 @@ func (work *Workspace) startRenderWithPreset(full bool, preset *stagewire.FilmPr
 				observability.Add("ferruccio_preview_completed_total", 1)
 			}
 		}
-		var geometry *picking.Scene
-		if err == nil && play && ctx.Err() == nil {
-			geometry, _ = picking.New(request.Text, float64(plan.Profile.Width)/float64(plan.Profile.Height))
-		}
 		closeErr := plan.Close()
 		cancel()
 		if err == nil {
 			err = closeErr
 		}
-		work.results <- renderResult{full: full, plan: plan, err: err, generation: generation, geometry: geometry, observation: observation}
+		work.results <- renderResult{full: full, plan: plan, err: err, generation: generation, observation: observation}
 		work.host.RequestRedraw()
 	}()
 	return nil
+}
+
+// runPreparedPreview provisions the app's own queue before its first submission.
+func runPreparedPreview(ctx context.Context, tools preview.Tools, plan *preview.Plan, log io.Writer, prepare func(context.Context, string, string) error, observe func(preview.Update)) error {
+	if prepare != nil {
+		if err := prepare(ctx, tools.Azazel, tools.Queue); err != nil {
+			return err
+		}
+	}
+	return preview.RunObserved(ctx, tools, plan, log, observe)
 }
 
 // Running reports an outstanding client observation or local pending preview.
@@ -431,18 +442,47 @@ func (work *Workspace) invalidate() {
 
 // rebuild changes structural controls while preserving the editor and its text.
 func (work *Workspace) rebuild() {
+	ctx := work.ui.Window().Context()
+	focused, previousReturn := ctx.FocusedWidget(), work.play.sourceReturn
+	previousPlacementSearch := work.play.placementSearchField
+	work.play.sourceReturn = nil
+	work.play.placementSearchField = nil
 	work.editor.SetFontSize(work.size)
 	work.viewer.SetFontSize(work.size)
 	work.theme = appearance.Theme()
 	work.ui.SetTheme(appearance.ThemeForSize(work.size))
 	work.root = newShortcutRoot(work.layout(), work.requestOpen, work.requestSave)
 	work.ui.SetRoot(work.root)
+	if previousPlacementSearch != nil && focused == previousPlacementSearch {
+		if work.play.placementSearchField != nil {
+			ctx.RequestFocus(work.play.placementSearchField)
+		} else {
+			ctx.ReleaseFocus(focused)
+		}
+	}
+	if previousReturn != nil && focused == previousReturn {
+		if work.play.sourceReturn != nil {
+			ctx.RequestFocus(work.play.sourceReturn)
+		} else {
+			ctx.ReleaseFocus(focused)
+		}
+	}
+	if previousReturn != nil && focused == work.editor && work.play.sourceReturn == nil &&
+		(work.composition == "play" || work.settingsOpen || work.renderSetupOpen) {
+		ctx.ReleaseFocus(focused)
+	}
 	work.invalidate()
 }
 
 // validate keeps invalid drafts editable and reports the schema's real error.
 func (work *Workspace) validate() {
+	work.openCheck = nil
 	err := work.state.document.Check()
+	work.applyOpenCheck(err)
+}
+
+// applyOpenCheck reports a schema check without reading the document again.
+func (work *Workspace) applyOpenCheck(err error) {
 	if err != nil {
 		work.status = "Draft needs attention"
 		work.diagnostic = err.Error()
@@ -507,26 +547,96 @@ func (work *Workspace) open() {
 		if len(paths) == 0 {
 			return
 		}
-		if err := work.state.load(paths[0]); err != nil {
-			work.problem(err)
+		work.openPath(paths[0])
+	})
+}
+
+// openReferencedSet takes a job's scene into the normal protected editor.
+func (work *Workspace) openReferencedSet() {
+	if work.refuseWhileFull("opening another file") {
+		return
+	}
+	if work.state.document.ReferencedSet() == "" {
+		return
+	}
+	work.protect(func() {
+		reference := work.state.document.ReferencedSet()
+		if reference == "" {
 			return
 		}
-		work.resetDocumentView()
-		work.releaseExample()
-		work.exampleDraft = false
-		work.study = ""
-		work.selectSpecimen()
-		work.editor.SetText(work.state.document.Text())
-		work.viewer.set(nil)
-		work.output = ""
-		work.caption = "Render this file to see its preview"
-		if work.composition == "play" {
-			work.play.geometry = nil
-			work.play.selected = ""
+		if !filepath.IsAbs(reference) {
+			reference = filepath.Join(filepath.Dir(work.state.path), reference)
 		}
-		work.validate()
-		work.rebuild()
+		cameraName, zoom, cameraPath := work.state.document.ReferencedCamera()
+		if cameraPath {
+			recipe, at, err := inheritedStillCameraPath(work.state.path, work.state.document.Text())
+			if err != nil {
+				work.problem(fmt.Errorf("%w. Render the job to keep its framing, or open its scene directly to edit it", err))
+				return
+			}
+			work.openPathWithCamera(reference, "", 0, recipe, at)
+			return
+		}
+		cameraWide := 0.0
+		if zoom {
+			var err error
+			cameraWide, err = inheritedStillWide(work.state.path, work.state.document.Text(), cameraName)
+			if err != nil {
+				work.problem(err)
+				return
+			}
+		}
+		work.openPathWithCamera(reference, cameraName, cameraWide, "", 0)
 	})
+}
+
+// openPath applies the same document and view reset for either open route.
+func (work *Workspace) openPath(path string) {
+	work.openPathWithCamera(path, "", 0, "", 0)
+}
+
+func (work *Workspace) openPathWithCamera(path, cameraName string, cameraWide float64, pathRecipe string, stillAt time.Duration) {
+	next := work.state
+	if err := next.load(path); err != nil {
+		work.problem(err)
+		return
+	}
+	if pathRecipe != "" {
+		if _, err := preview.InspectFull(path, next.document.Text(), preview.Profile{Full: true, CameraPathRecipe: pathRecipe}); err != nil {
+			work.problem(fmt.Errorf("%w. Render the job to keep its framing, or open its scene directly to edit it", err))
+			return
+		}
+	}
+	if cameraWide != 0 {
+		if _, physical := next.document.PhysicalFrame(); physical {
+			work.problem(fmt.Errorf("a physical camera rig cannot use an inherited job zoom"))
+			return
+		}
+	}
+	work.state = next
+	work.needsCheck = false
+	work.resetDocumentView()
+	work.working.cameraName, work.working.cameraWide, work.working.cameraPath = cameraName, cameraWide, pathRecipe
+	work.working.cameraPathAt = stillAt
+	work.releaseExample()
+	work.exampleDraft = false
+	work.study = ""
+	work.selectSpecimen()
+	work.editor.SetText(work.state.document.Text())
+	work.viewer.set(nil)
+	work.output = ""
+	work.caption = "Render this file to see its preview"
+	if work.composition == "play" {
+		work.play.selected = ""
+	}
+	if work.composition == "play" && work.state.document.Kind() == "set" && work.stagedBuilder() != nil {
+		work.openCheck = work.state.document
+		work.renderBlocked = true
+		work.status = "Checking YAML…"
+	} else {
+		work.validate()
+	}
+	work.rebuild()
 }
 
 // save preserves invalid work and uses the native overwrite confirmation.
@@ -547,25 +657,21 @@ func (work *Workspace) save(as bool) bool {
 		}
 		path = chosen
 	}
+	return work.saveAt(path)
+}
+
+// saveAt writes the draft to the chosen path and updates the workspace.
+func (work *Workspace) saveAt(path string) bool {
+	var notice string
 	var err error
-	if work.study != "" {
+	if work.study == larsonPlaygroundStudy.id || (work.study == "" && attributedVisitor(work.state.document)) {
+		notice, err = work.savePlayground(path)
+	} else if work.study != "" {
 		err = saveBundledStudyDocument(work.state.document, path, filepath.Dir(work.state.path), work.study)
+	} else if work.state.document.Kind() == "job" {
+		err = work.saveJob(path)
 	} else {
-		original := work.state.document.Text()
-		absolute, pathErr := filepath.Abs(path)
-		if pathErr == nil {
-			pathErr = work.state.document.RebaseProfileBooks(work.state.path, absolute)
-		}
-		if pathErr == nil {
-			err = work.state.document.Save(path)
-		} else {
-			err = pathErr
-		}
-		if err != nil {
-			work.state.document.Replace(original)
-		} else if work.state.document.Text() != original {
-			work.editor.ApplyText(work.state.document.Text())
-		}
+		notice, err = work.saveDraft(path)
 	}
 	if err != nil {
 		work.problem(err)
@@ -580,6 +686,10 @@ func (work *Workspace) save(as bool) bool {
 	work.refreshRenderBlocked(work.state.document.Check() == nil)
 	work.exampleDraft = false
 	work.status = "Saved · " + filepath.Base(path)
+	if notice != "" {
+		work.status = "Draft saved with unchecked dependencies"
+		work.diagnostic = notice
+	}
 	work.invalidate()
 	return true
 }
@@ -683,7 +793,6 @@ func (work *Workspace) chooseCatalogueExample(name, specimen string) {
 		work.output = ""
 		work.caption = "Render this file to see its preview"
 		if work.composition == "play" {
-			work.play.geometry = nil
 			work.play.selected = ""
 		}
 		work.validate()
@@ -711,13 +820,18 @@ func (work *Workspace) reference(place string) {
 		return
 	}
 	work.stopPreview()
+	work.cancelViewportGesture()
 	work.viewer.SetNavigable(false)
 	work.output = ""
+	work.play.renderedText = ""
 	work.working.photograph = picture
 	work.working.displayed = false
 	work.working.dirty = true
 	work.viewer.set(picture)
 	work.caption = credit
+	if work.root != nil {
+		work.refreshLayout = true
+	}
 	work.invalidate()
 }
 
@@ -744,6 +858,8 @@ func (work *Workspace) showImage(path string) error {
 		return err
 	}
 	picture, work.reducedNote = reduceForViewer(picture, viewerPixelLimit)
+	work.cancelViewportGesture()
+	work.play.renderedText = ""
 	work.working.photograph = picture
 	work.working.displayed = false
 	work.viewer.set(picture)
@@ -811,8 +927,11 @@ func (work *Workspace) layout() widget.Widget {
 	}
 	idle := func() bool { return false }
 	busy := func() bool { return work.cancel != nil }
-	top := primitives.HBox(
-		primitives.Text("ferruccio").FontSize(work.size*brandSizeRatio).Color(appearance.Pink),
+	controls := []widget.Widget{primitives.Text("ferruccio").FontSize(work.size * brandSizeRatio).Color(appearance.Pink)}
+	if work.state.document.Kind() != "catalogue" {
+		controls = append(controls, work.action("Play", false, func() bool { return work.fullRunning }, work.enterPlay))
+	}
+	controls = append(controls,
 		work.action("Observe", work.composition == "observe", idle, func() { work.composition = "observe"; work.rebuild() }),
 		work.action("Compose", work.composition == "compose", idle, func() { work.composition = "compose"; work.rebuild() }),
 		primitives.Expanded(primitives.Box()),
@@ -824,9 +943,10 @@ func (work *Workspace) layout() widget.Widget {
 			work.cancelRender()
 			work.invalidate()
 		}),
-	).Gap(10).PaddingXY(20, 14).Background(appearance.Panel)
+	)
+	top := primitives.HBox(controls...).Gap(10).PaddingXY(20, 14).Background(appearance.Panel)
 	navigation := primitives.VBox(work.text("Studies").Color(appearance.Cyan),
-		work.action("Larson + visitor", false, idle, func() { work.chooseExample("ferruccio-playground.yaml") }),
+		work.action("Larson + visitor", false, idle, func() { work.chooseExample(playgroundExample) }),
 		work.action("Subaru", false, idle, func() { work.chooseCatalogueExample("subaru-settings.yaml", "subaru") }),
 		work.action("First picture", false, idle, func() { work.chooseExample("first-picture.yaml") }), work.action("Webb at L2", false, idle, func() { work.chooseExample("webb-at-l2.yaml") }), work.action("Fizz", false, idle, func() { work.chooseExample("fizz.yaml") }),
 		primitives.Expanded(primitives.Box()), work.text("World references").Color(appearance.Cyan),
@@ -834,7 +954,7 @@ func (work *Workspace) layout() widget.Widget {
 	).Width(180).Padding(16).Gap(14).Background(appearance.Panel)
 	picture := primitives.VBox(work.live(func() string {
 		return strings.TrimSuffix(work.state.document.Name(), filepath.Ext(work.state.document.Name()))
-	}).FontSize(work.size*headingSizeRatio), primitives.Expanded(work.viewer), work.live(func() string { return work.caption }), work.action("Open image…", false, idle, func() {
+	}).FontSize(work.size*headingSizeRatio), primitives.Expanded(work.viewer), work.imageCaption(), work.action("Open image…", false, idle, func() {
 		if work.refuseWhileFull("opening an image") {
 			return
 		}
@@ -851,6 +971,7 @@ func (work *Workspace) layout() widget.Widget {
 			work.stopPreview()
 			work.output = ""
 			work.caption = "Image · " + filepath.Base(paths[0]) + work.reducedNote
+			work.refreshLayout = true
 			work.invalidate()
 		}
 	})).Padding(18).Gap(12).Background(appearance.Ground)
@@ -879,25 +1000,33 @@ func (work *Workspace) layout() widget.Widget {
 	content := primitives.HBox(navigation, primitives.Expanded(split)).Gap(1)
 	if work.composition == "compose" {
 		content = primitives.HBox(primitives.Expanded(primitives.VBox(
-			primitives.Expanded(picture), work.cameraControls(),
+			primitives.Expanded(picture), work.compositionActions(),
 		).Gap(8)))
 	}
 	var footerChildren []widget.Widget
-	if work.cancel != nil {
-		footerChildren = append(footerChildren, progress.New(progress.Indeterminate(true), progress.Size(24), progress.TrackColor(appearance.Raised), progress.IndicatorColor(appearance.Cyan)))
+	if bar := work.renderProgressBar(); bar != nil {
+		footerChildren = append(footerChildren, bar)
+	} else if work.cancel != nil {
+		footerChildren = append(footerChildren, activeRenderMarker())
 	}
-	footerChildren = append(footerChildren, primitives.Expanded(work.live(func() string { return work.status })))
+	footerChildren = append(footerChildren, primitives.Expanded(work.statusLine(func() string { return work.status })))
 	footerChildren = append(footerChildren, sizePicker)
 	footerChildren = append(footerChildren, work.themePicker())
-	footerChildren = append(footerChildren, work.action("Render log", false, idle, func() {
-		text := work.log.read()
-		if text == "" {
-			text = "No preview has run in this window yet."
-		}
-		work.message("Render log", text)
-	}))
+	footerChildren = append(footerChildren, work.action("Render log", false, idle, work.showRenderLog))
 	footer := primitives.HBox(footerChildren...).PaddingXY(20, 10).Gap(12).Background(appearance.Panel)
 	return primitives.VBox(top, primitives.Expanded(content), footer).Gap(1).Background(appearance.Ground)
+}
+
+// showRenderLog includes the complete footer status along with producer output.
+func (work *Workspace) showRenderLog() {
+	text := work.log.read()
+	if text == "" {
+		text = "No preview has run in this window yet."
+	}
+	if work.status != "" {
+		text = work.status + "\n\n" + text
+	}
+	work.message("Render log", text)
 }
 
 // schemaName identifies the actual local checker without claiming a legacy schema.

@@ -334,6 +334,34 @@ func TestChangePoseKeepsSupportedSignedSpaceCoordinates(t *testing.T) {
 	}
 }
 
+func TestTypedGroundPlacementKeepsSignedMetresAndRefusesOtherUnits(t *testing.T) {
+	const old = "        east: 30 # Keep the east note.\n        north: 40\n        height: {value: 50, unit: m}"
+	const typed = "        position:\n          east: {value: 30, unit: m}\n          north: {value: 40, unit: m}\n          up: {value: 50, unit: m}"
+	const id = "scene.set.things/craft"
+	source := strings.Replace(poseSource, old, typed, 1)
+	ground := strings.Replace(source, "setting: space", "setting: ground", 1)
+	document := poseDraft(t, ground)
+	objects, err := document.Objects()
+	if err != nil || len(objects) != 3 || objects[0].ID() != id || !objects[0].Grounded() || !objects[0].AbsolutePosition() || objects[0].ScaleEditable() {
+		t.Fatalf("unexpected absolute terrain placement: %v, %v", objects, err)
+	}
+	if err := document.SetThingScale(id, 2); err == nil || document.Text() != ground {
+		t.Fatal("size edit was accepted for an absolute terrain placement")
+	}
+	if err := document.ChangePose(PoseChange{ID: id, East: 5, Up: -55, LengthUnit: "m", AngleUnit: "deg"}); err != nil {
+		t.Fatal(err)
+	}
+	edited, err := document.Objects()
+	if err != nil || len(edited) != len(objects) || edited[0].Position() != [3]float64{35, 40, -5} || edited[1] != objects[1] {
+		t.Fatalf("absolute ground edit changed the wrong values: %v, %v", edited, err)
+	}
+	wrongUnits := strings.Replace(ground, "east: {value: 30, unit: m}", "east: {value: 30, unit: km}", 1)
+	bad, err := Open("units.yaml", []byte(wrongUnits))
+	if err == nil && bad.Check() == nil {
+		t.Fatal("non-metre absolute position passed the checked authoring boundary")
+	}
+}
+
 func TestImplicitV2GroundExposesAuthoredPlacements(t *testing.T) {
 	source := strings.Replace(poseSource, "  setting: space\n", "", 1)
 	document := poseDraft(t, source)

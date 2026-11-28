@@ -1,0 +1,8 @@
+$schema: https://github.com/janearc/slayer/schemas/job-v1.json
+scene: {set: orbit.yaml}
+camera: {name: quarter}
+renderer: gpu-native
+film: {width: 800, height: 800, rays: 2, exposure: 0.003}
+outputs:
+  picture: ../../out/studies/2026-11-27-relief-mixed-orbit/proof.png
+  raw: ../../out/studies/2026-11-27-relief-mixed-orbit/light.pfm

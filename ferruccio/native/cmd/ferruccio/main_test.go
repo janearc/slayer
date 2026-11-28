@@ -64,6 +64,14 @@ func TestGestureProofRequiresRenderedSourceAndKnownGesture(t *testing.T) {
 	if code == 0 || !strings.Contains(output, "requires --composition observe") {
 		t.Fatalf("undo proof with hidden editor returned %d: %s", code, output)
 	}
+	code, output = runAtelier("proof", "--out", path, "--gesture", "undo", "--render", "--file", "source.yaml", "--composition", "observe", "--dry-run")
+	if code != 0 {
+		t.Fatalf("undo proof with visible editor returned %d: %s", code, output)
+	}
+	code, output = runAtelier("proof", "--out", path, "--gesture", "orbit", "--render", "--file", "source.yaml", "--composition", "observe", "--dry-run")
+	if code == 0 || !strings.Contains(output, "requires Play composition") {
+		t.Fatalf("Observe orbit proof returned %d: %s", code, output)
+	}
 }
 
 func TestCompositionFlagAcceptsOnlyDeclaredLayouts(t *testing.T) {
@@ -243,13 +251,13 @@ func TestPortableDefaultsUseExistingSharedFoldersOrUserOutput(t *testing.T) {
 	if got := evidenceDirectory(""); got != want {
 		t.Fatalf("portable output %q, want %q", got, want)
 	}
-	if got := queueDirectory(""); got != "" {
+	if got := defaultRenderQueue(home, false).directory; got != "" {
 		t.Fatalf("invented a queue: %q", got)
 	}
 	if got := cacheDirectory(""); got != filepath.Join(home, "Library", "Caches", "Ferruccio", "Slayer") {
 		t.Fatalf("portable cache = %q", got)
 	}
-	if got := sourceShelf(""); got != "" {
+	if got := sourceShelf(); got != "" {
 		t.Fatalf("invented a source shelf: %q", got)
 	}
 	shared := filepath.Join(home, "mesh", "the-vorrh", "renders")
@@ -262,7 +270,7 @@ func TestPortableDefaultsUseExistingSharedFoldersOrUserOutput(t *testing.T) {
 			t.Fatal(err)
 		}
 	}
-	if got := queueDirectory(""); got != queue {
+	if got := defaultRenderQueue(home, false).directory; got != queue {
 		t.Fatalf("shared queue %q, want %q", got, queue)
 	}
 	if got := evidenceDirectory(""); got != frames {
@@ -271,11 +279,8 @@ func TestPortableDefaultsUseExistingSharedFoldersOrUserOutput(t *testing.T) {
 	if got := cacheDirectory(""); got != cache {
 		t.Fatalf("shared cache = %q, want %q", got, cache)
 	}
-	if got := sourceShelf(""); got != shelf {
+	if got := sourceShelf(); got != shelf {
 		t.Fatalf("shared shelf = %q, want %q", got, shelf)
-	}
-	if got := queueDirectory("/chosen/queue"); got != "/chosen/queue" {
-		t.Fatalf("explicit queue was replaced: %q", got)
 	}
 }
 

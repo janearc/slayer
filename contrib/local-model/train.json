@@ -1,0 +1,78 @@
+[
+  {
+    "id": "west-camera",
+    "request": "Make a 120 by 88 preview with two rays along each side of a pixel. Move the camera five metres west without moving it north or up. Keep aiming at the ball.",
+    "expected": {
+      "width": 120,
+      "height": 88,
+      "rays": 2,
+      "at": [
+        -5,
+        -10,
+        1
+      ],
+      "look_at": [
+        0,
+        0,
+        1
+      ]
+    }
+  },
+  {
+    "id": "aim-below-centre",
+    "request": "Use a 128 by 80 film with two rays along each side of a pixel. Keep the camera in place and aim a quarter metre below the ball's centre.",
+    "expected": {
+      "width": 128,
+      "height": 80,
+      "rays": 2,
+      "at": [
+        0,
+        -10,
+        1
+      ],
+      "look_at": [
+        0,
+        0,
+        0.75
+      ]
+    }
+  },
+  {
+    "id": "south-camera",
+    "request": "Make a 136 by 88 preview at one ray along each side of a pixel. Move the front camera two metres south. Keep its existing aim.",
+    "expected": {
+      "width": 136,
+      "height": 88,
+      "rays": 1,
+      "at": [
+        0,
+        -12,
+        1
+      ],
+      "look_at": [
+        0,
+        0,
+        1
+      ]
+    }
+  },
+  {
+    "id": "square-preview",
+    "request": "Make an 80 by 80 preview with one ray along each side of a pixel. Change neither camera position nor target.",
+    "expected": {
+      "width": 80,
+      "height": 80,
+      "rays": 1,
+      "at": [
+        0,
+        -10,
+        1
+      ],
+      "look_at": [
+        0,
+        0,
+        1
+      ]
+    }
+  }
+]

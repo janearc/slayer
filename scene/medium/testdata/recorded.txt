@@ -20,13 +20,13 @@ aurora, wide	bounds	ef18f3d30b8b9d2b19cc9e20
 aurora, wide	density	dde1e132530d76fa748f0b08
 aurora, wide	span	f1b8bd3f6cf5a4db8c883d0b
 clouds	bounds	d9e2b6c90d79dec97d4e820f
-clouds	density	70a688ccaab4a03e2002361e
+clouds	density	35389bd784a7cccf6065378c
 clouds	span	5d739dfbcada787ddc139271
 clouds, overcast	bounds	9aece061adbaf6d52655cc58
-clouds, overcast	density	09c1d4b8c5c5da7ea00b837c
+clouds, overcast	density	62ffb013e68d7ded9715bb08
 clouds, overcast	span	5205164fe0615d66288fc4f9
 clouds, sparse	bounds	d9e2b6c90d79dec97d4e820f
-clouds, sparse	density	0caf9c6f56f70033f09f6dae
+clouds, sparse	density	81724afe28f8e53851cf481a
 clouds, sparse	span	5d739dfbcada787ddc139271
 disc	bounds	8de0054f64c055670afcb730
 disc	density	02a2b68c14e220d7c0ef9310
@@ -42,7 +42,7 @@ disc, ringed by default	density	ff8949f89bdd435ecdab5201
 disc, ringed by default	span	c7a6f61873f433c903ea8302
 giant	bounds	d58408c3bfb7a968a7960956
 giant	density	04b1492aeeeb7e29ae045e07
-giant	span	79dbbf1c237dd05dda639bb1
+giant	span	635e7ffb5d9ca94782be98bd
 pillars	bounds	cd3cb8f3159b0448dac468eb
 pillars	density	47b22eb2a86a704847c4f21c
 pillars	tips	8471435f5a0b917eda0fa586

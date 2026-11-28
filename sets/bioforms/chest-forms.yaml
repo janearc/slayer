@@ -1,0 +1,82 @@
+# Three authored adult chest specimens in a shared studio.
+"$schema": https://github.com/janearc/slayer/schemas/ecosystem-v2.json
+scene:
+  name: Independent adult chest form controls
+  seed: 27
+  setting: space
+  light: none
+  set:
+    things:
+      broad:
+        kind: adult-chest-study-broad
+        seed: 27
+        position:
+          east: {value: -2.10, unit: m}
+          north: {value: 0, unit: m}
+          up: {value: 0, unit: m}
+      long:
+        kind: adult-chest-study-long
+        seed: 27
+        position:
+          east: {value: 0.00, unit: m}
+          north: {value: 0, unit: m}
+          up: {value: 0, unit: m}
+      asymmetric:
+        kind: adult-chest-study-asymmetric
+        seed: 27
+        position:
+          east: {value: 2.10, unit: m}
+          north: {value: 0, unit: m}
+          up: {value: 0, unit: m}
+  film:
+    width: 528
+    height: 480
+    rays: 3
+    exposure: 1
+    wide: 31
+  cameras:
+    broad-front:
+      title: Broad, shallow contour, front
+      location: {at: [-2.10000, -0.97000, 1.19]}
+      orientation: {look_at: [-2.10000, 0, 1.19]}
+    broad-three-quarter:
+      title: Broad, shallow contour, three-quarter
+      location: {at: [-1.41411, -0.68589, 1.19]}
+      orientation: {look_at: [-2.10000, 0, 1.19]}
+    long-front:
+      title: Longer lower contour, front
+      location: {at: [0.00000, -0.97000, 1.19]}
+      orientation: {look_at: [0.00000, 0, 1.19]}
+    long-three-quarter:
+      title: Longer lower contour, three-quarter
+      location: {at: [0.68589, -0.68589, 1.19]}
+      orientation: {look_at: [0.00000, 0, 1.19]}
+    asymmetric-front:
+      title: Asymmetric contour with a flat right side, front
+      location: {at: [2.10000, -0.97000, 1.19]}
+      orientation: {look_at: [2.10000, 0, 1.19]}
+    asymmetric-three-quarter:
+      title: Asymmetric contour with a flat right side, three-quarter
+      location: {at: [2.78589, -0.68589, 1.19]}
+      orientation: {look_at: [2.10000, 0, 1.19]}
+  world:
+    unit: 1
+    sky:
+      horizon: {srgb_linear: [0.12, 0.12, 0.12]}
+      zenith: {srgb_linear: [0.12, 0.12, 0.12]}
+      ground: {srgb_linear: [0.12, 0.12, 0.12]}
+      source: eye
+    suns:
+      left:
+        toward: [-0.38, -0.81, 0.44]
+        colour: {srgb_linear: [0.86, 0.86, 0.86]}
+        source: eye
+      right:
+        toward: [0.38, -0.81, 0.44]
+        colour: {srgb_linear: [0.86, 0.86, 0.86]}
+        source: eye
+    floods:
+      room:
+        colour: {srgb_linear: [0.16, 0.16, 0.16]}
+        strength: 1
+        source: eye

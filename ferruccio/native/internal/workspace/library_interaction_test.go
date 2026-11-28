@@ -219,6 +219,9 @@ func TestFullRenderButtonFreezesAuthoredRequestAndKeepsAcceptedPhotograph(t *tes
 	if work.output != result.plan.Output {
 		t.Fatal("accepted full output was not recorded")
 	}
+	if want := "Full Slayer render · 320 × 200 · 4 samples per pixel · exact"; work.caption != want {
+		t.Fatalf("authored sampling caption = %q, want %q", work.caption, want)
+	}
 	if !work.refreshLayout {
 		t.Fatal("full completion did not refresh display picker")
 	}
@@ -234,9 +237,15 @@ func TestRenderSetupFreezesChosenProducerSize(t *testing.T) {
 		t.Fatal(err)
 	}
 	work.editor.SetText(work.state.document.Text())
-	work.options.Evidence = t.TempDir()
+	work.options.Evidence = ""
 	work.options.Tools = preview.Tools{Transport: "disabled-for-unit-test", Azazel: "unused", Queue: "unused", Slayer: "unused"}
 	work.renderSetupOpen = true
+	destination := t.TempDir()
+	work.renderSubmitError = "Previous destination unavailable"
+	work.setRenderFolder(destination)
+	if work.renderSubmitError != "" {
+		t.Fatal("new destination retained a stale submission error")
+	}
 	work.renderSetupPath, work.renderSetupSource = work.state.path, work.state.document.Text()
 	work.renderPresets = []stagewire.FilmPreset{{Name: "imax", Width: 4096, Height: 3002}}
 	work.renderCameras = work.state.document.Cameras()
@@ -308,6 +317,12 @@ func TestRenderSetupFreezesChosenProducerSize(t *testing.T) {
 		if profile.SizePreset != "imax" || profile.Width != 4096 || profile.Height != 3002 || profile.Rays != 2 || profile.Camera != "arrival" || !profile.GPU || profile.CPURenderer {
 			t.Fatalf("wrong frozen preset or sampling: %+v", profile)
 		}
+		if filepath.Dir(result.plan.Directory) != destination {
+			t.Fatalf("full render went to %s, want %s", result.plan.Directory, destination)
+		}
+		if work.renderSetupFolder != "" || work.previewRequest(time.Time{}).OutputRoot != work.options.Evidence {
+			t.Fatal("the one-render destination leaked into later renders")
+		}
 	case <-time.After(5 * time.Second):
 		t.Fatal("preset selection did not start a frozen request")
 	}
@@ -357,7 +372,73 @@ func TestRenderSetupFreezesSevenExactSamples(t *testing.T) {
 		if result.plan.Profile.Samples != 7 || !result.plan.Profile.GPU || result.plan.Profile.CPURenderer {
 			t.Fatalf("wrong frozen sampling: %+v", result.plan.Profile)
 		}
+		if result.err == nil || result.err.Error() != "unknown preview transport \"disabled-for-unit-test\"" {
+			t.Fatalf("test unexpectedly attempted a transport: %v", result.err)
+		}
+		writeProofPNG(t, result.plan.Output, color.RGBA{A: 255})
+		result.err = nil
+		work.renderSamplesChoice = 16
+		work.finishPreview(result)
+		if want := "Full Slayer render · 320 × 200 · 7 samples per pixel · exact"; work.caption != want {
+			t.Fatalf("exact sampling caption = %q, want %q", work.caption, want)
+		}
 	case <-time.After(5 * time.Second):
 		t.Fatal("sample selection did not start a frozen request")
+	}
+}
+
+func TestSceneLibraryOpensAndSavesEditableOaklandStudy(t *testing.T) {
+	work := libraryEventWorkspace(t)
+	t.Cleanup(work.releaseExample)
+	control := libraryWidget(work.root, "Scene library").(*dropdown.Widget)
+	bounds := control.ScreenBounds()
+	clickLibraryPoint(work, geometry.Pt((bounds.Min.X+bounds.Max.X)/2, (bounds.Min.Y+bounds.Max.Y)/2))
+	drawLibraryWindow(t, work)
+
+	index := -1
+	for i, entry := range work.library {
+		if entry.label == "Oakland Larson study" {
+			index = i
+			break
+		}
+	}
+	overlays := work.ui.Window().OverlayContentWidgets()
+	if index < 0 {
+		t.Fatalf("Oakland study is missing from the scene library: %+v", work.library)
+	}
+	if len(overlays) != 1 {
+		t.Fatalf("scene library menu has %d overlays, want 1", len(overlays))
+	}
+	work.ui.HandleEvent(event.NewKeyEvent(event.KeyPress, event.KeyHome, 0, event.ModNone))
+	for i := 0; i < index; i++ {
+		work.ui.HandleEvent(event.NewKeyEvent(event.KeyPress, event.KeyDown, 0, event.ModNone))
+	}
+	work.ui.HandleEvent(event.NewKeyEvent(event.KeyPress, event.KeyEnter, 0, event.ModNone))
+	if work.study != oaklandLarsonStudy.id || !work.exampleDraft || work.Running() {
+		t.Fatalf("selection opened %q (study %q, draft %t, running %t)", work.DocumentName(), work.study, work.exampleDraft, work.Running())
+	}
+	if selected := work.scenePicker().(*dropdown.Widget).SelectedValue(); selected != "Oakland Larson study" {
+		t.Fatalf("selected study label = %q", selected)
+	}
+
+	edited := work.state.document.Text() + "\n# my first scene\n"
+	work.state.document.Replace(edited)
+	path := filepath.Join(t.TempDir(), "my-first-scene.yaml")
+	if !work.saveAt(path) {
+		t.Fatalf("save study: %s", work.diagnostic)
+	}
+	for _, name := range oaklandLarsonStudy.files {
+		saved, err := os.ReadFile(filepath.Join(filepath.Dir(path), name))
+		if err != nil {
+			t.Fatal(err)
+		}
+		bundled, err := os.ReadFile(filepath.Join(work.examplesFolder(), oaklandLarsonStudy.folder, name))
+		if err != nil || string(saved) != string(bundled) {
+			t.Fatalf("saved %s differs from the bundled asset: %v", name, err)
+		}
+	}
+	work.openPath(path)
+	if work.exampleDraft || work.state.document.Text() != edited {
+		t.Fatalf("reopening %q lost the authored copy: %s", path, work.diagnostic)
 	}
 }

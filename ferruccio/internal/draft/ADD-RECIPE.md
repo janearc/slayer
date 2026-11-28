@@ -22,4 +22,5 @@ from Slayer's live constructor registry, rather than inventing kind names;
 the checked document still validates the whole resulting set before commit.
 Kinds and named recipes are distinct choices even when their names collide.
 The constructed saved result must be checked before describing the edit as
-working. This does not yet provide profile-based fish or plants.
+working. Profile-based fish and plants use the separate
+[profile transaction](ADD-PROFILES.md).

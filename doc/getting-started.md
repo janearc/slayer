@@ -1,22 +1,26 @@
 # Getting started with Slayer
 
 Slayer makes pictures and films by tracing light through a scene. This
-page takes you from a fresh checkout to two finished pictures. It picks up
-where [QUICKSTART.md](../QUICKSTART.md) ends, but it needs less of it: the
-two pictures below read no data from the source shelf.
+page takes you from a fresh checkout to two finished pictures. The two
+pictures below need no extra data from the source shelf.
 
-Run every command from the checkout root. You need Git and the Go version
-named in `go.mod`. On macOS the build prints a linker warning about a
-duplicate `-lobjc`; it is harmless.
+Run every command from the checkout root. First follow [Building Slayer](building.md)
+to install Git, Game and the Go version in `go.mod`, and set up the source
+shelf used during the build. On macOS the build may print a linker warning
+about a duplicate `-lobjc`; it is harmless.
 
 ## Set up
 
 ```sh
-export SROOT=${HOME}/slayer
-export SLAYER_CACHE=${SROOT}/render/cache
-mkdir -p ${SROOT}/render/{cache,frames}
-go build -o bin/slayer ./cmd/slayer
+export SROOT="$PWD/out"
+export SLAYER_CACHE="${SROOT}/render/cache"
+mkdir -p "${SROOT}/render/cache" "${SROOT}/render/frames"
+game build slayer
 ```
+
+The build verifies the research sources first. The named `slayer` target
+builds this binary; use the ordinary `game build` when retaining stamped
+binaries as render evidence. See [Building](building.md) for provenance.
 
 `SLAYER_CACHE` is one absolute folder where slayer keeps work it can do
 again. `slayer assess` and `slayer draw` stop without it:
@@ -28,8 +32,8 @@ again. `slayer assess` and `slayer draw` stop without it:
 `SLAYER_SHELF` is the folder of published sources behind slayer's physical
 values. Neither picture on this page reads it, and both drew with it unset.
 Jobs that need data slayer does not ship, such as terrain models and star
-catalogues, are the ones that need the shelf. Fill it with the sources step
-of QUICKSTART.md before drawing those.
+catalogues, are the ones that need the shelf. See [Building](building.md)
+for how to fetch it before drawing those.
 
 ## Your first picture
 
@@ -47,13 +51,10 @@ it would write. Now draw it:
 
 ```sh
 ./bin/slayer draw doc/examples/jobs/first-picture.yaml \
-    --out ${SROOT}/render/frames/first-picture.png
+    --out "${SROOT}/render/frames/first-picture.png"
 ```
 
-It takes well under a second and prints two lines:
-
-    wrote ${SROOT}/render/frames/first-picture.png
-    wrote out/first-picture.pfm
+It prints the paths to the picture and raw-light file when they are written.
 
 The picture is `${SROOT}/render/frames/first-picture.png`: a peach ball with
 a hard shadow on a pale grey floor. The raw light is `out/first-picture.pfm`
@@ -98,7 +99,7 @@ above at 1280 by 720. It reads only files in this repository.
 
 ```sh
 ./bin/slayer draw doc/examples/jobs/city-grid-10000.yaml \
-    --out ${SROOT}/render/frames/city-grid-10000.png
+    --out "${SROOT}/render/frames/city-grid-10000.png"
 ```
 
 It took about two seconds here and wrote one file, the picture. The
@@ -139,5 +140,5 @@ each cache under `SLAYER_CACHE` holds and how much room it may use.
 - [Making models](making-models.md): construct through the manufactory.
 - [Testing](testing.md): choose a focused check before a full render suite.
 - [Building](building.md): the project runner, checks and the source shelf.
-- [Azazel](azazel.md): direct rendering and the future queue.
+- [Azazel](azazel.md): the shared render queue and worker.
 - [Examples](../EXAMPLES.md): more scenes and application commands.

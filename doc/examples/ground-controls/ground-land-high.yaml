@@ -1,0 +1,49 @@
+"$schema": https://github.com/janearc/slayer/schemas/ecosystem-v2.json
+scene:
+  name: like earth, seed 1, generated
+  seed: 7
+  setting: space
+  light: sun
+  sun: {azimuth: 225, altitude: 20}
+  # a space set with only bodies draws them unlit (2026-11-26); this craft,
+  # at the body's centre and smaller than a pixel from the camera, is
+  # there until that is fixed
+  set:
+    things:
+      lamp:
+        kind: voyager-1
+        seed: 17
+        complexity: demo
+        east: 0
+        north: 0
+  film: {width: 800, height: 800, rays: 2, exposure: 0.003, wide: 50}
+  cameras:
+    # the autocameras' earth portrait, scaled by the generated radius over
+    # the template's: 6422.0 km over 6371 km
+    portrait:
+      title: like earth, seed 1, portrait
+      location: {at: [-23317959, -0, 8487043]}
+      orientation: {look_at: [0, 0, 0]}
+    close:
+      location: {at: [-12500000, 0, 4550000]}
+      orientation: {look_at: [0, 0, 0]}
+  world:
+    unit: 1
+    sky:
+      stars: {seed: 29, share: 0.01, size: 0.3, bright: 0.6}
+      source: eye
+    bodies:
+      body:
+        generate:
+          mass: 1
+          makeup: {metal: 0.32, rock: 0.6798, ice: 0.0002, gas: 0}
+          day: 23.93
+          tilt: 23.44
+          distance: 1
+          sun: {mass: 1, luminosity: 1}
+          age: 4.5e9
+          seed: 1
+          ground_look: {ocean: 0.2, variation: 0.7, ridge_contrast: 1, made_up: true}
+          clouds: {base: 2, top: 9, cover: 0, loss: 0.5, made_up: true}
+        middle: [0, 0, 0]
+        detail: 5

@@ -26,8 +26,8 @@ a paged source, a pdf, is read a page at a time by poppler's pdftotext;
 it reaches nothing outside and writes nothing.
 
 the shelf is the one SLAYER_SHELF names, and with that unset, the shelf
-folder committed beside the list, so a fresh clone verifies with no
-setup.
+folder beside the list. use fetch --research to fetch the citations
+that verify reads.
 
 this is a text-and-value check. it does not infer units, range endpoints,
 coefficient roles or powers from prose. those claims need source review
@@ -74,19 +74,29 @@ func whereIn(from numbers.Source) string {
 	return fmt.Sprintf("on page %d of %s", from.Page, from.Key)
 }
 
+// citedSource resolves a number's citation to a source that can be fetched.
+func citedSource(list sources.List,
+	number numbers.Number) (sources.Source, error) {
+	if number.From == nil {
+		return sources.Source{}, fmt.Errorf("%s: no source is named", number.Name)
+	}
+	source, found := list.Find(number.From.Key)
+	if !found || source.Never() != "" {
+		return sources.Source{}, fmt.Errorf("%s: %s is not a source on the shelf",
+			number.Name, number.From.Key)
+	}
+	return source, nil
+}
+
 // verified is nothing when a number's source is on the shelf as pinned,
 // its page holds the text, and the text says the number; otherwise what
 // is wrong.
 func (at place) verified(list sources.List, number numbers.Number) error {
-	if number.From == nil {
-		return fmt.Errorf("%s: no source is named", number.Name)
+	source, err := citedSource(list, number)
+	if err != nil {
+		return err
 	}
 	from := *number.From
-	source, found := list.Find(from.Key)
-	if !found || source.Never() != "" {
-		return fmt.Errorf("%s: %s is not a source on the shelf",
-			number.Name, from.Key)
-	}
 	if _, err := at.shelf.Check(source); err != nil {
 		return fmt.Errorf("%s: %w", number.Name, err)
 	}

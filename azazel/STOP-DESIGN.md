@@ -1,9 +1,8 @@
 # Host stop value and durable latch draft
 
-The private pure value transition is implemented and tested. The durable
-stop record, resume command and process termination are not implemented.
-This extends the two admission decisions in `DESIGN.md`. The durable record
-contract remains a draft and needs review before Game or Carrie shares it.
+This draft describes a private stop transition and proposed file record for
+shared admission. The production queue has its own pause, resume and process
+supervision. See [scheduler admission](DESIGN.md#admission-and-stopping).
 
 ## The state and the event
 

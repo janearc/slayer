@@ -36,7 +36,7 @@ func (making *staging) halved(read set.Set) error {
 			making.given.set, said.Unit())
 	}
 	before := len(making.world.Lamps)
-	if err := stage.Add(making.world, said, making.rebasing(read)); err != nil {
+	if err := stage.Add(making.world, said.WithoutFlowing(), making.rebasing(read)); err != nil {
 		return fmt.Errorf("%s: %w", making.given.set, err)
 	}
 	if err := making.shored(read); err != nil {

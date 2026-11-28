@@ -1,0 +1,9 @@
+$schema: https://github.com/janearc/slayer/schemas/job-v1.json
+scene: {set: azure-flock-plain-gpu-v2.yaml}
+renderer: gpu-native
+shortcuts: {restir: off}
+film: {width: 960, height: 600, rays: 1, wide: 65}
+camera: {name: flock}
+outputs:
+  picture: ../../out/2026-11-27-azure-flock-plain-gpu-v2/proof.png
+  raw: ../../out/2026-11-27-azure-flock-plain-gpu-v2/light.pfm

@@ -8,7 +8,7 @@ of that scene. The first input is [a topology preview](island-source-preview.yam
 Build and run from the checkout root:
 
 ```sh
-game build island-binary
+game build
 game run island -- render --scene doc/island-source-preview.yaml --out out/island-preview
 ```
 
@@ -246,7 +246,6 @@ look-target keyframes, horizontal field of view, outgoing-segment easing and
 scene timestamps. It points to a scene beside the plan. Run it through Game:
 
 ```sh
-game build island-binary
 game run island -- sequence --plan doc/island-ascent-preview.yaml --out out/island-ascent --dry-run
 game run island -- sequence --plan doc/island-ascent-preview.yaml --out out/island-ascent
 ```

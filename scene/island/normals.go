@@ -9,9 +9,10 @@ import (
 )
 
 // normalAt estimates the source surface's normal from four neighbouring
-// source heights in the fixed world. The stencil does not change with the
-// camera or leaf depth. It is a shading approximation, not new geometry or
-// proof of source resolution, relief error or a shadow-ray offset bound.
+// source heights in the fixed world. Normally the stencil is fixed; the
+// explicit mesh-footprint mode may enlarge it for the current selection.
+// It is a shading approximation, not new geometry or proof of source
+// resolution, relief error or a shadow-ray offset bound.
 func (book *vertexBook) normalAt(key lattice) (maths.Vec, error) {
 	if normal, found := book.normals[key]; found {
 		return normal, nil
@@ -21,7 +22,17 @@ func (book *vertexBook) normalAt(key lattice) (maths.Vec, error) {
 	}
 	lon, lat := book.terrain.location(float64(key.column), float64(key.row))
 	detail := book.terrain.detail
-	coordinates := [4][2]float64{{lon - detail.NormalLongitude, lat}, {lon + detail.NormalLongitude, lat}, {lon, lat + detail.NormalLatitude}, {lon, lat - detail.NormalLatitude}}
+	lonStep, latStep := detail.NormalLongitude, detail.NormalLatitude
+	if book.normalSteps != nil {
+		step, found := book.normalSteps[key]
+		if !found || step <= 0 {
+			return maths.Vec{}, fmt.Errorf("island: no selected mesh footprint for normal")
+		}
+		span := float64(book.terrain.root.MaxColumn)
+		lonStep = max(lonStep, float64(step)*(book.terrain.region.East-book.terrain.region.West)/span)
+		latStep = max(latStep, float64(step)*(book.terrain.region.North-book.terrain.region.South)/span)
+	}
+	coordinates := [4][2]float64{{lon - lonStep, lat}, {lon + lonStep, lat}, {lon, lat + latStep}, {lon, lat - latStep}}
 	var points [4]maths.Vec
 	for index, coordinate := range coordinates {
 		book.normalQueries++

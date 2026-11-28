@@ -1,12 +1,15 @@
 # Example jobs
 
-One job of each kind, to read and to draw. Each reads only files in this
-repository and writes under `out/` or the renders home:
+these jobs use inputs in the checkout. inspect the planned files
+with `--dry-run` before drawing. on a shared machine use the
+[Azazel queue](../../azazel.md#submit-work).
 
-    slayer draw doc/examples/jobs/first-picture.yaml
+    bin/slayer draw doc/examples/jobs/first-picture.yaml --dry-run
 
 - `first-picture.yaml`, `smoke-still.yaml`: a still of smoke.
-- `first-film.yaml`: a short film with music rendered from a tune.
+- `first-film.yaml`: an 18-frame film with music rendered from a
+  tune. it writes PNG frames and an MP4. MP4 encoding requires macOS
+  with cgo.
 - `lantern-portrait.yaml`, `orbital-portrait.yaml`: named scenes.
 - `city-*.yaml`, `macrostructures.yaml`: sets drawn as stills.
 - `alfa/`: a submarine underway by moonlight, planned frame by frame

@@ -1,0 +1,7 @@
+"$schema": https://github.com/janearc/slayer/schemas/job-v1.json
+scene: {set: shadow-foreground.yaml}
+renderer: cpu
+camera: {name: disc}
+outputs:
+  picture: ../../../out/2026-11-27-flowing-shadow-foreground/proof.png
+  raw: ../../../out/2026-11-27-flowing-shadow-foreground/light.pfm

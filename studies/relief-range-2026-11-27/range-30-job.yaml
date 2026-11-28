@@ -1,0 +1,8 @@
+$schema: https://github.com/janearc/slayer/schemas/job-v1.json
+scene: {set: range-30.yaml}
+camera: {name: grazing}
+renderer: gpu-native
+film: {width: 800, height: 800, rays: 2, exposure: 0.003}
+outputs:
+  picture: ../../out/studies/2026-11-27-range-30/proof.png
+  raw: ../../out/studies/2026-11-27-range-30/light.pfm

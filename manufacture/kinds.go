@@ -136,6 +136,30 @@ func table() map[string]maker {
 	rows["new-horizons"] = newHorizons{}
 	rows["new-horizons-vtad"] = newHorizonsVTAD{}
 	rows["human-scale-2m"] = scaleHuman{}
+	rows["adult-human-neutral"] = adultHumanStudy{}
+	rows["adult-human-reaching"] = adultHumanStudy{reaching: true}
+	rows["adult-human-reach-clip"] = adultHumanReachClip{}
+	rows["adult-human-male-study"] = adultHumanStudy{male: true}
+	rows["adult-human-details"] = adultHumanStudy{bareScalp: true, skinMarks: true}
+	rows["adult-human-cheek-scar"] = adultHumanStudy{bareScalp: true, skinMarks: true, scarRake: true}
+	rows["adult-human-thin-skin"] = adultHumanStudy{bareScalp: true, skinMarks: true, thinSkin: true}
+	rows["adult-human-auricle"] = adultHumanStudy{bareScalp: true, skinMarks: true, auricles: true}
+	rows["adult-human-auricle-thin-skin"] = adultHumanStudy{
+		bareScalp: true, skinMarks: true, thinSkin: true, auricles: true,
+	}
+	rows["adult-human-groom-fibre"] = adultHumanStudy{fibreScalp: true}
+	rows["adult-human-groom-medium"] = adultHumanStudy{fibreScalp: true, mediumScalp: true}
+	rows["adult-human-groom-medium-layered"] = adultHumanStudy{fibreScalp: true, mediumScalp: true, crownLift: .9}
+	rows["adult-human-groom-medium-field"] = adultHumanStudy{fibreScalp: true, mediumScalp: true, scalpField: true}
+	rows["adult-human-groom-medium-field-wisps"] = adultHumanStudy{fibreScalp: true, mediumScalp: true, scalpField: true, fieldWisps: true}
+	rows["adult-human-body-hair"] = adultHumanStudy{bareScalp: true, bodyHair: true}
+	rows["adult-human-facial-hair"] = adultHumanStudy{bareScalp: true, skinMarks: true, facialHair: true}
+	rows["adult-human-vellus-study"] = adultHumanStudy{bareScalp: true, skinMarks: true, vellusHair: true}
+	rows["adult-human-wider-stance"] = adultHumanStudy{bareScalp: true, widerStance: true}
+	maps.Copy(rows, adultIrisRows())
+	maps.Copy(rows, chestMaterialRows())
+	maps.Copy(rows, chestFormRows())
+	maps.Copy(rows, tissueStudyRows())
 	rows["yurt"] = yurtRow{}
 	rows["winnebago"] = winnebagoRow{}
 	rows["bivouac"] = bivouacRow{}

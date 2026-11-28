@@ -3,10 +3,10 @@ package whales
 import (
 	"errors"
 	"fmt"
-	"github.com/janearc/slayer/manufacture/geometry"
 	"slices"
 
 	"github.com/janearc/slayer/bioforms/skeleton"
+	"github.com/janearc/slayer/manufacture/geometry"
 	"github.com/janearc/slayer/maths"
 	"github.com/janearc/slayer/mesh"
 	"github.com/janearc/slayer/scene/thing"
@@ -43,12 +43,18 @@ func (model *orcaModel) orcaPosed(bones *skeleton.Skeleton, pose skeleton.Pose,
 	if err != nil {
 		return nil, err
 	}
-	rest := model.orcaRest()
-	frames := bones.Frames(pose)
-	posed := make([]maths.Vec, len(rest.relieved))
-	for i, p := range rest.relieved {
-		posed[i] = skeleton.Carry(p, frames, binding[i])
+	placed, err := binding.Pose(pose)
+	if err != nil {
+		return nil, err
 	}
+	return model.orcaCarried(placed, at, palette, satin)
+}
+
+func (model *orcaModel) orcaCarried(placed *skeleton.SkinPose, at maths.Subspace,
+	palette Palette, satin float64,
+) ([]thing.Thing, error) {
+	rest := model.orcaRest()
+	posed := placed.Points()
 	faces := slices.Clone(rest.faces)
 	normals := geometry.UnitNormals(posed, faces)
 	skin, err := mesh.NewWithRestPoints(posed, rest.points, faces, normals,

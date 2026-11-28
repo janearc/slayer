@@ -1,7 +1,8 @@
 # Let the lens ask for detail
 
-The preparation helper in `scene/footprint` is not an enabled whole-world
-renderer.
+`scene/footprint` estimates visibility and pixel displacement for an
+explicit perspective camera. the island renderer uses these bounds
+when selecting terrain patches.
 
 The constructor takes a camera pose, horizontal pinhole field, actual
 raster dimensions, pixel width/height ratio and near distance. Nothing
@@ -59,4 +60,5 @@ detail. Roots outside the image may still have visible branches. Population
 identity must remain fixed when its representation changes; the lens does not
 reseed the forest.
 
-Aggregate canopy and temporal transitions are not covered.
+see the [island terrain transition](terrain-transitions.md) for
+interpolating between selected terrain representations.

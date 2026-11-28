@@ -1,0 +1,68 @@
+# Left to right, opaque control and the 2, 4 and 8 mm tissue slabs.
+"$schema": https://github.com/janearc/slayer/schemas/ecosystem-v2.json
+scene:
+  name: Thin tissue transmission
+  seed: 27
+  setting: space
+  light: none
+  set:
+    things:
+      opaque:
+        kind: tissue-study-opaque
+        seed: 27
+        position:
+          east: {value: -0.099, unit: m}
+          north: {value: 0, unit: m}
+          up: {value: 0, unit: m}
+      thin:
+        kind: tissue-study-2mm
+        seed: 27
+        position:
+          east: {value: -0.033, unit: m}
+          north: {value: 0, unit: m}
+          up: {value: 0, unit: m}
+      middle:
+        kind: tissue-study-4mm
+        seed: 27
+        position:
+          east: {value: 0.033, unit: m}
+          north: {value: 0, unit: m}
+          up: {value: 0, unit: m}
+      thick:
+        kind: tissue-study-8mm
+        seed: 27
+        position:
+          east: {value: 0.099, unit: m}
+          north: {value: 0, unit: m}
+          up: {value: 0, unit: m}
+  film:
+    width: 800
+    height: 300
+    rays: 4
+    exposure: 1
+    wide: 31
+  cameras:
+    backlit:
+      location: {at: [0, -0.52, 0.033]}
+      orientation: {look_at: [0, 0, 0.033]}
+  world:
+    unit: 1
+    materials:
+      baffle:
+        colour: {srgb_linear: [0, 0, 0]}
+        source: eye
+    boxes:
+      shadow-baffle:
+        material: baffle
+        middle: [-0.033, 0.03, 0.038]
+        size: [0.033, 0.006, 0.016]
+        source: eye
+    suns:
+      back:
+        toward: [0, 1, 0]
+        colour: {srgb_linear: [5.0, 5.0, 5.0]}
+        source: eye
+      camera-fill:
+        toward: [0, -1, 0]
+        colour: {srgb_linear: [0.20, 0.20, 0.20]}
+        source: eye

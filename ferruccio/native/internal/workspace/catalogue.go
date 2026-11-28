@@ -24,11 +24,17 @@ func (work *Workspace) selectSpecimen() {
 
 // rendererConfigured checks the executable that owns the active format.
 func (work *Workspace) rendererConfigured() bool {
-	tools := work.renderTools()
-	if work.options.Tools.Transport == "slayer" {
-		return work.evidenceFolder() != "" && tools.Slayer != "" && work.state.document.Kind() != "catalogue"
+	return work.rendererConfiguredAt(work.renderTools(), work.evidenceFolder())
+}
+
+func (work *Workspace) rendererConfiguredAt(tools preview.Tools, folder string) bool {
+	if folder == "" {
+		return false
 	}
-	if tools.Azazel == "" || tools.Queue == "" || work.evidenceFolder() == "" {
+	if work.options.Tools.Transport == "slayer" {
+		return tools.Slayer != "" && work.state.document.Kind() != "catalogue"
+	}
+	if tools.Azazel == "" || tools.Queue == "" {
 		return false
 	}
 	if work.state.document.Kind() == "catalogue" {

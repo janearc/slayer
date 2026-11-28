@@ -7,6 +7,8 @@ package skeleton
 import (
 	"errors"
 	"fmt"
+	"maps"
+	"slices"
 	"strings"
 
 	"github.com/janearc/slayer/maths"
@@ -61,6 +63,10 @@ type Skeleton struct {
 
 // New is a skeleton with no bones.
 func New() *Skeleton { return &Skeleton{byName: map[string]int{}} }
+
+func (skeleton *Skeleton) snapshot() Skeleton {
+	return Skeleton{bones: slices.Clone(skeleton.bones), byName: maps.Clone(skeleton.byName)}
+}
 
 // Add puts a bone on the skeleton, jointed to the bone named parent at
 // its head; an empty parent makes a root. A name used twice, a parent

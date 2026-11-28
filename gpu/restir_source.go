@@ -47,6 +47,8 @@ func restirEdits() []restirEdit {
 	parts := restirParts()
 	const fall = "static float3 falling(World world, float3 point, float3 normal,\n" +
 		"                      int leaving_sphere) {\n"
+	const primaryTransparency = "\tfloat clearness = clamp(made.mirror.z, 0.0f, 1.0f);\n" +
+		"\tfloat foam_coverage = 0;\n"
 	return []restirEdit{
 		{"the world's two fields", "\tthread uint *work;\n#endif\n};\n",
 			"\tthread uint *work;\n#endif\n" +
@@ -59,11 +61,9 @@ func restirEdits() []restirEdit {
 				"\tif (world.restir_on != 0) {\n" +
 				"\t\treturn falling_restir(world, point, normal, leaving_sphere);\n\t}\n" +
 				"\tfloat3 sum = skylit(world, point, normal, leaving_sphere);\n"},
-		{"only the primary hit reads its reservoir",
-			"\tSeen seen = surfaced(world, hit, point, normal);\n\tfloat clearness = clamp(made.mirror.z, 0.0f, 1.0f);\n",
-			"\tSeen seen = surfaced(world, hit, point, normal);\n" +
-				"\t// later bounces light as ever\n\tworld.restir_on = 0;\n" +
-				"\tfloat clearness = clamp(made.mirror.z, 0.0f, 1.0f);\n"},
+		{"only the primary hit reads its reservoir", primaryTransparency,
+			"\t// later lighting uses the ordinary lamp sampler\n" +
+				"\tworld.restir_on = 0;\n" + primaryTransparency},
 		{"the trace kernel names its reservoir", "\tworld.shared = sky_share(header, pixel);\n",
 			"\tworld.shared = sky_share(header, pixel);\n\tworld.restir_on = 1;\n" +
 				"\tworld.restir_at = rc_int(rays, rc_res_b) + 4 * restir_pixel(rays, pixel);\n"},

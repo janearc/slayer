@@ -58,8 +58,23 @@ type grown struct {
 // material, or why there can be none.
 func newGrown(place maths.Subspace, params manufacture.ConiferParams,
 	material *thing.Material) (grown, error) {
+	if material != nil && material.DirectSun != nil {
+		return grown{}, unsupported{"precomputed direct sun with shadows is CPU-only"}
+	}
 	if material != nil && material.IndependentEmission {
 		return grown{}, unsupported{"independent surface emission is CPU-only"}
+	}
+	if material != nil && material.Fibre != nil {
+		return grown{}, unsupported{"CPU-only fibre scattering"}
+	}
+	if material != nil && material.ThinTissue.Enabled() {
+		return grown{}, unsupported{"CPU-only thin tissue transmission"}
+	}
+	if material != nil && material.Subsurface.Enabled() {
+		return grown{}, unsupported{"CPU-only surface subsurface diffusion"}
+	}
+	if material != nil && material.Finish != nil {
+		return grown{}, unsupported{"CPU-only procedural surface finish"}
 	}
 	if params.Depth < 0 || params.Depth > mostConiferDepth {
 		return grown{}, unsupported{fmt.Sprintf(

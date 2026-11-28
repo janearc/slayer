@@ -1,6 +1,9 @@
 # Griffith basin set landmark
 
-`world.griffith-basin` reuses the same deterministic ridge and Los Angeles basin constructor used by the Heard Griffith stage, through the shared `scene/city` package. It builds one grouped ridge mesh, batched street blocks and tower meshes, and lit window/street/traffic surfaces. The set path omits the legacy basin haze volume because current clear-boundary ocean rendering refuses scene volumes. The set declaration supplies an absolute map position in metres and a clockwise-from-north heading in degrees:
+`scene.world.griffith-basin` places the manufactured ridge and city
+used by the Heard Griffith stage. it draws a ridge mesh, streets,
+towers and emissive windows and lamps. the placement uses an absolute
+map position in metres and a clockwise-from-north heading in degrees.
 
 ```yaml
 world:
@@ -17,4 +20,18 @@ world:
     city-light-footprint: 4
 ```
 
-The shared builder uses a right-handed proper rotation. Its local positive Z city axis aims along the supplied heading; local X is west at zero heading, Y is up. `scale` uniformly compresses the constructor geometry, while `relief-scale` separately compresses terrain heights. `city-forward` moves the urban layout along local Z in metres (negative brings it toward the sea); `ridge-forward` shifts the land relief inland while leaving the urban building bases on the lowland plane. This shot-specific layout puts city blocks seaward of the Griffith ridge instead of hiding them behind the nearshore terrace. `city-detail` deterministically retains that fraction of repeated neighborhood lots, `terrain-samples` selects a 129/257/513-square terrain mesh, `city-light-scale` adjusts emitted light over the positive range 1e-9–20 (small values support night scenes with high print exposure), and `city-light-footprint` enlarges and spaces the window/lamp geometry for far-view pixel coverage. These are independent far-view shot controls; all defaults preserve the original Heard stage. The example values are an explicitly authored shot approximation: half-scale city geometry, quarter-scale relief, with lowland lifted to mean sea so it does not sit below the ocean. A finite coastal skirt extends from local Z −600m at mean sea to −1200m at 60m below it before geometry scale, overlapping the finite ocean edge under water. Inland terrain extends to local Z 7200m and X ±4500m. No infinite plane sits under the boat. These positions, boundaries, shoreline relationship, basin, and towers are not survey geometry, a DEM, or a faithful LA skyline. It is opt-in; ordinary sets do not receive a landscape. The current tower vocabulary is the existing 67 varied, stepped downtown towers, not the separate kilometer-scale arcology. Retain the source note with the render.
+`scale` changes the whole model. `relief-scale` adjusts ridge heights
+independently. `city-forward` and `ridge-forward` shift the city and ridge
+along the model’s local positive Z axis, which faces the heading.
+negative `city-forward` moves the buildings toward the sea.
+
+use `city-detail` to retain a fraction of repeated lots and
+`terrain-samples` to choose a square ridge grid of 129, 257 or 513 samples
+per side. `city-light-scale` sets emitted light. `city-light-footprint`
+changes how much of a distant pixel the window and lamp geometry occupies.
+
+this placement is authored scenery. the coastal skirt slopes below
+mean sea to meet a finite ocean. the city blocks and ridge are generated
+geometry, with no survey registration. the set placement omits the
+stage’s haze volume so the shot can use a clear ocean boundary.
+see [the builder](../scene/city/griffith.go) for bounds and defaults.

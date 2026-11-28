@@ -22,6 +22,7 @@ import (
 	"github.com/janearc/slayer/gpu"
 	"github.com/janearc/slayer/interfaces/file"
 	"github.com/janearc/slayer/maths"
+	rawframe "github.com/janearc/slayer/raw"
 	"github.com/janearc/slayer/render/colour"
 	"github.com/janearc/slayer/scene/footprint"
 	"github.com/janearc/slayer/scene/frame"
@@ -43,6 +44,7 @@ type record struct {
 	ImageSHA256         string                   `json:"image-sha256"`
 	Build               *debug.BuildInfo         `json:"go-build-info,omitempty"`
 	Sources             []sourcePlan             `json:"sources"`
+	Procedural          *proceduralPlan          `json:"procedural-ground,omitempty"`
 	HeightModel         string                   `json:"height-model"`
 	RenderOrigin        maths.Vec                `json:"render-origin-metres"`
 	Patches             []terrain.Patch          `json:"patches"`
@@ -169,6 +171,11 @@ func (session *sceneSession) draw(ctx context.Context, plan *plan, destination s
 			return record{}, fmt.Errorf("island: invalid coverage or depth at pixel %d", index)
 		}
 	}
+	if plan.Procedural != nil {
+		if err := rawframe.Write(filepath.Join(destination, "light.pfm"), picture); err != nil {
+			return record{}, err
+		}
+	}
 	imageHash, err := file.SequencePNGHash(filepath.Join(destination, "island.png"),
 		colour.Develop(picture, plan.Exposure))
 	if err != nil {
@@ -176,7 +183,7 @@ func (session *sceneSession) draw(ctx context.Context, plan *plan, destination s
 	}
 	receipt := record{TerrainTransition: prepared.Transition, Started: started.UTC(), Elapsed: time.Since(started), SettingsSHA256: configHash(replay),
 		BinarySHA256: session.binaryHash, ImageSHA256: hex.EncodeToString(imageHash[:]), Build: session.build,
-		Sources: plan.Sources, ModelSources: plan.modelSourceRecords(), HeightModel: plan.Model, RenderOrigin: origin.Origin(),
+		Sources: plan.Sources, Procedural: plan.Procedural, ModelSources: plan.modelSourceRecords(), HeightModel: plan.Model, RenderOrigin: origin.Origin(),
 		Patches: prepared.Patches, Samples: prepared.Samples, Limited: prepared.Limited, Profile: profile, Site: site}
 	if len(plan.modelSources) > 0 {
 		receipt.InputSettingsSHA256 = plan.hash
@@ -197,6 +204,15 @@ func (session *sceneSession) draw(ctx context.Context, plan *plan, destination s
 // All caches share one fixed retained-payload allowance rather than each
 // receiving the default full cache. Metadata and temporary tiles are separate.
 func (plan plan) openSources(ctx context.Context) (*island.Layers, []*terrain.Raster, error) {
+	if p := plan.Procedural; p != nil {
+		source, err := island.NewProceduralHeights(island.ProceduralGround{Seed: p.Seed, Radius: plan.Radius,
+			Base: p.Base, Height: p.Height, Wavelength: p.Wavelength, Fine: p.Fine})
+		if err != nil {
+			return nil, nil, err
+		}
+		layers, err := island.NewLayers(source)
+		return layers, nil, err
+	}
 	var layers []island.Heights
 	var opened []*terrain.Raster
 	for _, source := range plan.Sources {

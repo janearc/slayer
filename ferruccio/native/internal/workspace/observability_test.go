@@ -5,6 +5,7 @@ import (
 	"net/http/httptest"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/gogpu/gogpu"
 	"github.com/gogpu/ui/app"
@@ -25,6 +26,32 @@ func metricValue(t *testing.T, name string) float64 {
 		}
 	}
 	return 0
+}
+
+func TestWorkingMotionMetricsCountOnlyAcceptedFrames(t *testing.T) {
+	const motion = "ferruccio_working_motion_to_pixels_seconds"
+	const interval = "ferruccio_working_motion_frame_interval_seconds"
+	const coalesced = "ferruccio_working_motion_coalesced_total"
+	beforeMotion := metricValue(t, motion+"_count")
+	beforeSum := metricValue(t, motion+"_sum")
+	beforeInterval := metricValue(t, interval+"_count")
+	beforeCoalesced := metricValue(t, coalesced)
+	start := time.Now()
+	timing := workingTiming{}
+	timing.moved(start)
+	timing.moved(start.Add(20 * time.Millisecond))
+	timing.pixelsReady(start.Add(50 * time.Millisecond))
+	timing.pixelsReady(start.Add(60 * time.Millisecond))
+	timing.moved(start.Add(80 * time.Millisecond))
+	timing.pixelsReady(start.Add(100 * time.Millisecond))
+	if metricValue(t, motion+"_count")-beforeMotion != 2 ||
+		metricValue(t, interval+"_count")-beforeInterval != 1 ||
+		metricValue(t, coalesced)-beforeCoalesced != 1 {
+		t.Fatal("motion was not coalesced into two accepted frames")
+	}
+	if delta := metricValue(t, motion+"_sum") - beforeSum; delta < .04999 || delta > .05001 {
+		t.Fatalf("motion used a superseded timestamp: %g seconds", delta)
+	}
 }
 
 func TestWorkspaceMetricsRecordInitializationAndTick(t *testing.T) {

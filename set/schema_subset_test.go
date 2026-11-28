@@ -188,9 +188,11 @@ var v2Also = map[string][]string{
 // v2Only is, for a block of the reader named the same way, the keys in
 // that very block that only schema version 2 has: version 1 does not take
 // them, and version 2's stand says a floating stand's least water and the
-// steepest ground a stand grows on.
+// steepest ground a stand grows on, and a generated body may have a
+// flowing appearance.
 var v2Only = map[string][]string{
-	"world.go/stands/within": {"least-water", "steepest"},
+	"world.go/stands/within":  {"least-water", "steepest"},
+	"pieces.go/bodies/aurora": {"generate", "flowing"},
 }
 
 // v2Unread is, for a block of the reader named the same way, the keys
@@ -399,6 +401,9 @@ var v2Blocks = []keyBlock{
 	{"space_world.go", "orbitStep", "inclination", []string{"$defs", "orbit"}},
 	{"space_world.go", "attitudeStep", "shield", []string{"$defs", "attitude"}},
 	{"space_world.go", "instrumentStep", "pupil", []string{"$defs", "instrument-eye"}},
+	{"generated.go", "generateKeys", "seed", []string{"$defs", "generated-planet"}},
+	{"generated.go", "generateKeys", "metal", []string{"$defs", "generated-planet", "properties", "makeup"}},
+	{"generated.go", "generateKeys", "luminosity", []string{"$defs", "generated-planet", "properties", "sun"}},
 }
 
 // keyBlock is one block of keys the reader reads: where in the reader its

@@ -1,0 +1,6 @@
+"$schema": https://github.com/janearc/slayer/schemas/job-v1.json
+scene: {set: amber-rebase-global.yaml}
+renderer: gpu-native
+camera: {name: amber}
+film: {width: 640, height: 400, rays: 1, wide: 60}
+print: {knee: 0.8, top: 4, stops: -18}

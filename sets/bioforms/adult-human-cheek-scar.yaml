@@ -1,0 +1,63 @@
+# Matched left-cheek views with and without the scar rake.
+"$schema": https://github.com/janearc/slayer/schemas/ecosystem-v2.json
+scene:
+  name: Adult human, healed scratches on the left cheek
+  seed: 27
+  setting: space
+  light: none
+  set:
+    things:
+      marked:
+        kind: adult-human-cheek-scar
+        seed: 27
+        position:
+          east: {value: 0, unit: m}
+          north: {value: 0, unit: m}
+          up: {value: 0, unit: m}
+      control:
+        kind: adult-human-details
+        seed: 27
+        position:
+          east: {value: 3, unit: m}
+          north: {value: 0, unit: m}
+          up: {value: 0, unit: m}
+  film:
+    width: 480
+    height: 540
+    rays: 4
+    exposure: 1
+    wide: 29
+  cameras:
+    marked:
+      title: Left cheek with healed scratches
+      location: {at: [0.258, -0.330, 1.570]}
+      orientation: {look_at: [0.034, -0.050, 1.551]}
+    control:
+      title: Left cheek without the scratch layer
+      location: {at: [3.258, -0.330, 1.570]}
+      orientation: {look_at: [3.034, -0.050, 1.551]}
+  world:
+    unit: 1
+    sky:
+      horizon: {srgb_linear: [0.092, 0.104, 0.118]}
+      zenith: {srgb_linear: [0.052, 0.060, 0.070]}
+      ground: {srgb_linear: [0.070, 0.081, 0.091]}
+      source: eye
+    suns:
+      key:
+        toward: [0.54, -0.80, 0.50]
+        colour: {srgb_linear: [1.26, 1.22, 1.18]}
+        source: eye
+      fill:
+        toward: [-0.44, -0.46, 0.35]
+        colour: {srgb_linear: [0.42, 0.44, 0.48]}
+        source: eye
+      rim:
+        toward: [0.26, 0.84, 0.58]
+        colour: {srgb_linear: [0.53, 0.55, 0.58]}
+        source: eye
+    floods:
+      room:
+        colour: {srgb_linear: [0.11, 0.12, 0.13]}
+        strength: 1
+        source: eye

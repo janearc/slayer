@@ -36,6 +36,10 @@ type Detail struct {
 	// in degrees. Both zero preserves flat shading. A full source halo is
 	// required; these steps are authored sampling choices, not error bounds.
 	NormalLongitude, NormalLatitude float64
+	// MeshFootprintNormals uses the coarsest selected cell touching each
+	// shared vertex as a minimum source-normal stencil. It is a view-varying
+	// shading approximation, not a bound on disagreement with face normals.
+	MeshFootprintNormals bool
 }
 
 // Terrain retains an immutable frame, source and region across camera views.
@@ -70,6 +74,9 @@ func New(sphere frame.Sphere, from Heights, region Region, detail Detail) (*Terr
 		detail.MinimumHeight > detail.MaximumHeight ||
 		sphere.Radius().InMetres()+detail.MinimumHeight <= 0 {
 		return nil, fmt.Errorf("island: invalid terrain detail or height envelope")
+	}
+	if detail.MeshFootprintNormals && detail.NormalLongitude == 0 {
+		return nil, fmt.Errorf("island: mesh-footprint normals need a positive minimum normal stencil")
 	}
 	span := (detail.Side - 1) << detail.Depth
 	return &Terrain{frame: sphere, from: from, region: region, detail: detail,
@@ -150,6 +157,24 @@ func (ground *Terrain) prepareSelection(ctx context.Context, selection terrain.S
 	if ground.detail.NormalLongitude > 0 {
 		vertices.normals = make(map[lattice]maths.Vec)
 	}
+	if ground.detail.MeshFootprintNormals {
+		vertices.normalSteps = make(map[lattice]int)
+		for _, patch := range selection.Patches {
+			if err := ctx.Err(); err != nil {
+				return Prepared{}, err
+			}
+			step := (patch.MaxColumn - patch.MinColumn) / (ground.detail.Side - 1)
+			for row := range ground.detail.Side {
+				for column := range ground.detail.Side {
+					key := lattice{patch.MinColumn + column*step, patch.MinRow + row*step}
+					if _, exists := vertices.normalSteps[key]; !exists && len(vertices.normalSteps) >= ground.detail.Points {
+						return Prepared{}, fmt.Errorf("island: normal footprint budget exhausted")
+					}
+					vertices.normalSteps[key] = max(vertices.normalSteps[key], step)
+				}
+			}
+		}
+	}
 	result := Prepared{Patches: selection.Patches, Origin: origin.Origin(), Limited: selection.Limited}
 	for _, patch := range selection.Patches {
 		if err := ctx.Err(); err != nil {
@@ -223,6 +248,7 @@ type vertexBook struct {
 	points        map[lattice]maths.Vec
 	edges         edgeIndex
 	normals       map[lattice]maths.Vec
+	normalSteps   map[lattice]int
 	normalQueries int
 }
 

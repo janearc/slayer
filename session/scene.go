@@ -24,6 +24,7 @@ import (
 	"github.com/janearc/slayer/scene/thing"
 	"github.com/janearc/slayer/set"
 	"github.com/janearc/slayer/sources"
+	"github.com/janearc/slayer/stage"
 	"github.com/janearc/slayer/terrain"
 	"github.com/janearc/slayer/trace"
 )
@@ -89,6 +90,7 @@ type staging struct {
 	have           stock
 	made           tally
 	places         map[string]maths.Vec
+	detailAnchors  map[string]set.Thing
 	radii          map[string]float64
 	recipes        set.Set
 	stood          []standing
@@ -219,6 +221,9 @@ func staged(given asked) (*thing.World, tally, asked, error) {
 	if err != nil {
 		return nil, tally{}, given, err
 	}
+	if given.detail != nil {
+		return stagedDetail(read, given)
+	}
 	if worldOnly(read) {
 		return stagedWorld(read, given).results()
 	}
@@ -273,6 +278,15 @@ func staged(given asked) (*thing.World, tally, asked, error) {
 		return nil, tally{}, given, err
 	}
 	stage.given.eye = &eye
+	lines, err := stage.starred(read, stage.given, eye.Origin,
+		stage.given.exposure)
+	if err != nil {
+		return nil, tally{}, given, err
+	}
+	stage.given.departures = append(stage.given.departures, lines...)
+	if err := stage.flowingBodies(read, eye.Origin); err != nil {
+		return nil, tally{}, given, err
+	}
 	if stage.given.overlay, err = stage.overlaid(read); err != nil {
 		return nil, tally{}, given, err
 	}
@@ -648,6 +662,15 @@ func namedShot(read set.Set, name string, where set.Where) (set.Shot,
 // where is where a named thing stands, for the set's cameras.
 func (stage *staging) where(name string) (maths.Vec, bool) {
 	at, found := stage.places[name]
+	if !found {
+		if placed, available := stage.detailAnchors[name]; available {
+			origin, err := stage.thingPlace(placed)
+			if err == nil {
+				stage.places[name] = origin
+				return origin, true
+			}
+		}
+	}
 	return at, found
 }
 
@@ -719,56 +742,47 @@ func (stage *staging) light(read set.Set) error {
 // skyward is the way to a body at an azimuth and an altitude, in
 // degrees: x east, y up, and north toward minus z.
 func skyward(azimuth, altitude float64) maths.Vec {
-	round, up := azimuth*maths.Degree, altitude*maths.Degree
-	return maths.V(math.Sin(round)*math.Cos(up), math.Sin(up),
-		-math.Cos(round)*math.Cos(up))
+	return stage.Skyward(azimuth, altitude)
 }
 
 // moonlit is the full moon where the set puts it: its face, glowing as
 // its geometric albedo says, and its light from its way, each through
 // the air from the ground's lowest height; and its way. a moon at or
 // below the horizon is refused.
-func (stage *staging) moonlit(moon set.Moon) (maths.Vec, error) {
-	azimuth, altitude := moon.Where()
-	if !(altitude > 0) {
+func (making *staging) moonlit(moon set.Moon) (maths.Vec, error) {
+	way, rise, above := stage.Moonward(moon)
+	if !above {
 		return maths.Vec{}, fmt.Errorf("%s: the moon is not above the "+
-			"horizon", stage.given.set)
+			"horizon", making.given.set)
 	}
-	way := skyward(azimuth, altitude)
-	height := measure.Metres(stage.lowest)
-	rise, exposure := measure.Radians(altitude*maths.Degree),
-		stage.given.exposure
+	height, exposure := measure.Metres(making.lowest), making.given.exposure
 	if moon.Disc() {
 		face, err := moonlight.Disc().Through(height, rise)
 		if err != nil {
 			return way, err
 		}
 		ball, err := globe.New(moonlight.Moon().Radius().InMetres() *
-			stage.given.moonScale)
+			making.given.moonScale)
 		if err != nil {
 			return way, err
 		}
 		far := moonlight.Moon().Distance().InMetres()
-		material, err := stage.faced(moon, way, face.Picture(exposure))
+		material, err := making.faced(moon, way, face.Picture(exposure))
 		if err != nil {
 			return way, err
 		}
 		// The visual disc must not block its paired distant light.
-		stage.world.Add(thing.Thing{Shape: ball, Material: material,
+		making.world.Add(thing.Thing{Shape: ball, Material: material,
 			Attrs:  thing.Attrs{Clear: true},
 			Motion: thing.Still(maths.Subspace{Origin: way.Scale(far)})})
 	}
-	arriving, err := moonlight.Full().Through(height, rise)
+	lamp, err := stage.DirectMoon(way, height, rise, exposure)
 	if err != nil {
 		return way, err
 	}
-	lamp, err := emit.NewDistant(way, arriving.Picture(exposure))
-	if err != nil {
-		return way, err
-	}
-	stage.lunarSource = &stagedDistantSource{index: len(stage.world.Lamps), lamp: lamp}
-	stage.world.Lamp(lamp)
-	stage.made.lamps++
+	making.lunarSource = &stagedDistantSource{index: len(making.world.Lamps), lamp: lamp}
+	making.world.AuthoredLamp(lamp, thing.AuthorRef{Collection: "scene", Name: "moon"})
+	making.made.lamps++
 	return way, nil
 }
 
@@ -927,7 +941,7 @@ type pinnedAsset struct {
 func pinnedAssetAt(key, file, near, flag string) (*pinnedAsset, error) {
 	shelf, err := sources.Here()
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("dataset %q requires a source shelf: %w", key, err)
 	}
 	listed, err := nearest(near, listFile)
 	if err != nil {
@@ -1061,27 +1075,9 @@ func (stage *staging) stand(read set.Set) error {
 		if stage.trialUnseen(each.Name()) {
 			continue
 		}
-		if _, scaled := each.Scale(); scaled && (stage.villagey(each) || each.Kind() == fireKind || each.Alight() || strings.HasPrefix(each.Name(), "rig ")) {
-			return fmt.Errorf("%s: scale is not supported for terrain-founded villages, fire, burning things or special stage rigs", each.Name())
-		}
-		place, err := stage.thingPlace(each)
-		if err != nil {
+		if err := stage.stageThing(each, uint64(i)); err != nil {
 			return err
 		}
-		stage.places[each.Name()] = place
-		stage.note(each.Name(), stage.reportedKind(each.Kind(), each.Recipe()), place)
-		start := len(stage.world.Things)
-		stood, err := stage.groundedThing(each, uint64(i), place)
-		if !stood && err == nil {
-			scale, _ := each.Scale()
-			_, err = stage.putRecipeFacingScaled(each.Kind(), each.Recipe(),
-				each.Complexity(), each.Seed(), uint64(i), place,
-				each.Alight(), each.Name(), nil, scale)
-		}
-		if err != nil {
-			return fmt.Errorf("%s: %w", each.Name(), err)
-		}
-		stage.recordThingAuthor(start, each.Name())
 	}
 	stage.warmNote()
 	stage.warm = nil
@@ -1477,4 +1473,29 @@ func (stage *staging) add(one kept, kind string, at maths.Subspace,
 	flames, err := alight(stage.world, one, at, seed, stage.given)
 	stage.made.lamps += flames
 	return err
+}
+
+// stageThing manufactures one placement using its original authored index.
+func (stage *staging) stageThing(each set.Thing, index uint64) error {
+	if _, scaled := each.Scale(); scaled && (stage.villagey(each) || each.Kind() == fireKind || each.Alight() || strings.HasPrefix(each.Name(), "rig ")) {
+		return fmt.Errorf("%s: scale is not supported for terrain-founded villages, fire, burning things or special stage rigs", each.Name())
+	}
+	place, err := stage.thingPlace(each)
+	if err != nil {
+		return err
+	}
+	stage.places[each.Name()] = place
+	stage.note(each.Name(), stage.reportedKind(each.Kind(), each.Recipe()), place)
+	start := len(stage.world.Things)
+	stood, err := stage.groundedThing(each, index, place)
+	if !stood && err == nil {
+		scale, _ := each.Scale()
+		_, err = stage.putRecipeFacingScaled(each.Kind(), each.Recipe(),
+			each.Complexity(), each.Seed(), index, place, each.Alight(), each.Name(), nil, scale)
+	}
+	if err != nil {
+		return fmt.Errorf("%s: %w", each.Name(), err)
+	}
+	stage.recordThingAuthor(start, each.Name())
+	return nil
 }

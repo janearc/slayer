@@ -1,23 +1,21 @@
 # Geometry page packing trial
 
-This is an experimental CPU packing foundation. `visitGeometryPages`
-receives the encoder's pending mesh trees, validates the page budget and
-all global index limits, and visits packed pages in original mesh order.
-Pages preserve global face, normal and node offsets. It preflights input
-before emitting and refuses an oversized mesh; subdivision is not yet
-implemented.
+the draw-tagged CPU experiment `visitGeometryPages` validates the
+mesh trees, page budget and index limits before visiting packed
+pages in original mesh order. pages preserve global face, normal
+and node offsets. an oversized mesh is refused.
 
 The byte budget applies to the packed page data, not to the
 process, source trees, staging arrays, GPU acceleration or ray queues.
 
-The page visitor is not wired into the renderer. A page cannot be sent
-independently to the existing trace kernel: the renderer and native
-acceleration plan still expect global scene data. This is not a working
-paged renderer, image-decomposition implementation, or a 2 GiB guarantee.
-The page visitor's pending source trees are themselves held in memory.
+the page visitor is test-only. the renderer and its native acceleration
+plan still require global scene data. pending source trees remain in memory.
 
-Focused `go test -tags=draw ./gpu -run '^TestGeometryPage' -count=1`
-passes through the Game tests lane. It compares reassembled packed buffers
-and native host mappings to the whole encoder for branched and smooth
-meshes, shared groups and repeated placements, and tests budget boundaries,
-preflight and visitor errors. No GPU render or full-suite test was run.
+the focused CPU tests compare reassembled buffers and native host
+mappings against whole-scene encoding, for branched and smooth
+meshes, shared groups and repeated placements. they also check page
+budgets and visitor errors.
+
+```sh
+game test -- -tags=draw -count=1 ./gpu -run '^TestGeometryPage'
+```

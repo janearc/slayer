@@ -25,10 +25,10 @@ states.
 |---|---|---|---|
 | none (exact) | nothing: the reference | anything measured, catalogued or judged; anything not said to be otherwise | |
 | `vibes` | turns on every shortcut below | films to watch, going to a video site where they are compressed | a measurement, a smoke, the catalogue, a picture cited as evidence |
-| `fastlight` | turns on the light shortcuts, `lamp-store` and `sky-looks` | the same, for scenes with mist or smoke | the same |
+| `fastlight` | requests `lamp-store`, `sky-looks` and `restir` | films that can use approximate lighting | the same |
 | `lamp-store` | mist and smoke are lit from a store of each lamp's light; a shadow cast into mist is as soft as a cell (12.5 m on the cloud sea); about 2 percent of the picture's light differs | a faster frame of mist or smoke under a few lamps | a picture whose mist shadows are the subject; more than sixteen lamps (refused) |
 | `sky-looks` | the sky's sixteen looks from a surface point are shared among a pixel's rays; sky-lit shade is a little rougher within a pixel; no change at one ray a pixel | a faster frame at four rays a pixel or more | one ray a pixel (nothing changes); without `lamp-store` (refused) |
-| `restir` | direct light from many lamps is found by reservoir resampling over a tree of the lamps: a few candidates a pixel, shared with the last frame and with neighbours, one shadow ray. Noisier, biased near shadow edges, and a lamp that moves is followed late (see [restir.md](restir.md)) | a film of a crowd of lamps, on the gpu, through a pinhole | a measurement; mist or smoke under the lamps; a flood, sun or beam (refused) |
+| `restir` | direct light from many lamps is found by reservoir resampling over a tree of the lamps: a few candidates a pixel, shared with the last frame and with neighbours, one shadow ray. Noisier, biased near shadow edges, and a lamp that moves is followed late (see [restir.md](restir.md)) | a film of a crowd of lamps, on the gpu, through a pinhole | a measurement; mist or smoke under the lamps; a flood, sun, beam or polar lamp (refused) |
 | `fantasy` (a set's block) | the scene says values the physics does not; its keys are below | pictures that are made to be looked at | a claim about what a place looks like; anything where the measured value is wanted |
 | science workflow (no single switch) | adds independent checks and replay where supported | claiming a picture is right | combining with any shortcut (refused) |
 
@@ -41,9 +41,8 @@ is never taken for one drawn without.
 
 ## vibes
 
-`vibes: on` is the flag for every flag. Today it turns on `lamp-store`
-and `sky-looks`, through `fastlight`. It exists so that a film to watch is
-one word.
+`vibes: on` requests each lighting shortcut through the same defaults
+as `fastlight`.
 
 It does not make anything else cheaper: `vibes` with `fastlight:
 off` disables these light shortcuts unless an individual setting overrides
@@ -64,10 +63,11 @@ scene, `volume-lighting: cached` with `lamp-store`, and a proof. It may be
 said in a job, in a set under `scene`, and on the door as `--fastlight
 on|off`.
 
-A shortcut is decided by the first that says anything: its own word under
-`shortcuts`, then `fastlight`, then `vibes`; each is read from the command
-line, then the job, then the set. So `fastlight: on` with `lamp-store:
-off` draws exact mist light.
+resolve each shortcut by its own setting, then `fastlight`, then
+`vibes`. for each of those settings, the command line takes precedence
+over the job and set. `restir` takes priority when enabled, and the
+frame skips the lamp store and shared sky looks. for mist or smoke
+with fast light, set `shortcuts: {restir: off}`.
 
 ## lamp-store
 
@@ -93,6 +93,13 @@ four, at sixteen each takes one.
 
 It needs `lamp-store`, since the two are drawn by one mode of the kernel.
 
+## restir
+
+use `shortcuts: {restir: on}` for direct light from many positioned
+lamps. it requires native Metal queries, a pinhole and a closed
+shutter. media and cached volume lighting are unsupported. see
+[the ReSTIR design](restir.md) for the estimator and its limits.
+
 ## fantasy
 
 A set's `fantasy` block says what the scene states that the physics does
@@ -111,8 +118,7 @@ There is no switch with this name. It is three things, used together:
 
 - `fermat` selects 64 pixels from a hash of a raw image's bytes and
   replays their computation on the exact tracer; each must match bit for
-  bit. Run it with `hillside -prove` and the original rendering
-  parameters.
+  bit. use `slayer prove JOB RAW` or `hillside -prove` where supported.
 - the harness's checks (`burning-trousers`), which compare the renderer
   with closed-form physics and independent expectations;
 - a signed binary. (Nothing in the tree makes or checks one today; it is
@@ -126,7 +132,7 @@ tracer's and would not match.
 
 | Where | How |
 |---|---|
-| the command line | `slayer draw JOB --vibes on --lamp-store off` |
-| a job | `vibes: on`, `fastlight: on`, `shortcuts: {lamp-store: off}` |
+| the command line | `slayer draw JOB --fastlight on --restir off` |
+| a job | `fastlight: on`, `shortcuts: {restir: off}` |
 | a set | `vibes` and `fastlight` under `scene`; no shortcuts |
 | the schema | each flag's line is its documentation: the editor shows it on hover and `slayer --agent-help` lists it; a test holds that every flag in the schema is in `--agent-help` |

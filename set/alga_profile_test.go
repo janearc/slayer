@@ -1,6 +1,7 @@
 package set
 
 import (
+	"crypto/sha256"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -99,6 +100,32 @@ func TestAuthoredKelpScenesUseAlgaRecipes(t *testing.T) {
 			}
 			if _, err := row.Construction(); err != nil {
 				t.Fatal(err)
+			}
+		})
+	}
+}
+
+func TestBuiltinKelpRecipeUsesEmbeddedBookAfterRelocation(t *testing.T) {
+	book, err := os.ReadFile("../manufacture/algae/kelp/kelp.yaml")
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, name := range []string{"kelp-plant.yaml", "kelp-stand.yaml", "kelp-plant-water.yaml"} {
+		t.Run(name, func(t *testing.T) {
+			source, err := os.ReadFile(filepath.Join("..", "sets", name))
+			if err != nil {
+				t.Fatal(err)
+			}
+			read, err := Read(filepath.Join(t.TempDir(), name), source)
+			if err != nil {
+				t.Fatal(err)
+			}
+			external, err := read.ProfileSources()
+			if err != nil || len(external) != 0 {
+				t.Fatalf("relocated example requires external books: %v, %v", external, err)
+			}
+			if got := read.BuiltinProfileSources()["alga:kelp"]; got != sha256.Sum256(book) {
+				t.Fatalf("embedded alga provenance = %x, want the exact producer book digest", got)
 			}
 		})
 	}

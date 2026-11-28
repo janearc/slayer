@@ -1,0 +1,47 @@
+# The face looks south. Coordinates are east, north and up.
+"$schema": https://github.com/janearc/slayer/schemas/ecosystem-v2.json
+scene:
+  name: Fine hair on cheeks and dorsal digits
+  seed: 27
+  setting: space
+  light: none
+  set:
+    things:
+      adult:
+        kind: adult-human-vellus-study
+        seed: 27
+        heading: {value: 0, unit: deg}
+        position:
+          east: {value: 0, unit: m}
+          north: {value: 0, unit: m}
+          up: {value: 0, unit: m}
+  film: {width: 640, height: 480, rays: 4, exposure: 1, wide: 26}
+  cameras:
+    cheek:
+      title: Left cheek with raking light across the skin
+      location: {at: [0.173, -0.199, 1.565]}
+      orientation: {look_at: [0.048, -0.070, 1.565]}
+    fingers:
+      title: Left dorsal fingers and knuckles
+      location: {at: [0.438, -0.103, 0.741]}
+      orientation: {look_at: [0.255, 0, 0.730]}
+    toes:
+      title: Top of the left toes and their nail margins
+      location: {at: [0.202, -0.281, 0.146]}
+      orientation: {look_at: [0.098, -0.147, 0.022]}
+  world:
+    unit: 1
+    sky:
+      horizon: {srgb_linear: [0.094, 0.095, 0.098]}
+      zenith: {srgb_linear: [0.060, 0.065, 0.071]}
+      ground: {srgb_linear: [0.044, 0.041, 0.037]}
+      source: eye
+    suns:
+      rake:
+        toward: [0.14, 0.41, 0.90]
+        colour: {srgb_linear: [1.21, 1.13, 1.02]}
+        source: eye
+      fill:
+        toward: [0.61, -0.75, 0.16]
+        colour: {srgb_linear: [0.36, 0.37, 0.40]}
+        source: eye

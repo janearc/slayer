@@ -207,8 +207,8 @@ func (seen *crowd) blocked(ray maths.Ray, far float64) bool {
 }
 
 // blockedExcept is blocked while ignoring one exact staged boundary. It is
-// used only for the authored ocean mean-plane source path; every other opaque
-// object is still tested on both sides of the mean interface.
+// used for the ocean mean-plane source and to check whether unrelated
+// shadow-casting geometry crosses a tissue column.
 func (seen *crowd) blockedExcept(ray maths.Ray, far float64,
 	skip *thing.Thing) bool {
 	far = math.Min(far, nowhere)

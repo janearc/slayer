@@ -5,13 +5,14 @@ and where its numbers came from. This page says what the report counts,
 how to read it, and what it cannot tell you.
 
 ```sh
-game run maturity
-go run ./tools/maturity -family spacecraft
-go run ./tools/maturity -numbers hubble webb
+game run maturity -- -family spacecraft
+game run maturity -- -numbers hubble webb
 ```
 
-In code it is `manufacture.MaturityReport`, one `Maturity` a kind, in
-alphabetical order.
+[`manufacture.MaturityReport`](../../../manufacture/maturity.go) provides
+the fields below, one row per kind, in alphabetical order. use the
+[catalogue inventory](model-maturity.md) for component counts and source
+notes, including profile-backed catalogue entries.
 
 ## What each column is
 
@@ -30,7 +31,7 @@ alphabetical order.
 | picked | named numbers it reads that someone chose |
 
 A kind is built of parts, of meshes, or of both, so one of those two
-columns is often nought. `-numbers` lists the measured and picked names
+columns is often zero. the report also retains the measured and picked names
 under each kind.
 
 ## Parts and pieces

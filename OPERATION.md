@@ -120,6 +120,8 @@ clipping each colour at white.
 ## Output formats
 
 - `interfaces/file` writes PNG images.
+- `interfaces/movie` writes H.264 MP4 with optional AAC audio through
+  AVFoundation on macOS with cgo.
 - `raw` reads and writes linear RGB in PFM files. `slayer develop` can
   adjust raw frames or sum several into a long exposure.
 - `interfaces/terminal` represents each terminal cell as six subpixels in
@@ -148,53 +150,40 @@ numbers from memory.
 
 ## Running Slayer
 
-`slayer` is the front door. Build it with `game build` from the checkout
-root, then run `game run slayer -- VERB ARGS`, or run `bin/slayer`. Images
-go to `out/` unless a flag or the job says another place. `slayer --help`
-lists the verbs; `slayer --agent-help` gives the same verb map for an agent. A verb's
-`--help` lists its own arguments and flags.
+build with `game build` from the checkout root, then run
+`game run slayer -- VERB ARGS` or call `bin/slayer` directly.
+`slayer --help` lists the verbs. each verb has its own `--help`.
 
 | Verb | Does |
 |---|---|
 | `draw JOB` | draws a job, a sequence plan or a set file: frames, a movie with its sound, titles, a stock |
+| `compare-regions SET` | compares candidate samples against pinned references for named regions |
 | `list [HEADING]` | says what there is: scenes, smokes, presets, stocks, tunes, voicings, library, kinds |
 | `assess FILE` | says whether a file will draw, drawing nothing; `--judge` judges a set, `--smokes` the smokes, `--census PATH` writes the geometry it stages |
 | `develop JOB RAW...` | develops light already drawn through a job's print or stock |
+| `prove JOB RAW` | checks selected pixels of a CPU raw against the exact tracer |
 | `tunes DIR` | serves a tune library's voting page, or checks, films or pages its tunes |
 | `cache` | says what the disk caches hold; `--clear [KIND]` empties them |
 | `watch JOB` | draws a job live in this terminal as it is saved |
 | `edit [JOB]` | lays out watch, the editor and the agent console in tmux |
 | `schema` | prints the job schema, or with `--where` the path of its copy |
 
-Bare `slayer` at a terminal is `edit`. `slayer render FILE`, which draws a
-whole set file as `hillside` does, is still read ahead of the door in its
-own flags. The older `set`, `smokes` and `develop` commands are gone;
-`slayer set` and `slayer smokes` print where they went.
+bare `slayer` at a terminal opens the editor. for a set or numbered
+smoke comparison, use `slayer assess FILE --judge` or
+`slayer assess --smokes`.
 
-A job is a YAML document that says which scene, at what size and rays,
-with which lens, print, sound and titles, and what comes out
-([job/README.md](job/README.md); the schema is `slayer schema`).
+a job is a [YAML document](job/README.md) that names the scene and
+sets the camera, sampling, development and outputs. `slayer schema`
+prints the schema.
 
-The flags `--out`, `--width`, `--height`, `--rays`, `--at`, `--camera`,
-`--renderer`, `--quality` and the four switches below stand over the
-job. `--dry-run` prints the job in its canonical form and each file it
-would write, and draws nothing.
+`slayer draw --dry-run` prints the resolved job and planned outputs.
+use `--rays` to set samples per side or `--spp` for a total sample
+count on supported stills.
 
-To make a short on a team's renders home:
-
-```sh
-SLAYER_RENDERS=~/renders SLAYER_TEAM=me slayer draw doc/examples/jobs/first-film.yaml
-```
-
-A still goes into `frames/DATE-NAME/` and a film into `animations/DATE-
-NAME/` under the renders home, the job file is copied beside it, and the
-job's `outputs.note` goes into the team's notes file. Control-c stops
-between frames. A second run resumes: frames drawn under the same job,
-the files it reads and the build are kept, and the rest are drawn.
-
-A film that writes a movie and no frames removes its frames once the
-movie is written; `--keep-frames` keeps them. The door's
-[README](door/README.md) has where things go and what a resume checks.
+see [example jobs](doc/examples/jobs/README.md) for a short with sound
+and [output and resume](door/README.md#resume) for retained frames. on
+a shared machine, submit application renders through
+[Azazel](doc/azazel.md#submit-work).
 
 The older runs still work for the scene commands:
 
@@ -216,20 +205,11 @@ says so in the picture's record. Detail is in
 [doc/flags.md](doc/flags.md).
 
 - `quality` is how much of a frame is drawn: `exact` (the default) or
-  `preview`. It is not about how light is found.
-- `vibes: on` is for films to watch and not to measure: it turns on
-  every shortcut. `fastlight: on` turns on the light shortcuts. A
-  shortcut is one named approximation, `on` or `off`: `lamp-store` (mist
-  and smoke lit from a store of each lamp's light) and `sky-looks` (the
-  sky's sixteen looks shared among a pixel's rays).
-
-  Each is a flag of the job, of the set under `scene` (the first two
-  only), and of the door (`--vibes`, `--fastlight`, `--lamp-store`,
-  `--sky-looks`). The first that says anything decides: the shortcut's
-  own word, then `fastlight`, then `vibes`; each read from the command
-  line, then the job, then the set. GPU only.
-
-  Measurements are in [doc/fast-light.md](doc/fast-light.md).
+  `preview`.
+- `vibes: on` requests the GPU lighting shortcuts. choose
+  `lamp-store`, `sky-looks` or
+  `restir` individually to select a specific approximation.
+  [Rendering flags](doc/flags.md) explains how they combine.
 - `fantasy` is a block in a set that states what the scene says and the
   physics does not (its keys are `lake`, `lakeglow`, `moon`, `moonglow`,
   `giants`, `close` and `closeglow`; see `session/fantasy.go`). Hillside

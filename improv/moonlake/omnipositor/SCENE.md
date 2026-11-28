@@ -19,12 +19,12 @@ plate-every: 48
 
 ```sh
 game build omnipositor-binary
-game lane gpu -- game run omnipositor -- scene composite.yaml --out out/summit-composite --movie
-game lane gpu -- game run omnipositor -- scene composite.yaml --out out/summit-reference --reference --movie
+bin/omnipositor scene composite.yaml --out out/summit-composite --dry-run
 ```
 
-Each output directory must be new, with an existing parent. Both commands
-write numbered PNGs, a receipt with frame times and hashes, and, if requested,
+For a render, submit the producer and its explicit inputs through
+[Azazel](../../../doc/azazel.md). Use distinct new output directories for
+the composite and the reference control. Both write numbered PNGs, a receipt with frame times and hashes, and, if requested,
 a silent H.264 movie. `--raw` also retains linear PFM frames. `--dry-run`
 checks the plan and job without staging or drawing. Both paths use the same
 scene clock and Metal developer. Frame ranges are half-open job frame indices.

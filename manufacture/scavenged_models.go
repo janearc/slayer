@@ -1,10 +1,54 @@
 package manufacture
 
 import (
+	_ "embed"
 	"fmt"
-	avian "github.com/janearc/slayer/manufacture/animals/vertebrates/dinosaurs/theropods/birds"
+	"strings"
 	"sync"
+
+	avian "github.com/janearc/slayer/manufacture/animals/vertebrates/dinosaurs/theropods/birds"
 )
+
+// The default cluster and superblock draw by index from the sorted kinds
+// captured at 9fabd006, excluding ClusterKind. Changing their order or
+// membership changes the parts drawn from existing seeds.
+//
+//go:embed scavenged-candidates.txt
+var scavengedCandidatesRaw string
+
+var scavengedCandidates = sync.OnceValues(func() ([]string, error) {
+	models, err := scavengedModels()
+	if err != nil {
+		return nil, err
+	}
+	names := strings.Fields(scavengedCandidatesRaw)
+	if len(names) == 0 {
+		return nil, fmt.Errorf("manufacture: no historical cluster candidates")
+	}
+	if err := checkScavengedCandidates(names, kindNames(), models); err != nil {
+		return nil, err
+	}
+	return names, nil
+})
+
+func checkScavengedCandidates(names, public []string, models map[string]func() (Kind, error)) error {
+	publicNames := make(map[string]bool, len(public))
+	for _, name := range public {
+		if _, exists := models[name]; exists {
+			return fmt.Errorf("manufacture: cluster candidate %q is also a public kind", name)
+		}
+		publicNames[name] = true
+	}
+	for _, name := range names {
+		if name == ClusterKind {
+			return fmt.Errorf("manufacture: a cluster is not a part of a cluster")
+		}
+		if _, private := models[name]; !private && !publicNames[name] {
+			return fmt.Errorf("manufacture: historical cluster candidate %q is unavailable", name)
+		}
+	}
+	return nil
+}
 
 // Retired catalogue labels remain private to the default cluster's seeded
 // draw. They are never offered as factory kinds or accepted as asked parts.

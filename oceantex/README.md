@@ -28,8 +28,8 @@ its d65 and black body, its srgb.
     })
 
 The original phone demo wrote shore, cliff and overhead views, sea states,
-top-down tiles and water colour strips. It is not installed as a Slayer
-command yet; that entry point will use the existing Game demo dispatcher.
+top-down tiles and water colour strips. The API above is the library
+entry point in this checkout.
 
 oceantex is a package of slayer: `github.com/janearc/slayer/oceantex`.
 

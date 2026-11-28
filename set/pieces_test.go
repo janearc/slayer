@@ -656,8 +656,8 @@ func TestABuiltWorldsMistakesAreRefused(t *testing.T) {
 		{"        toward: [0.5762, -0.8163, -0.04]\n", "",
 			"a sun says [toward colour source], all of them"},
 		{"    floods:", "    flood:",
-			"flood is not a key here; this block takes [beams bodies boxes " +
-				"channels fizzes floods griffith-basin imports lamp-fields lamps " +
+			"flood is not a key here; this block takes [beams binaries bodies boxes " +
+				"channels cloud-decks fizzes floods griffith-basin imports lamp-fields lamps " +
 				"materials motions ocean sky spheres spots suns unit " +
 				"vapor-cavities " +
 				"weathering wisps]"},

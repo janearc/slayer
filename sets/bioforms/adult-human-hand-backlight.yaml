@@ -1,0 +1,42 @@
+# Neutral left hand viewed from outside the arm. The hand light sits inboard.
+"$schema": https://github.com/janearc/slayer/schemas/ecosystem-v2.json
+scene:
+  name: Native adult hand under a local backlight
+  seed: 27
+  setting: space
+  light: none
+  set:
+    things:
+      adult:
+        kind: adult-human-thin-skin
+        seed: 27
+        position:
+          east: {value: 0, unit: m}
+          north: {value: 0, unit: m}
+          up: {value: 0, unit: m}
+  film:
+    width: 480
+    height: 600
+    rays: 4
+    wide: 32
+    exposure: 1
+  cameras:
+    left-hand:
+      location: {at: [0.53, -0.030, 0.744]}
+      orientation: {look_at: [0.247, -0.003, 0.744]}
+  world:
+    unit: 1
+    spots:
+      backlight:
+        at: [0.197, -0.002, 0.724]
+        aim: [1, -0.05, -0.12]
+        cone: 67
+        soft: 12
+        temperature: 6500
+        strength: 0.024
+        source: eye
+    suns:
+      camera-fill:
+        toward: [1, -0.13, 0.21]
+        colour: {srgb_linear: [0.42, 0.40, 0.38]}
+        source: eye

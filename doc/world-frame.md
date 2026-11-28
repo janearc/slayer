@@ -1,7 +1,8 @@
 # One anchor, many render origins
 
-The frame math in `scene/frame` does not change scene YAML, terrain
-placement, a camera, a spacecraft or the GPU encoder.
+`scene/frame` defines a fixed spherical world frame and an explicit
+translation for each render. the island renderer chooses the camera
+as its render origin before preparing terrain and scene geometry.
 
 ## Fixed world coordinates
 
@@ -33,9 +34,8 @@ east/up/south basis at a position's radial subpoint. `Sphere.Compass`
 uses azimuth clockwise from that local north and elevation above that
 local horizon. Instrument roll remains part of the instrument's pose.
 
-Altitude and nadir therefore follow the planet after horizontal travel.
-They coincide with world y only above the anchor. No method here turns
-a static spacecraft placement into a time-evolving orbit.
+altitude and nadir follow the planet after horizontal travel.
+they align with the world y axis directly above the anchor.
 
 ## Render coordinates
 
@@ -50,8 +50,8 @@ scale; this translation does not repair an invalid pose.
 
 Every positional encoder input must use the same render origin: mesh and
 group placements, cameras, finite lights, beam endpoints, planet centres,
-weather bounds and density-query transforms. These helpers do not apply
-that change to the existing renderer by themselves.
+weather bounds and density-query transforms. each renderer adapter
+applies this translation when constructing those inputs.
 
 Rebasing does not remove all large-number arithmetic from a globe shader.
 Radius/height cancellation, grazing intersections and large scalar shape

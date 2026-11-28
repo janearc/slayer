@@ -19,6 +19,7 @@ type Object struct {
 	scale                   float64
 	hasScale, scaleEditable bool
 	grounded                bool
+	absolutePosition        bool
 }
 
 // ID identifies the authored collection and key, independent of pose.
@@ -33,12 +34,15 @@ func (object Object) Kind() string { return object.kind }
 // Recipe is the authored recipe name, or empty for other objects.
 func (object Object) Recipe() string { return object.recipe }
 
-// Position is east, north and up in metres. For a grounded thing, up is its
-// authored height above the terrain, not its staged world elevation.
+// Position is authored east, north and up in metres. Ground placements with
+// separate east and north fields use height above terrain for the third value.
 func (object Object) Position() [3]float64 { return object.position }
 
-// Grounded reports a placement anchored to terrain.
+// Grounded reports a placement in a ground scene, including absolute positions.
 func (object Object) Grounded() bool { return object.grounded }
+
+// AbsolutePosition reports whether the placement uses a typed world position.
+func (object Object) AbsolutePosition() bool { return object.absolutePosition }
 
 // Heading is clockwise degrees from north and whether explicitly authored.
 func (object Object) Heading() (float64, bool) { return object.heading, object.hasHeading }
@@ -95,6 +99,10 @@ func (document *Document) SetGeneratedHeading(id string, degrees float64) error 
 // Objects reads supported placements without opening geometry or changing text.
 func (document *Document) Objects() ([]Object, error) {
 	_, placements, err := document.poseNodes()
+	return poseObjects(placements, err)
+}
+
+func poseObjects(placements []poseNodes, err error) ([]Object, error) {
 	if err != nil {
 		return nil, err
 	}
@@ -191,6 +199,11 @@ func (document *Document) poseNodes() (*yaml.Node, []poseNodes, error) {
 	if err != nil {
 		return nil, nil, err
 	}
+	return document.posesIn(tree)
+}
+
+func (document *Document) posesIn(tree *yaml.Node) (*yaml.Node, []poseNodes, error) {
+	var err error
 	scene := member(tree.Content[0], "scene")
 	var placements []poseNodes
 	setting := member(scene, "setting")
@@ -202,14 +215,18 @@ func (document *Document) poseNodes() (*yaml.Node, []poseNodes, error) {
 				name, block := things.Content[index].Value, things.Content[index+1]
 				kind := member(block, "kind")
 				recipe := member(block, "recipe")
-				if (kind == nil && recipe == nil) || member(block, "east") == nil || member(block, "north") == nil ||
+				absolute := member(block, "position")
+				if (kind == nil && recipe == nil) ||
 					member(block, "place") != nil || member(block, "orbit") != nil || member(block, "around") != nil ||
 					member(block, "attitude") != nil {
 					continue
 				}
-				object := Object{id: "scene.set.things/" + name, name: name, grounded: grounded}
+				if !editablePosition(block, absolute) {
+					continue
+				}
+				object := Object{id: "scene.set.things/" + name, name: name, grounded: grounded, absolutePosition: absolute != nil}
 				object.scale = 1
-				object.scaleEditable = document.schemaName == "https://github.com/janearc/slayer/schemas/ecosystem-v2.json" && member(block, "part-spin") == nil
+				object.scaleEditable = !(grounded && object.absolutePosition) && document.schemaName == "https://github.com/janearc/slayer/schemas/ecosystem-v2.json" && member(block, "part-spin") == nil
 				if value := member(block, "scale"); value != nil {
 					object.scale, err = readNumber(value, "object scale")
 					if err != nil {
@@ -222,16 +239,15 @@ func (document *Document) poseNodes() (*yaml.Node, []poseNodes, error) {
 				} else {
 					object.kind = kind.Value
 				}
-				placement := poseNodes{object: object, block: block}
-				placement.coordinates[0], placement.coordinates[1] = member(block, "east"), member(block, "north")
-				for axis := 0; axis < 2; axis++ {
-					placement.object.position[axis], err = readNumber(placement.coordinates[axis], "object position")
-					if err != nil {
-						return nil, nil, err
-					}
+				recipeKind := kind
+				if recipe != nil && kind == nil {
+					recipeKind = member(member(member(scene, "recipes"), recipe.Value), "kind")
 				}
-				placement.coordinates[2], placement.object.position[2], err = poseQuantity(block, "height", "m")
-				if err != nil {
+				if object.absolutePosition && recipeKind != nil && recipeKind.Value == "fire" {
+					object.scaleEditable = false
+				}
+				placement := poseNodes{object: object, block: block}
+				if err := placement.readPosition(absolute); err != nil {
 					return nil, nil, err
 				}
 				if err := placement.readHeading(); err != nil {
@@ -274,6 +290,40 @@ func (document *Document) poseNodes() (*yaml.Node, []poseNodes, error) {
 		}
 	}
 	return tree, placements, nil
+}
+
+func editablePosition(block, absolute *yaml.Node) bool {
+	east, north := member(block, "east"), member(block, "north")
+	if absolute == nil {
+		return east != nil && north != nil
+	}
+	return east == nil && north == nil && member(block, "height") == nil
+}
+
+// readPosition keeps the nodes of either coordinate spelling for later edits.
+func (placement *poseNodes) readPosition(absolute *yaml.Node) error {
+	var err error
+	if absolute != nil {
+		for axis, key := range [3]string{"east", "north", "up"} {
+			placement.coordinates[axis], placement.object.position[axis], err = poseQuantity(absolute, key, "m")
+			if err != nil {
+				return err
+			}
+			if placement.coordinates[axis] == nil {
+				return fmt.Errorf("position requires %s", key)
+			}
+		}
+		return nil
+	}
+	for axis, key := range [2]string{"east", "north"} {
+		placement.coordinates[axis] = member(placement.block, key)
+		placement.object.position[axis], err = readNumber(placement.coordinates[axis], "object position")
+		if err != nil {
+			return err
+		}
+	}
+	placement.coordinates[2], placement.object.position[2], err = poseQuantity(placement.block, "height", "m")
+	return err
 }
 
 // readHeading retains the distinction between explicit zero and an omitted turn.

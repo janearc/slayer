@@ -196,9 +196,9 @@ func TestAGroundWearsItsMapAndLightsAsDrawnMirrored(t *testing.T) {
 	}
 }
 
-// a ground with a Fine is painted finer than its tiles, as world.Fine
-// does with the rungs, vary and mix it is given, and not as the tiles
-// alone: the same world, painted by the same call, reads the same
+// a ground with a Fine and no lines is painted at the point, as
+// world.Scrooged does with the vary and mix it is given, and not as the
+// tiles alone: the same world, painted by the same call, reads the same
 // everywhere, and the tiles' own paint does not.
 func TestAGroundWithAFinenessIsPaintedFiner(t *testing.T) {
 	fineness, err := bodies.NewFineness(2, maths.Share(0.25), maths.Share(0.5))
@@ -209,7 +209,7 @@ func TestAGroundWithAFinenessIsPaintedFiner(t *testing.T) {
 	tr := terrain()
 	tr.Tiling = hexes.Sphere{Splits: 4}
 	ref := world.New(tr)
-	fine, tiles := ref.Fine(look(), 2, 0.25, 0.5), ref.Painted(look())
+	fine, tiles := ref.Scrooged(look(), 0.25, 0.5), ref.Painted(look())
 	differs := false
 	for i, p := range spread(400) {
 		if got, want := m.Texture.At(p), fine.At(p); got != want {

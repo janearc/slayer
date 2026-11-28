@@ -42,7 +42,7 @@ folders on the renders page are read only; nothing here changes them.
   through `@night-pad` from the bar its `sound` names (cheeptune
   renders it; walk.SongSpan cuts and fades it).
 
-## What is still not right
+## Limits of the recorded study
 
 - A beam is a thin thread with no glow round it: there is no multiple
   scattering, so the halo a beam has in fog is not drawn. A thin

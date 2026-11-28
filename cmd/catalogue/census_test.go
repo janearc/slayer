@@ -68,7 +68,9 @@ func TestCensusStartsWithRequestedMissionsAndIncludesUnlaunchedConcepts(t *testi
 
 func Example_census() {
 	var out, failed bytes.Buffer
-	tool(context.Background()).Run([]string{"census", "jimo", "new-horizons"}, &out, &failed)
+	if status := tool(context.Background()).Run([]string{"census", "jimo", "new-horizons"}, &out, &failed); status != 0 {
+		panic(fmt.Sprintf("catalogue census exited with status %d: %s", status, failed.String()))
+	}
 	var report missionReport
 	if err := json.Unmarshal(out.Bytes(), &report); err != nil {
 		panic(err)

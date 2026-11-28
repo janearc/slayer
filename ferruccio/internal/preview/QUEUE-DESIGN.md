@@ -4,8 +4,9 @@ The app prepares one adjacent frozen YAML and one unique output directory per
 intended render. Azazel alone schedules and supervises producer commands.
 Submission uses configured Azazel/queue/agent, an absolute existing producer
 binary and a finite request checked against the owner's published schema.
-No direct producer, Game-lane wrapper, worker, resume or private queue fallback
-exists in the preview transport.
+Azazel runs the producer outside the frontend's Game lanes. A packaged
+launch can [initialize a private queue](../../native/cmd/ferruccio/PORTABLE-QUEUE.md)
+and [start dispatch](WORKER-LIFECYCLE.md) on demand.
 
 The plan identity determines an idempotency key. The exact serialized request
 is retained beside an audit YAML copy; uncertain acknowledgement retries use
@@ -25,9 +26,8 @@ Operator-interrupted or uncertain results retain input because descendant
 quiescence is not independently established by the current owner recovery path. Audit files and
 output directories remain. Terminal failure/cancellation never accepts PNGs.
 
-The client runs no queue engine and starts no publishers. Azazel owns dispatch,
-partial images, live pages and progress. Tests use generated Runner mocks to
-assert actual subprocess arguments and ownership; no real queue is submitted.
+Azazel owns dispatch, partial images, live pages and progress. The client
+observes the worker and requests cancellation through the queue protocol.
 
 
 The request declares the adjacent snapshot, retained audit YAML, and known

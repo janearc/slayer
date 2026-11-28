@@ -75,12 +75,9 @@ The total GPU step budget is bounded; compare long winding paths before
 claiming resolved photon subrings. Mirror paths through gravity still
 need explicit validation. The receipts below cover the configured background.
 
-Branches: Slayer `feat/metal-gravity`, Celestial `feat/metal-geodesics`.
-The local `demos/gravity.work` selects both isolated worktrees. Run Game
-targets `check-gravity`, `anti-gravity`, `anti-field` and
-`bench-gravity` through the GPU lane.
-
-Carrie retains reviewable patches against the owning library bases.
+The original runs used Slayer's `feat/metal-gravity` and Celestial's
+`feat/metal-geodesics` from a shared workspace. The named checks and
+benchmark in those branches were prototype runs.
 
 The dispatch comparison checks identical samples at 2, 8, 16 and 32 rows,
 including a partial final band. On this M3 Max, the controlled close-up's

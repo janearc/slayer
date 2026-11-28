@@ -1,0 +1,54 @@
+"$schema": https://github.com/janearc/slayer/schemas/ecosystem-v2.json
+scene:
+  name: amber giant
+  seed: 7
+  setting: space
+  light: sun
+  sun: {azimuth: 225, altitude: 20}
+  set:
+    things:
+      lamp:
+        kind: voyager-1
+        seed: 17
+        complexity: demo
+        east: 0
+        north: 0
+  film: {width: 800, height: 800, rays: 2, exposure: 0.003, wide: 50}
+  cameras:
+    disc:
+      location: {at: [-318490735, 0, 115921147]}
+      orientation: {look_at: [0, 0, 0]}
+    close:
+      location: {at: [-159245367, 0, 57960573]}
+      orientation: {look_at: [0, 0, 0]}
+  world:
+    unit: 1
+    sky:
+      stars: {seed: 29, share: 0.01, size: 0.3, bright: 0.6}
+      source: eye
+    bodies:
+      amber:
+        generate:
+          mass: 317.8
+          makeup: {metal: 0.02, rock: 0.03, ice: 0.05, gas: 0.90}
+          day: 9.93
+          tilt: 3.13
+          distance: 5.2
+          sun: {mass: 1, luminosity: 1}
+          age: 4.5e9
+          seed: 1
+          giant_look:
+            made_up: true
+            paints: [[0.42, 0.19, 0.06], [0.9, 0.69, 0.35], [0.36, 0.09, 0.04], [0.95, 0.76, 0.47], [0.32, 0.12, 0.05], [0.82, 0.56, 0.26], [0.5, 0.22, 0.08]]
+            roil: 0.06
+            shear: 7
+            grain: 0.08
+            fine: 0.05
+            mottle: 0.5
+            jets: 10
+            spots:
+              - {lat: -0.25, lon: 2.0, size: 0.19, stretch: 2, turn: 2.5, paint: [0.8, 0.18, 0.06]}
+            streets:
+              - {lat: 0.4, count: 6, size: 0.06, turn: 2, seed: 3, paint: [0.95, 0.85, 0.6]}
+        middle: [0, 0, 0]
+        detail: 3

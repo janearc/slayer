@@ -226,3 +226,24 @@ func (made *Mesh) closest(i int, point maths.Vec) weights {
 	share := unity / (va + vb + vc)
 	return weights{unity - (vb+vc)*share, vb * share, vc * share}
 }
+
+// SurfaceSite is the nearest point and the outward winding's normal on
+// its face. Weights are ordered by that face's corners. The normal uses
+// the local orientation even for an open mesh.
+type SurfaceSite struct {
+	Point, Normal maths.Vec
+	Face          int
+	Weights       [triangleCorners]float64
+}
+
+// SurfaceNear finds the nearest triangle using the mesh hierarchy.
+func (made *Mesh) SurfaceNear(point maths.Vec) (SurfaceSite, bool) {
+	face, weights, _ := made.nearest(point)
+	if face < nought {
+		return SurfaceSite{}, false
+	}
+	return SurfaceSite{
+		Point: made.pointAt(face, weights), Normal: made.across(face).Unit(),
+		Face: face, Weights: [triangleCorners]float64(weights),
+	}, true
+}

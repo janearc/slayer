@@ -119,7 +119,7 @@ func readJSONRecord(in io.Reader, value any) error {
 }
 
 // readBinaryBatches restores shared meshes and checks the complete stream.
-func readBinaryBatches(in *bufio.Reader) (Snapshot, error) {
+func readBinaryBatches(in *bufio.Reader, size int64) (Snapshot, error) {
 	magic := make([]byte, len(binaryMagic))
 	if _, err := io.ReadFull(in, magic); err != nil || (string(magic) != binaryMagic && string(magic) != binaryMagicWithOrigins) {
 		return Snapshot{}, fmt.Errorf("invalid staged snapshot signature")
@@ -128,7 +128,9 @@ func readBinaryBatches(in *bufio.Reader) (Snapshot, error) {
 	if err := readJSONRecord(in, &snapshot); err != nil {
 		return Snapshot{}, err
 	}
-	if (string(magic) == binaryMagic && snapshot.Version != 4) || (string(magic) == binaryMagicWithOrigins && snapshot.Version != 5) || snapshot.MeshCount <= 0 || snapshot.BatchCount <= 0 || len(snapshot.Scene.Objects) != 0 || len(snapshot.Scene.Batches) != 0 || len(snapshot.Meshes) != 0 || len(snapshot.Places) != 0 {
+	empty := snapshot.Version == 5 && snapshot.MeshCount == 0 && snapshot.BatchCount == 0
+	if (string(magic) == binaryMagic && snapshot.Version != 4) || (string(magic) == binaryMagicWithOrigins && snapshot.Version != 5) ||
+		(!empty && (snapshot.MeshCount <= 0 || snapshot.BatchCount <= 0)) || len(snapshot.Scene.Objects) != 0 || len(snapshot.Scene.Batches) != 0 || len(snapshot.Meshes) != 0 || len(snapshot.Places) != 0 {
 		return Snapshot{}, fmt.Errorf("invalid binary staged header")
 	}
 	var meshes []*placement.DisplayMesh
@@ -150,6 +152,12 @@ func readBinaryBatches(in *bufio.Reader) (Snapshot, error) {
 			return Snapshot{}, fmt.Errorf("invalid staged batch reference or size")
 		}
 		batch := placement.StagedBatch{Mesh: meshes[row.Mesh], Bounds: row.Bounds, HasBounds: row.HasBounds, Author: row.Author, Authored: row.Authored}
+		if size >= 0 {
+			if row.Count > uint64(size)/placeBytes || row.Count > uint64(math.MaxInt) {
+				return Snapshot{}, fmt.Errorf("staged batch is larger than its snapshot")
+			}
+			batch.Places = make([]maths.Subspace, 0, int(row.Count))
+		}
 		used[row.Mesh] = true
 		for left := row.Count; left > 0; {
 			count := int(min(uint64(placeChunk), left))

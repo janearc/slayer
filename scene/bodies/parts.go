@@ -241,6 +241,10 @@ type Clouds struct {
 	cover     float64 // share of the sky clouded
 	dense     float64 // extinction per kilometre at a patch's heart
 	seed      uint64
+	turning   bool // use latitude-based weather even on a locked body
+	soft      bool // leave the fine billows unturned by storms
+	turn      float64
+	hasTurn   bool
 }
 
 // NewClouds is a cloud layer filling a shell, covering a share of the
@@ -265,6 +269,32 @@ func NewClouds(shell Shell, cover maths.Portion, loss Loss,
 
 // hang is the part taking its place on the body.
 func (clouds Clouds) hang(body *Body) { body.clouds = &clouds }
+
+// TurningWeather chooses latitude-based weather for this shell, even when
+// the body keeps one face toward its star. It does not alter body motion.
+func (clouds Clouds) TurningWeather() Clouds {
+	clouds.turning = true
+	return clouds
+}
+
+// SoftWeather keeps fine billows unturned by storms in turning weather.
+// It chooses an artistic pattern; the broad clouds and storms stay.
+func (clouds Clouds) SoftWeather() Clouds {
+	clouds.turning, clouds.soft = true, true
+	return clouds
+}
+
+// StormTurn sets the authored storm turn in radians at a storm's heart.
+func (clouds Clouds) StormTurn(turn float64) Clouds {
+	clouds.turn, clouds.hasTurn = turn, true
+	return clouds
+}
+
+// WeatherChoice reports the authored pattern and optional storm turn.
+func (clouds Clouds) WeatherChoice() (turning, soft bool, turn float64,
+	hasTurn bool) {
+	return clouds.turning, clouds.soft, clouds.turn, clouds.hasTurn
+}
 
 // Low is the layer's lower edge above the surface, in kilometres.
 func (clouds Clouds) Low() float64 { return clouds.low }
@@ -688,9 +718,10 @@ func (plume Plume) Colour() maths.Light { return plume.colour }
 // coarse tile it sits in, its brightness varied and a neighbouring
 // class let in, both by shares.
 type Fineness struct {
-	rungs uint // levels finer; zero lets the picture choose
-	vary  float64
-	mix   float64
+	rungs  uint // levels finer; zero lets the picture choose
+	vary   float64
+	mix    float64
+	ridges float64
 }
 
 // NewFineness paints the ground rungs levels below its own tiles,
@@ -710,7 +741,19 @@ func NewFineness(rungs uint, vary, mix maths.Portion) (Fineness, error) {
 	if err != nil {
 		return Fineness{}, fmt.Errorf("bodies: fineness mix: %w", err)
 	}
-	return Fineness{rungs: rungs, vary: varied, mix: mixed}, nil
+	return Fineness{rungs: rungs, vary: varied, mix: mixed, ridges: 1}, nil
+}
+
+// Ridges sets an artistic multiplier on the painted ridge contribution.
+func (fine Fineness) Ridges(share maths.Portion) (Fineness, error) {
+	value, err := share.Share()
+	if err != nil {
+		return Fineness{}, fmt.Errorf("bodies: ridge contrast: %w", err)
+	}
+	// Twice the existing contrast at the top of the authored range is an
+	// artistic choice. One half retains the original strength.
+	fine.ridges = 2 * value
+	return fine, nil
 }
 
 // Rungs is how many levels finer than the ground's tiles to paint, a
@@ -907,6 +950,13 @@ func (body Body) groundMaterial(detail int) (*thing.Material, error) {
 			Turn: ground.turn}
 	case ground.fine != nil:
 		fine := ground.fine
+		if ground.look.Lines <= nought {
+			// no lines to draw tiles by: read from the world's tree at
+			// the point, so no tile's shape shows, whatever the rung
+			material.Texture = made.ScroogedRidges(ground.look, fine.vary,
+				fine.mix, fine.ridges)
+			break
+		}
 		material.Texture = made.Fine(ground.look, int(fine.rungs),
 			fine.vary, fine.mix)
 	default:
@@ -1047,6 +1097,14 @@ func (gas Gas) Bands() texture.Banded { return copyBands(gas.bands) }
 // band texture holding a number that is not finite, or nil when it
 // holds none.
 func bandsComplaint(bands texture.Banded) error {
+	for place, spot := range bands.Spots {
+		if err := numberComplaint(fmt.Sprintf("bands' spot %d detail", place), spot.Detail); err != nil {
+			return err
+		}
+		if spot.Detail < 0 || spot.Detail > 1 {
+			return fmt.Errorf("bands' spot %d detail must be from nought to one", place)
+		}
+	}
 	for place, paint := range bands.Paints {
 		if err := lightComplaint(fmt.Sprintf("bands' paint %d", place),
 			paint); err != nil {
@@ -1430,6 +1488,9 @@ func (part Tail) refusal() error {
 
 // refusal is why the part cannot be worn, or nil.
 func (part Clouds) refusal() error {
+	if part.hasTurn && !(part.turn >= 0 && part.turn <= 10) {
+		return fmt.Errorf("bodies: cloud storm turn must be from 0 to 10 radians")
+	}
 	return refusal(part.made, "NewClouds", nil)
 }
 

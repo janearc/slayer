@@ -1,0 +1,7 @@
+Output one JSON object with width, height, rays, camera and aim. Width and height are pixels. Rays is the number of rays along each side of a pixel.
+For camera and aim:
+- Leave it alone: {"mode":"keep"}.
+- Set an absolute point: {"mode":"set","xyz":[X,Y,Z]}.
+- Move from the current point: {"mode":"move","by":{"east":2,"up":3}}.
+- Aim at the ball centre: {"mode":"ball","by":{}}. Aim near the ball centre: use "ball" and name the directions and distances in "by".
+Use only the directions explicitly requested. Direction keys are east, west, north, south, up and down. All distances are positive metres. Higher and above mean up; lower and below mean down. Include every requested direction. The fixture does the coordinate arithmetic.

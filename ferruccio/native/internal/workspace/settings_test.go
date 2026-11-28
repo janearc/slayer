@@ -134,11 +134,12 @@ func TestOwnRenderIsTheCPUByDefaultAndTheGPUOnlyWhenChosen(t *testing.T) {
 	}
 }
 
-func TestTheAzazelRoadKeepsTheCPURendererWhateverIsChosen(t *testing.T) {
+func TestTheAzazelQueueHonorsTheChosenGPU(t *testing.T) {
 	work := settingsWorkspace(t, "renderer :: gpu\n")
 	work.options.Tools.Transport = "azazel"
-	if profile := work.ownRender(preview.Profile{}); !profile.CPURenderer || profile.GPU {
-		t.Fatalf("the Azazel road was given %+v", profile)
+	work.composition = "play"
+	if profile := work.previewRequest(time.Now()).Profile; profile.CPURenderer || !profile.GPU {
+		t.Fatalf("the queue did not retain the GPU choice: %+v", profile)
 	}
 }
 

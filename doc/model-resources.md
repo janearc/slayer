@@ -11,12 +11,18 @@ seed, detail, geometry, materials and animation when measuring improvements.
 
 ## Inspect an actual scene
 
-`game run scene-complexity-build` builds the scene reporter. Then
-`game run scene-complexity -- report JOB.yaml` counts the first scene frame
-without drawing; `--frames first,last,12` selects frame indices and `--all`
-visits every frame. Multiple jobs may be listed. Error rows are retained and
-cause a failing exit. See the [scene reporter guide](../cmd/scene-complexity/README.md)
-for supported job types, provenance and measurement limitations.
+to count the geometry in the first scene frame without drawing:
+
+```sh
+game build slayer
+game run slayer -- assess sets/webb-at-l2.yaml --census out/webb-census.json
+```
+
+the census counts all placed geometry, including objects outside the
+camera view. for more frame selections, the ordinary `game build` also
+builds `scene-complexity`. see the
+[scene reporter guide](../cmd/scene-complexity/README.md) for its job and
+frame options.
 
 For the set, scene and direct Go authoring surfaces, see the
 [scene constructor reference](scene-constructor-reference.md).

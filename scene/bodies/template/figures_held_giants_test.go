@@ -75,7 +75,9 @@ func TestJupiterFiguresAreHeld(t *testing.T) {
 // (64,800 s), and a tail 30 radii long, 2 wide at the base, bending
 // 0.25, 0.4 per radius dense, ragged 0.6.
 func TestHotJupiterFiguresAreHeld(t *testing.T) {
-	const radius = 69911
+	// the body's radius, from scene/generate (hotJupiterRadiusKm), and
+	// the unit its tail is said in
+	const radius = 111962
 	got := its(t, HotJupiter)
 	gasPart := wantGas(t, 0.08, 40, jupiterBands())
 	tailPart := wantTail(t, 30*radius, 2*radius, 0.06, 0.25,

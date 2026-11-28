@@ -10,6 +10,7 @@ import (
 	"github.com/janearc/slayer/maths"
 	"github.com/janearc/slayer/maths/noise"
 	"github.com/janearc/slayer/scene/bodies/template"
+	"github.com/janearc/slayer/scene/generate"
 	"github.com/janearc/slayer/scene/swatches"
 	yaml "gopkg.in/yaml.v3"
 )
@@ -40,8 +41,10 @@ type World struct {
 	floods        []Flood
 	sky           *Sky
 	bodies        []Body
+	pairs         []Pair
 	suns          []Sunlight
 	wisps         []Wisp
+	cloudDecks    []LocalCloudDeck
 	fizzes        []Fizz
 	vaporCavities []VaporCavitation
 	motions       []Motion
@@ -156,6 +159,9 @@ func (made World) Spots() []Spotlight { return slices.Clone(made.spots) }
 
 // Wisps is every wisp, in the order written.
 func (made World) Wisps() []Wisp { return slices.Clone(made.wisps) }
+
+// CloudDecks are explicitly bounded local cloud volumes.
+func (made World) CloudDecks() []LocalCloudDeck { return slices.Clone(made.cloudDecks) }
 
 // Fizzes is every fizz, in the order written.
 func (made World) Fizzes() []Fizz { return slices.Clone(made.fizzes) }
@@ -444,23 +450,61 @@ func (made Stars) Look() (share, size, bright float64) {
 	return made.share, made.size, made.bright
 }
 
-// A Body is a body from a template, its middle at a place, its moons'
-// ground tiled so finely; and, where the set says, drawn at a radius of
-// its own, its axis tilted, and its aurora shown or not. what it does
-// not say is the template's.
+// A Body is a body from a template or generated from a planet's numbers,
+// its middle at a place, its moons' ground tiled so finely; and, where
+// the set says, drawn at a radius of its own, its axis tilted, and its
+// aurora shown or not. what it does not say is the template's.
 type Body struct {
 	name, template string
+	generated      *generate.Planet
 	middle         [3]float64
 	detail         float64
 	radius, tilt   *float64
 	aurora         *bool
+	circles        string
+	phase          float64
+	flowing        *Planet
 }
+
+// Flowing is the authored spectral appearance, if this generated body has one.
+func (made Body) Flowing() (Planet, bool) {
+	if made.flowing == nil {
+		return Planet{}, false
+	}
+	return *made.flowing, true
+}
+
+// WithoutFlowing holds the same world without bodies that require a view.
+// Only the session that subsequently stages those bodies should use this.
+func (made World) WithoutFlowing() World {
+	made.bodies = slices.DeleteFunc(slices.Clone(made.bodies), func(body Body) bool { return body.flowing != nil })
+	return made
+}
+
+// Circles is the name of the pair whose lava drop the body goes round, or
+// nothing for a body that stands at its middle. A body that circles a drop
+// is locked, with one face to the drop; its place, sun and year follow
+// from the drop's, and its generate block says neither.
+func (made Body) Circles() string { return made.circles }
+
+// Phase is where on its circle round the drop the body stands, in
+// degrees from the side of the pair's periapsis.
+func (made Body) Phase() float64 { return made.phase }
 
 // Name is the body's name.
 func (made Body) Name() string { return made.name }
 
 // Template is the template it is made from, by its name.
 func (made Body) Template() string { return made.template }
+
+// Generated is the planet a body is generated from, and whether it is
+// generated rather than taken from a template.
+func (made Body) Generated() (generate.Planet, bool) {
+	if made.generated == nil {
+		return generate.Planet{}, false
+	}
+	return *made.generated, true
+}
 
 // Middle is where its middle stands, in the world's space.
 func (made Body) Middle() maths.Vec { return fromMap(made.middle) }
@@ -540,8 +584,10 @@ func (reading reader) world(_, value *yaml.Node) error {
 		"floods":         reading.floods,
 		"sky":            reading.backdrop,
 		"bodies":         reading.bodies,
+		"binaries":       reading.pairs,
 		"suns":           reading.suns,
 		"wisps":          reading.wisps,
+		"cloud-decks":    reading.localCloudDecks,
 		"fizzes":         reading.fizzes,
 		"vapor-cavities": reading.vaporCavities,
 		"motions":        reading.motions,
@@ -901,16 +947,22 @@ func (reading reader) bodies(_, value *yaml.Node) error {
 		var aurora bool
 		err := reading.keys(block, map[string]step{
 			"template": reading.word(&made.template, template.Names()...),
+			"generate": reading.generated(&made.generated, name.Value),
 			"middle":   reading.three(&made.middle, -farthest, farthest),
 			"detail":   reading.whole(&made.detail, 1, math.MaxInt32),
 			"radius": reading.number(&radius, math.SmallestNonzeroFloat64,
 				farthest),
-			"tilt":   reading.number(&tilt, -180, 180),
-			"aurora": reading.yes(&aurora),
+			"tilt":    reading.number(&tilt, -180, 180),
+			"aurora":  reading.yes(&aurora),
+			"circles": reading.text(&made.circles),
+			"phase":   reading.number(&made.phase, -360, 360),
+			"flowing": reading.flowing(&made.flowing),
 		}, nil)
 		if err == nil {
-			err = reading.all(block, "a body", "template", "middle",
-				"detail")
+			err = reading.madeOnce(block)
+		}
+		if err == nil && made.flowing != nil && (made.generated == nil || made.circles != "" || says(block, "radius")) {
+			err = reading.refuse(block, "flowing requires a generated body at a fixed middle, without a radius override")
 		}
 		if says(block, "radius") {
 			made.radius = &radius

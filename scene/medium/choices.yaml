@@ -61,9 +61,29 @@ numbers:
     says: octaves of the noise that lays cloud patches
     kind: picked
     by: Slayer's medium shapes
+  - name: cloud-billow
+    value: 0.3
+    says: how much a cloud patch's edge and thickness are broken up by finer noise, read unstretched, 2026-11-26 by eye
+    kind: picked
+    by: Slayer's medium shapes
+  - name: cloud-detail
+    value: 12
+    says: how many times finer than the patches the cloud's billowing noise is read at
+    kind: picked
+    by: Slayer's medium shapes
+  - name: cloud-detail-octaves
+    value: 3
+    says: octaves of the noise that billows a cloud
+    kind: picked
+    by: Slayer's medium shapes
+  - name: cloud-reach
+    value: 0.4
+    says: how far up the layer the lowest, thinnest cloud patch reaches, the thickest reaching the top
+    kind: picked
+    by: Slayer's medium shapes
   - name: cloud-edge
-    value: 0.08
-    says: how far either side of the cover's threshold a cloud patch's edge is soft
+    value: 0.2
+    says: how far either side of the cover's threshold a cloud patch's edge is soft, 2026-11-26 by eye
     kind: picked
     by: Slayer's medium shapes
   - name: cloud-whole
@@ -74,6 +94,236 @@ numbers:
   - name: cloud-top
     value: 0.15
     says: the share of itself a cloud patch still is at the top of the layer
+    kind: picked
+    by: Slayer's medium shapes
+  - name: cloud-deck
+    value: 1.2
+    says: how much cover a tidally locked world's cloud blanket adds at its substellar point, enough for a solid deck there and out across the day side; measured 2026-11-27, with the deck 0.4 wide and 1 high the day side was 0.55 to 0.67 covered 0.4 to 0.9 radians out, and holes stood in it
+    kind: picked
+    by: Slayer's medium shapes
+  - name: cloud-deck-width
+    value: 0.6
+    says: the blanket's width, in radians of arc from the substellar point, so that it is full over the day side to the terminator's belt, the deck proper being the towers (Yang, Cowan and Abbot 2013 put the convective deck of a locked world at 30 to 50 degrees across, from memory, to shelve, and that is the towers' width and not this); the value 2026-11-27 by eye
+    kind: picked
+    by: Slayer's medium shapes
+  - name: cloud-terminator
+    value: 0.45
+    says: how much more cover a locked world has in the turbulent belt about its terminator, where hot and cold air meet, 2026-11-26 by eye
+    kind: picked
+    by: Slayer's medium shapes
+  - name: cloud-terminator-width
+    value: 0.5
+    says: the terminator belt's width, in radians of arc, 2026-11-27 by eye
+    kind: picked
+    by: Slayer's medium shapes
+  - name: cloud-night
+    value: -0.5
+    says: how much less cover a locked world has beyond its deck, and a negative number is how much more, which it is here, since the air that rises at the substellar point flows out aloft and carries its cloud over the rest of the day side and the night side, so most of the planet is cloud, 2026-11-27 by eye
+    kind: picked
+    by: Slayer's medium shapes
+  - name: cloud-night-from
+    value: 0.5
+    says: how far from the substellar point, in radians, the carried cloud begins to come on beyond the deck, 2026-11-27 by eye
+    kind: picked
+    by: Slayer's medium shapes
+  - name: cloud-night-width
+    value: 0.9
+    says: how many radians the carried cloud takes to come on, 2026-11-27 by eye
+    kind: picked
+    by: Slayer's medium shapes
+  - name: cloud-far
+    value: 0.7
+    says: how much less cover a locked world has deep in its night, away from the terminator, where the carried cloud thins and the ground shows through, 2026-11-27 by eye
+    kind: picked
+    by: Slayer's medium shapes
+  - name: cloud-far-from
+    value: 1.9
+    says: how far from the substellar point, in radians, the carried cloud begins to thin into the night, 2026-11-27 by eye
+    kind: picked
+    by: Slayer's medium shapes
+  - name: cloud-far-width
+    value: 0.9
+    says: how many radians the thinning takes to come on, 2026-11-27 by eye
+    kind: picked
+    by: Slayer's medium shapes
+  - name: cloud-broken
+    value: 0.2
+    says: how much finer noise breaks the cloud at a locked world's terminator, so the belt churns, 2026-11-27 by eye
+    kind: picked
+    by: Slayer's medium shapes
+  - name: cloud-locked-storm
+    value: 1.5
+    says: how far from the substellar point, in radians, the whorls of a locked world's sky turn, nearly at its terminator, 2026-11-26 by eye
+    kind: picked
+    by: Slayer's medium shapes
+  - name: cloud-locked-stretch
+    value: 1
+    says: how many times longer along the wind than across a cloud is drawn in a locked world's sky, where the air rises at the substellar point and flows out all round and there is no one way along; one is not drawn out, which keeps the whorls from being combed, 2026-11-27 by eye
+    kind: picked
+    by: Slayer's medium shapes
+  - name: cloud-locked-filament
+    value: 0
+    says: how much of a noise finer across the wind breaks a streak into filaments in a locked world's sky; none, since its clouds have no streaks, and the filaments' fixed direction combed the whorls, 2026-11-27 by eye
+    kind: picked
+    by: Slayer's medium shapes
+  - name: cloud-locked-jet
+    value: 0
+    says: how far, in radians, the winds slide a locked world's sky round its axis; none, since the sliding is by latitude and a locked sky's weather is laid by distance from its sun, 2026-11-27 by eye
+    kind: picked
+    by: Slayer's medium shapes
+  - name: cloud-locked-strength
+    value: 0.6
+    says: how much a locked sky's whorls differ from one another in width and turn, as a share, each between one less and one more of this, so those north and south of the terminator are not mirror images, 2026-11-27 by eye
+    kind: picked
+    by: Slayer's medium shapes
+  - name: cloud-tower-base
+    value: 0.6
+    says: how tall, as a share of the substellar point's, the convective towers of a locked sky are at the distance cloud-tower-width from it, 2026-11-27 by eye
+    kind: picked
+    by: Slayer's medium shapes
+  - name: cloud-tower-width
+    value: 1.3
+    says: how far from the substellar point, in radians, the towers have fallen to a third of the way from their tallest to cloud-tower-base, 2026-11-27 by eye
+    kind: picked
+    by: Slayer's medium shapes
+  - name: cloud-towers
+    value: 0.75
+    says: how much lower than the tallest the lowest tower of a locked sky is, as a share, which gives the deck its relief, 2026-11-27 by eye
+    kind: picked
+    by: Slayer's medium shapes
+  - name: cloud-tower-billow
+    value: 0.35
+    says: how much finer noise billows the tops of a locked sky's towers, as a share of their height either way, so a tower is cauliflower and not a hill, 2026-11-27 by eye
+    kind: picked
+    by: Slayer's medium shapes
+  - name: cloud-locked-eye-clear
+    value: 0.05
+    says: how much cover the eye of a whorl in a locked sky clears; a turning sky's is 0.8, which in a sky that is cloud nearly all over drew the whorl as a hole, and a whorl in a sky of cloud is spiral arms, 2026-11-27 by eye
+    kind: picked
+    by: Slayer's medium shapes
+  - name: cloud-locked-arm-cover
+    value: 0.05
+    says: how much cover the arms of a whorl in a locked sky are banded by, more than a turning sky's 0.3, so that the arms read as cloud spiralling in cloud, 2026-11-27 by eye
+    kind: picked
+    by: Slayer's medium shapes
+  - name: cloud-locked-core
+    value: 1
+    says: how much more cover a whorl's heart has in a locked sky, so that the whorl is a body of cloud its arms thin and thicken and no gaps wind into it, 2026-11-27 by eye
+    kind: picked
+    by: Slayer's medium shapes
+  - name: cloud-locked-size
+    value: 0.25
+    says: how wide a whorl in a locked sky is, in radians of the sphere, so that with the strengths 0.4 to 1.6 times it a whorl is some hundreds to two thousand kilometres across on a world of Earth's size; at 0.15 one facing the camera was 38 pixels of a disc 800 across and not seen, 2026-11-27 by eye
+    kind: picked
+    by: Slayer's medium shapes
+  - name: cloud-locked-whorl-thin
+    value: 20
+    says: how much a whorl's arms and eye raise and lower the cloud in a locked sky, as a share of its height per unit of the whorl's own cover, so that an arm is a ridge and a lane lower cloud and the cover stays full, 2026-11-27 by eye
+    kind: picked
+    by: Slayer's medium shapes
+  - name: cloud-locked-turn
+    value: 3.5
+    says: how far, in radians, a whorl in a locked sky turns the sky at its heart, less than a turning sky's 5, which wound the fine noise into concentric lines, 2026-11-27 by eye
+    kind: picked
+    by: Slayer's medium shapes
+  - name: cloud-tower-frequency
+    value: 10
+    says: the frequency of the noise that makes towers of different heights, over the unit direction, a tower about a tenth of a radian across, 2026-11-27 by eye
+    kind: picked
+    by: Slayer's medium shapes
+  - name: cloud-equator
+    value: 0.2
+    says: how much more cover the equator's belt has, where the trade winds meet, 2026-11-26 by eye
+    kind: picked
+    by: Slayer's medium shapes
+  - name: cloud-dry
+    value: 0.25
+    says: how much less cover the dry belts of the subtropics have, 2026-11-26 by eye
+    kind: picked
+    by: Slayer's medium shapes
+  - name: cloud-track
+    value: 0.12
+    says: how much more cover the storm tracks of the mid-latitudes have, 2026-11-26 by eye
+    kind: picked
+    by: Slayer's medium shapes
+  - name: cloud-width
+    value: 0.22
+    says: how wide, in radians of latitude, a cloud belt is, 2026-11-26 by eye
+    kind: picked
+    by: Slayer's medium shapes
+  - name: cloud-dry-at
+    value: 0.44
+    says: the latitude of the dry belts in radians, about 25 degrees
+    kind: picked
+    by: Slayer's medium shapes
+  - name: cloud-track-at
+    value: 0.87
+    says: the latitude of the storm tracks in radians, about 50 degrees
+    kind: picked
+    by: Slayer's medium shapes
+  - name: cloud-stretch
+    value: 2.5
+    says: how many times longer along the wind than across a cloud is drawn, 2026-11-26 by eye
+    kind: picked
+    by: Slayer's medium shapes
+  - name: cloud-jet
+    value: 0.5
+    says: how far in radians the winds slide the sky round the axis at most, 2026-11-26 by eye
+    kind: picked
+    by: Slayer's medium shapes
+  - name: cloud-whorl-size
+    value: 0.35
+    says: how far in radians a whorl's turn reaches before it is a third of itself, 2026-11-26 by eye
+    kind: picked
+    by: Slayer's medium shapes
+  - name: cloud-whorl-turn
+    value: 5
+    says: how far in radians a whorl turns the sky at its heart, 2026-11-26 by eye
+    kind: picked
+    by: Slayer's medium shapes
+  - name: cloud-whorl-core
+    value: 0.2
+    says: how much more cover a whorl's heart has, 2026-11-26 by eye
+    kind: picked
+    by: Slayer's medium shapes
+  - name: cloud-filament
+    value: 0.2
+    says: how much finer noise across the wind breaks a streak into filaments, 2026-11-26 by eye
+    kind: picked
+    by: Slayer's medium shapes
+  - name: cloud-filament-across
+    value: 2.5
+    says: how many times finer across the wind than along it the filaments' noise is read, 2026-11-26 by eye
+    kind: picked
+    by: Slayer's medium shapes
+  - name: cloud-cluster
+    value: 1.2
+    says: how far the equator's belt is broken into clusters, one being to the point of gaps, 2026-11-26 by eye
+    kind: picked
+    by: Slayer's medium shapes
+  - name: cloud-beads
+    value: 5
+    says: how many times round the body the equator's clusters' noise is read, 2026-11-26 by eye
+    kind: picked
+    by: Slayer's medium shapes
+  - name: cloud-eye
+    value: 0.3
+    says: how wide a whorl's clear eye is, in whorl radii, 2026-11-26 by eye
+    kind: picked
+    by: Slayer's medium shapes
+  - name: cloud-eye-clear
+    value: 0.8
+    says: how much cover a whorl's eye loses at its centre, 2026-11-26 by eye
+    kind: picked
+    by: Slayer's medium shapes
+  - name: cloud-arms
+    value: 3
+    says: how many arms a whorl has, 2026-11-26 by eye
+    kind: picked
+    by: Slayer's medium shapes
+  - name: cloud-arm-cover
+    value: 0.3
+    says: how much cover a whorl's arms add and the bands between them lose, 2026-11-26 by eye
     kind: picked
     by: Slayer's medium shapes
   - name: aurora-floor

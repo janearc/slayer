@@ -1,0 +1,9 @@
+$schema: https://github.com/janearc/slayer/schemas/job-v1.json
+# Same authored scene and sampling as 585; CPU evaluates the field directly.
+scene: {set: study.yaml}
+renderer: cpu
+film: {width: 960, height: 600, rays: 1, wide: 55}
+camera: {name: oblique}
+outputs:
+  picture: ../../../out/2026-11-27-local-cloud-deck-study-cpu/proof.png
+  raw: ../../../out/2026-11-27-local-cloud-deck-study-cpu/light.pfm

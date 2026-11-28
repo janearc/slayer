@@ -44,6 +44,13 @@ func through(scene *staged, ray maths.Ray, far float64) passage {
 	return throughGain(scene, ray, far, nil, strides)
 }
 
+// throughShifted is through with the ray's samples a share of the way
+// into each step, as a pixel's own shift says (MarchShift), and not at
+// the middle.
+func throughShifted(scene *staged, ray maths.Ray, far, shift float64) passage {
+	return throughGainShifted(scene, ray, far, nil, strides, shift)
+}
+
 // throughClear interleaves water extinction, water single-scattering, and
 // explicitly opted-in bounded clouds. Each local source is attenuated by the
 // water and cloud between it and the eye; later samples continue through
@@ -91,6 +98,7 @@ func throughClear(scene *staged, seen look, far float64,
 		}
 		cursor = step.along
 	}
+	passed = settled(passed)
 	gap := math.Max(0, far-cursor)
 	passed.added = passed.added.Add(clearWaterScatterSegment(scene,
 		seen, ray, cursor, gap, far, water, passed.keep))
@@ -198,6 +206,17 @@ func shows(keep maths.Light) bool {
 	return keep.R > faint || keep.G > faint || keep.B > faint
 }
 
+// settled is a passage once its march is over: when the march stopped
+// for want of light, what was left of the light behind is nothing, so a
+// body that is opaque hides what is behind it, however bright. A march
+// that ran out of volumes first keeps what it has.
+func settled(passed passage) passage {
+	if !shows(passed.keep) {
+		passed.keep = maths.Light{}
+	}
+	return passed
+}
+
 // most is the channel of keep that lets the most through, which is what
 // a pixel's cover is taken from.
 func most(keep maths.Light) float64 {
@@ -209,6 +228,13 @@ func most(keep maths.Light) float64 {
 // march's segments are short and want few.
 func throughGain(scene *staged, ray maths.Ray, far float64, gain gainer,
 	cuts int) passage {
+	return throughGainShifted(scene, ray, far, gain, cuts, marchHalf)
+}
+
+// throughGainShifted is throughGain taking its samples a share of the way
+// into each step.
+func throughGainShifted(scene *staged, ray maths.Ray, far float64,
+	gain gainer, cuts int, shift float64) passage {
 	passed := untouched()
 	// the ray's own scratch, on this call's stack, so that a march
 	// through a few volumes allocates nothing and no two goroutines
@@ -228,6 +254,7 @@ func throughGain(scene *staged, ray maths.Ray, far float64, gain gainer,
 	}
 	steps := steppingIn(across, cuts, takenRoom[:], partsRoom[:])
 	steps.refine = scene.beams.Ray(ray, far)
+	steps.shift = shift
 	for shows(passed.keep) {
 		step, found := steps.next()
 		if !found {
@@ -257,7 +284,7 @@ func throughGain(scene *staged, ray maths.Ray, far float64, gain gainer,
 				*keep)
 		}
 	}
-	return passed
+	return settled(passed)
 }
 
 // heated is a medium that says how hot it is at a point, as a flame's
@@ -320,6 +347,9 @@ type stepper struct {
 	taken  []int
 	parts  []int
 	refine beamstep.Refinement
+	// shift is how far into each step the sample is taken, a share of
+	// the step: the middle, unless the march is jittered.
+	shift float64
 }
 
 // marchZero is defined as the first subdivision index.
@@ -327,6 +357,67 @@ const marchZero = 0
 
 // marchHalf is defined as the midpoint of a unit cell.
 const marchHalf = 0.5
+
+// shiftFor is where a look's march takes its samples in each step: its
+// fine pixel's, or the middle for a look that has none, and for every
+// look of a scene with a field in it, which the Metal draw makes with
+// its own kernel, whose marches take the middle. A path that has no pixel
+// on one side takes the middle on both.
+func (scene *staged) shiftFor(seen look) float64 {
+	if !seen.shifted || len(scene.fields) > 0 {
+		return marchHalf
+	}
+	return MarchShift(seen.across, seen.down)
+}
+
+// atTheMiddle is a medium whose march takes the middle of each step and
+// not a shift: a ring's, as planet's rings say, and as the Metal kernel's
+// ring_kind volumes do.
+type atTheMiddle interface{ MarchesAtTheMiddle() bool }
+
+// pcgHash is the PCG hash of O'Neill 2014 (pcg-random.org), the
+// output function of a 32-bit state. gpu/shift.metal has the same,
+// word for word, so the two draw alike.
+func pcgHash(value uint32) uint32 {
+	state := value*747796405 + 2891336453
+	word := ((state >> ((state >> 28) + 4)) ^ state) * 277803737
+	return (word >> 22) ^ word
+}
+
+// A shift is the top 24 bits of a hash over 2^24, which float32 and
+// float64 both hold exactly. It spans the whole step: a narrower span is
+// biased for any integrand that bends, and leaves the arcs at part of
+// their contrast.
+const (
+	shiftBits  = 24
+	shiftTop   = 32 - shiftBits
+	shiftScale = 1 << shiftBits
+)
+
+// shiftEdge is how far from the edge of its step a sample is kept, as a
+// share of the step: 2^-12, a power of two, so a float32 holds it and the
+// shift beside it exactly. A sample at the very end of a crossing sits
+// where the medium stops, and a float32's rounding of its place puts it in
+// the gas or out of it where a float64's does not, so a ray whose shift
+// was a hair from nought or one differed between the two by the whole of
+// a sample's light. The kept share moves 1 in 2048 of the shifts by less
+// than a 2048th of a step, a lean of the second order, which the
+// unbiasedness test measures.
+const shiftEdge = 1.0 / (1 << 12)
+
+// MarchShift is where in each step the ray of a fine pixel, at x and y
+// across the picture's rays, takes its samples: a share of the step from
+// nought up to under one, from the pixel's own integers by the PCG hash,
+// kept shiftEdge of a step from either end. Every ray of a picture has
+// its own, so the steps of a coarse march lie at different depths from
+// pixel to pixel, as fine noise that more rays to a pixel smooth, and not
+// as arcs where the steps line up (2026-11-26). Before this the march
+// took the middle of every step. The Metal kernel makes the same number
+// from the same integers, exactly.
+func MarchShift(x, y uint32) float64 {
+	share := float64(pcgHash(x^pcgHash(y))>>shiftTop) / shiftScale
+	return min(max(share, shiftEdge), 1-shiftEdge)
+}
 
 // roomy is how many crossings a march keeps in scratch on the stack
 // before it asks the heap for more.
@@ -345,7 +436,7 @@ func steppingIn(across []crossing, cuts int, taken, parts []int) *stepper {
 		taken, parts = make([]int, len(across)), make([]int, len(across))
 	}
 	return &stepper{across: across, cuts: cuts, taken: taken[:len(across)],
-		parts: parts[:len(across)]}
+		parts: parts[:len(across)], shift: marchHalf}
 }
 
 // nearest is the nearest step not yet taken, as a stride with its
@@ -361,8 +452,15 @@ func (steps *stepper) nearest() (stride, bool) {
 		length := (crossed.leave - crossed.enter) / float64(steps.cuts)
 		begin := crossed.enter + float64(steps.taken[k])*length
 		split := steps.refine.Splits(begin, begin+length)
+		// a step a beam has cut finer is already marched finely, and its
+		// samples are at the middle of each part, as the Metal march has
+		// them; only a whole step takes the shift
+		shift := steps.shift
+		if _, flat := crossed.volume.med.(atTheMiddle); flat || split > 1 {
+			shift = marchHalf
+		}
 		middle := float64(steps.taken[k]) +
-			(float64(steps.parts[k])+marchHalf)/float64(split)
+			(float64(steps.parts[k])+shift)/float64(split)
 		along := crossed.enter + middle*length
 		if !found || along < best.along {
 			found = true

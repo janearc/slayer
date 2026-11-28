@@ -188,7 +188,46 @@ func beyondWhite(lights []maths.Light, exposure float64) (over []maths.Light,
 // The Metal developer of improv/moonlake/omnipositor/gpudevelop blooms by
 // these weights, as float32s.
 func BloomWeights(radius float64) (weights []float64, reach int) {
-	reach = int(math.Ceil(reachSigmas * radius))
+	return bloomWeightsTo(radius, reachSigmas)
+}
+
+// unseenGlow is the light, as a share of white, below which the edge of a
+// cut-off glow is not seen as an edge: a thirty-second of white, a step of
+// under three per cent. Picked by eye, 2026-11-26: a glow that stops
+// above it shows as a square, and one that stops below it does not.
+//
+// The usual reach is kept for every light whose gaussian is not above
+// white where it is cut off, which is every light the bloom's tests and
+// pictures hold; only a light brighter than that, a star's, is carried
+// farther.
+const unseenGlow = 1.0 / 32
+
+// mostSigmas is the farthest, in sigmas, a bloom may reach however bright
+// the light it spreads. Picked: a gaussian is e^-32 down by then, and the
+// kernel stays under about seventeen sigmas wide.
+const mostSigmas = 8.0
+
+// sigmasFor is how many sigmas a bloom of lights that spill the over
+// reaches: the usual reach, or farther where the brightest spill is so
+// bright that the gaussian is still seen at the usual reach. A glow cut
+// off while it is still seen is a hard edge, a square, where a lens's is
+// round and falls to nothing. It is never past mostSigmas.
+func sigmasFor(over []maths.Light) float64 {
+	peak := 0.0
+	for _, light := range over {
+		peak = max(peak, light.R, light.G, light.B)
+	}
+	cutOff := peak * math.Exp(-reachSigmas*reachSigmas/pair)
+	if !(cutOff > whole) || math.IsInf(peak, whole) {
+		return reachSigmas
+	}
+	needed := math.Sqrt(pair * math.Log(peak/unseenGlow))
+	return math.Min(mostSigmas, max(reachSigmas, needed))
+}
+
+// bloomWeightsTo is BloomWeights cut off at a number of sigmas.
+func bloomWeightsTo(radius, sigmas float64) (weights []float64, reach int) {
+	reach = int(math.Ceil(sigmas * radius))
 	weights = make([]float64, pair*reach+whole)
 	var sum float64
 	for index := range weights {
@@ -272,7 +311,7 @@ func Bloom(lights []maths.Light, across, down int, exposure,
 		panic(fmt.Sprintf("colour: a bloom of %v pixels is past %v, "+
 			"wider than any picture", radius, widest))
 	}
-	weights, reach := BloomWeights(radius)
+	weights, reach := bloomWeightsTo(radius, sigmasFor(over))
 	sideways := spread(over, weights, reach, across, down, false)
 	glow := spread(sideways, weights, reach, across, down, true)
 	// the glow goes back to the scale of the light by the reciprocal of

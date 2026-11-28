@@ -1,0 +1,154 @@
+$schema: https://github.com/janearc/slayer/schemas/ecosystem-v2.json
+# GPU diagnostic: identical placement, but membrane paint is omitted.
+# See AZURE-FLOCK.md for the detailed CPU reference and limitations.
+scene:
+  name: Azure flock, lit and reframed GPU diagnostic
+  seed: 241
+  setting: space
+  light: none
+  recipes:
+    ptero-glide: {animal: {family: reptile, file: ./hatz-glide.yaml, species: hatzegopteryx, study: detailed-plain}}
+    ptero-left: {animal: {family: reptile, file: ./hatz-left.yaml, species: hatzegopteryx, study: detailed-plain}}
+    ptero-right: {animal: {family: reptile, file: ./hatz-right.yaml, species: hatzegopteryx, study: detailed-plain}}
+    ptero-lift: {animal: {family: reptile, file: ./hatz-lift.yaml, species: hatzegopteryx, study: detailed-plain}}
+  film: {width: 1280, height: 800, rays: 2, exposure: 0.003, wide: 65}
+  cameras:
+    flock:
+      location: {at: [0, 0, 20]}
+      orientation: {look_at: [-100, -19, 8]}
+  set:
+    things:
+      flyer-01: {recipe: ptero-left, seed: 241, east: -12, north: 4, height: {value: 18, unit: m}, heading: {value: 100, unit: deg}}
+      flyer-02: {recipe: ptero-left, seed: 242, east: -43, north: 17, height: {value: 5, unit: m}, heading: {value: 145, unit: deg}}
+      flyer-03: {recipe: ptero-right, seed: 243, east: -43, north: -3, height: {value: 15, unit: m}, heading: {value: 210, unit: deg}}
+      flyer-04: {recipe: ptero-lift, seed: 244, east: -48, north: -15, height: {value: 9, unit: m}, heading: {value: 150, unit: deg}}
+      flyer-05: {recipe: ptero-glide, seed: 245, east: -56, north: -26, height: {value: 20, unit: m}, heading: {value: 225, unit: deg}}
+      flyer-06: {recipe: ptero-left, seed: 246, east: -65, north: -39, height: {value: 14, unit: m}, heading: {value: 115, unit: deg}}
+      flyer-07: {recipe: ptero-right, seed: 247, east: -71, north: -31, height: {value: 4, unit: m}, heading: {value: 200, unit: deg}}
+      flyer-08: {recipe: ptero-lift, seed: 248, east: -77, north: -20, height: {value: 25, unit: m}, heading: {value: 145, unit: deg}}
+      flyer-09: {recipe: ptero-glide, seed: 249, east: -84, north: -7, height: {value: 9, unit: m}, heading: {value: 225, unit: deg}}
+      flyer-10: {recipe: ptero-left, seed: 250, east: -94, north: -51, height: {value: 25, unit: m}, heading: {value: 190, unit: deg}}
+      flyer-11: {recipe: ptero-right, seed: 251, east: -97, north: -37, height: {value: 4, unit: m}, heading: {value: 150, unit: deg}}
+      flyer-12: {recipe: ptero-lift, seed: 252, east: -104, north: 7, height: {value: 24, unit: m}, heading: {value: 205, unit: deg}}
+  world:
+    unit: 1
+    sky:
+      horizon: {srgb_linear: [0.12, 0.30, 0.48]}
+      zenith: {srgb_linear: [0.035, 0.10, 0.23]}
+      ground: {srgb_linear: [0.17, 0.31, 0.42]}
+      source: eye
+    # Artistic photographic lighting, not illumination inferred from the suns.
+    suns:
+      flock-key:
+        toward: [0.3, 0.82, 0.49]
+        colour: {srgb_linear: [4.2, 4.1, 3.9]}
+        source: eye
+    floods:
+      cool-fill:
+        colour: {srgb_linear: [0.42, 0.50, 0.55]}
+        strength: 4.5
+        source: eye
+    # Theatrical cues are enlarged and moved above the real star directions.
+    materials:
+      primary-cue: {glow: {srgb_linear: [8, 3, 1]}, source: eye}
+      companion-cue: {glow: {srgb_linear: [1, 3, 8]}, source: eye}
+    spheres:
+      primary-disc-cue: {material: primary-cue, middle: [-1000, 0, 145], radius: 12, source: eye}
+      companion-disc-cue: {material: companion-cue, middle: [-932, -363, 155], radius: 8, source: eye}
+    binaries:
+      pair:
+        generate:
+          primary: {mass: 2.45, age: 1.2e7}
+          companion: {mass: 0.62, temperature: 7400, radius: 0.0122}
+          separation: 9.2
+          eccentricity: 0.16
+          drop: {mass: 0.1, temperature: 3000, age: 1.0e9, distance: 48, phase: 8, made_up: true}
+        drop_at: [3830375473414, -2214876735866, -46725997.1872]
+        time: 4
+    bodies:
+      azure:
+        generate:
+          mass: 17.15
+          makeup: {metal: 0.03, rock: 0.12, ice: 0.70, gas: 0.15}
+          day: 16
+          tilt: 20
+          distance: 20
+          sun: {mass: 2.45, luminosity: 50.6292440418}
+          age: 1.2e7
+          seed: 29
+          giant_look:
+            made_up: true
+            paints: [[0.03, 0.08, 0.2], [0.12, 0.42, 0.65], [0.58, 0.85, 0.9], [0.08, 0.25, 0.5], [0.25, 0.65, 0.75], [0.04, 0.12, 0.3], [0.45, 0.7, 0.85]]
+            roil: 0.09
+            shear: 5
+            grain: 0.06
+            fine: 0.04
+            mottle: 0.4
+            jets: 14
+        middle: [0, 0, -46725997.1872]
+        detail: 3
+    wisps:
+      # Made-up local clouds; they are not resolved giant weather.
+      low-blue-bank:
+        middle: [-120, -25, -55]
+        radius: 90
+        thick: 0.0003
+        seed: 308
+        scale: 24
+        amount: 0.82
+        colour: {srgb_linear: [0.20, 0.52, 0.84]}
+        source: eye
+      high-pale-bank:
+        middle: [-170, -32, 88]
+        radius: 100
+        thick: 0.00025
+        seed: 309
+        scale: 32
+        amount: 0.86
+        colour: {srgb_linear: [0.46, 0.72, 0.95]}
+        source: eye
+      cloud-ragged-west:
+        middle: [-94, -58, -18]
+        radius: 27
+        thick: 0.01
+        seed: 311
+        scale: 8
+        amount: 0.94
+        colour: {srgb_linear: [0.40, 0.68, 0.90]}
+        source: eye
+      cloud-ragged-east:
+        middle: [-125, 12, -20]
+        radius: 34
+        thick: 0.008
+        seed: 312
+        scale: 10
+        amount: 0.93
+        colour: {srgb_linear: [0.37, 0.60, 0.87]}
+        source: eye
+      cloud-upper-island:
+        middle: [-110, -45, 55]
+        radius: 36
+        thick: 0.05
+        seed: 313
+        scale: 8
+        amount: 0.99
+        colour: {srgb_linear: [0.55, 0.75, 0.95]}
+        source: eye
+      cloud-high-centre:
+        middle: [-145, -3, 62]
+        radius: 40
+        thick: 0.035
+        seed: 314
+        scale: 9
+        amount: 0.98
+        colour: {srgb_linear: [0.56, 0.72, 0.95]}
+        source: eye
+      cloud-side-bank:
+        middle: [-120, -74, 30]
+        radius: 35
+        thick: 0.045
+        seed: 315
+        scale: 7
+        amount: 0.98
+        colour: {srgb_linear: [0.32, 0.55, 0.84]}
+        source: eye

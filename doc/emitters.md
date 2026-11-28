@@ -1,24 +1,21 @@
 # Emitters
 
-An emitter describes a light source independently of a visible surface:
-a star's illumination, a magnetar's beams, or a jet. Keeping that description
-as data lets the CPU evaluate its motion and send the result to the GPU,
-which cannot call Go methods.
+an emitter supplies illumination to surfaces and media. use
+[surface emission](light.md#lights-and-things-that-glow) to make
+the source itself visible. Slayer evaluates time-dependent lamp
+state for the frame before sending supported sources to Metal.
 
-## Forms of emission
-
-- **Point:** a position, a Celestial spectrum, and a time-dependent strength.
-  It shines equally in every direction, or in a cone when `Width` is set.
-  A `Pulse` function gives its strength over time.
-- **Polar:** two beams with independent directions, widths, and falloffs.
-  The second pole can be offset from the first pole's opposite; magnetic
-  poles need not form a centred, symmetric pair.
-
-The kinds `emit` has are `Point`, `Polar`, `Beam` (a finite Gaussian
-column), `Volume` (a sphere of light) and `Distant`.
+| Go type | Light model |
+|---|---|
+| `emit.Point` | inverse-square falloff from a position. optional cone and time-dependent strength. |
+| `emit.Polar` | two beams from a position, with a shared width and falloff. the second pole can be offset from the first pole’s opposite. |
+| `emit.Beam` | finite Gaussian column with a source radius, reach and divergence. surfaces and media make it visible. |
+| `emit.Volume` | sphere with integrated scalar falloff. visibility uses a ray to its centre. |
+| `emit.Distant` | constant direction and incident strength across the scene. |
 
 ## Spin and precession
 
-For `emit.Polar` only: `Spin` turns the poles about the spin axis, and
-`Cone` and `Precess` move the spin axis around a cone, by angle and period.
-A magnetar's beams sweep as it spins; a precessing jet traces a cone.
+in `emit.Polar`, `Spin` is the period of the poles’ rotation about
+the spin axis. `Tilt` offsets the magnetic axis from that spin
+axis. `Cone` and `Precess` set the angle and period of the spin
+axis’s motion about `Axis`.

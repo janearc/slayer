@@ -1,8 +1,7 @@
 # writing a tune for a video
 
-this page is for a small language model that has read `SCORING.md` and can
-write a valid score. it adds what a tune for a video needs: parts a cut can
-land on, and a sheet that says where they are. read `SCORING.md` first.
+use [scoring](SCORING.md) to write a tune. a cut sheet marks
+where each section begins so an edit can land on a musical change.
 
 ## what a tune for a video is
 
@@ -66,24 +65,9 @@ a cut sheet is a second file beside the score, `NAME.cuts.json`. it is read
 by `cheeptune.ReadCuts` and checked against the score. an error names the
 part and what to change; the checker tells you every problem at once.
 
-```
-{
-	"group": "sombre and slow",
-	"mood": "sombre and slow",
-	"feeling": "A quiet room after bad news.",
-	"intent": "A slow, wordless moment: an empty house, a letter.",
-	"listen_for": "The drum that starts like a heartbeat at 0:11.",
-	"voicing": "@tape-chords",
-	"tempo": 64,
-	"meter": 4,
-	"seconds": 41.25,
-	"parts": [
-		{"name": "embers", "bar": 1, "second": 0.0,
-		 "change": "one voice and a held chord, no drums",
-		 "feels": "still and alone: nobody speaks"}
-	]
-}
-```
+see [the ember-rising cut sheet](examples/ember-rising.cuts.json)
+for a complete example. use `slayer tunes DIR NAME --check` to
+check and synthesize a tune from its score and sheet.
 
 | field | rule |
 | --- | --- |
@@ -92,15 +76,16 @@ part and what to change; the checker tells you every problem at once.
 | `feeling` | one sentence: what a viewer should feel |
 | `intent` | one sentence: what kind of video or moment it is for |
 | `listen_for` | one sentence naming the one thing to notice, with its time |
-| `voicing` | a built-in voicing, written with the `@` |
+| `voicing` | a built-in or library voicing, written with the `@` |
 | `tempo`, `meter` | the same as the score's |
-| `seconds` | the score's length, to two decimals: bars times meter times 60 divided by tempo |
-| `parts` | at least two (the sample above shows one to be short). each has `name`, `bar`, `second`, `change` and `feels` |
+| `seconds` | the score’s musical length, rounded to two decimals. sum the durations across any tempo changes |
+| `parts` | at least two. each has `name`, `bar`, `second`, `change` and `feels` |
 
 in a part, `bar` counts from one and the first part is bar 1. bars go up
-from one part to the next, and `name` is used once. `second` is the bar's
-start, `(bar - 1) times meter times 60 divided by tempo`, to two decimals
-(the reader accepts a hundredth of a second either way).
+from one part to the next, and `name` is used once. `second` gives
+the start of the bar, rounded to two decimals. use the score’s tempo
+changes when calculating it. the checker accepts a difference of up
+to 0.006 seconds.
 
 `change` is one line
 on what changes there. `feels` is a short phrase in feeling terms, not in
@@ -108,7 +93,7 @@ theory, at most ten words: "the floor drops out: tension", "everything
 arrives: release", "one voice left alone: waiting".
 
 write the sheet before the notes. say what the tune is for, then write it,
-then render it and look at the piano roll (`Piece.Roll()`): if the roll does
+then render it and look at the piano roll (`Piece.WriteRoll(path)`). if the roll does
 not show the change the sheet claims, change the tune or change the words.
 
 `ReadCuts(path, score)` returns the sheet; `Spans()` gives each part's name,
@@ -116,8 +101,8 @@ bar, start, end, change and feels, with times as durations.
 
 ## the library
 
-`cheeptune/library/` holds twenty-three tunes written to this page, each with a
-sheet. they are compiled in. `@NAME` names one as a score, and
+`cheeptune/library/` holds embedded tunes with their cut sheets.
+`slayer list library` shows the current collection. `@NAME` names one as a score, and
 `cheeptune.OpenTune("NAME")` renders it with the voicing its sheet names and
 returns the sheet as well. `cheeptune.Library()` lists them.
 
@@ -128,11 +113,9 @@ sheet, and its sheet is read against it.
 
 ### slow and somber, then a boss fight: ember-rising
 
-the file is `examples/ember-rising.json`. this began as a first draft that
-was valid and not tuned by ear. what was changed: the sheet was written, and
-the last bar before the drop now has a beat of rest in the lead, so the drop
-lands out of a gap and not into a wall; the opening comment says the plan.
-the notes are otherwise the draft's. 132 a minute, a minor.
+the [score](examples/ember-rising.json) runs at 132 beats per minute
+in A minor. a beat of rest in the lead before bar 11 leaves space
+for the drop.
 
 ```
 {
@@ -415,4 +398,5 @@ its sheet, `library/glass-hour.cuts.json`:
 - a sheet that says one thing and a tune that does another. render the roll
   and look.
 - a time quoted in `listen_for` that is not where the part is. work it out
-  from the bar: `(bar - 1) times meter times 60 divided by tempo`.
+  from the bar and the score’s tempo map. at a fixed tempo, use
+  `(bar - 1) * meter * 60 / tempo`.

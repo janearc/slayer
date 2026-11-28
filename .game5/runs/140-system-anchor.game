@@ -1,0 +1,1 @@
+system-anchor . :: go run ./cmd/system-anchor

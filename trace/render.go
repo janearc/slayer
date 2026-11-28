@@ -293,10 +293,25 @@ func render(seen view) (*frame.Frame, error) {
 // Four of the five, render, the kept draw, SampledEach and Replay, ask
 // again after painting, for what only drawing shows; band does not.
 func (seen view) staging() (*staged, error) {
+	return seen.stagingIn(maths.Band{})
+}
+
+func (seen view) stagingIn(band maths.Band) (*staged, error) {
 	scene := stage(seen.world, seen.at)
 	scene.enableClearInscatterFault(seen)
 	if err := scene.refusal(); err != nil {
 		return nil, err
+	}
+	if err := scene.prepareFibres(band, seen.holding > 0); err != nil {
+		return nil, err
+	}
+	if err := scene.validateThinTissue(band, seen.holding > 0); err != nil {
+		return nil, err
+	}
+	if band.Nanometres == 0 {
+		if err := scene.prepareSubsurface(); err != nil {
+			return nil, err
+		}
 	}
 	return scene, nil
 }
@@ -337,7 +352,8 @@ func (seen view) through(scene *staged, wide float64, x, y int) frame.Pixel {
 		told.tell("a ray from the lens", "x", x, "y", y, "of", of,
 			"ray", ray)
 	}
-	asked := look{ray: ray, pixel: wide, grain: seen.grain(wide)}
+	asked := look{ray: ray, pixel: wide, grain: seen.grain(wide),
+		shifted: true, across: uint32(x), down: uint32(y)}
 	if seen.holding > 0 {
 		asked.inside, asked.holding = seen.inside, seen.holding
 	}

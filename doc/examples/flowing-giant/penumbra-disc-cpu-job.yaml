@@ -1,0 +1,7 @@
+"$schema": https://github.com/janearc/slayer/schemas/job-v1.json
+scene: {set: penumbra-disc.yaml}
+renderer: cpu
+camera: {name: close}
+outputs:
+  picture: ../../../out/2026-11-27-penumbra-disc-cpu/proof.png
+  raw: ../../../out/2026-11-27-penumbra-disc-cpu/light.pfm

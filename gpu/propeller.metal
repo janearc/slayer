@@ -25,7 +25,9 @@ static float propeller_at(device const float *card, float3 point) {
   }
   float2 d=float2(x,y)-centre;
   float r2=dot(d,d);
-  if(r2<=9*width*width)sum+=exp(-.5f*r2/(width*width));
+  // 2026-11-26: lowered by its value at the 3 sigma cut (exp(-4.5)) so it
+  // reaches zero there, as scene/medium's filament does
+  if(r2<=9*width*width)sum+=max(exp(-.5f*r2/(width*width))-0.011108997f,0.0f);
  }
  if(card[propeller_spread]>0)sum*=(core/width)*(core/width);
  float start=wake_smooth(0.0f,2*core,s),end=1-wake_smooth(active-2*core,active,s);

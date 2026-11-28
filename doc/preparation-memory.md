@@ -1,7 +1,7 @@
 # Geometry preparation without keeping every intermediate
 
-This changes host preparation only. It introduces no MSL transport change,
-field ABI change or density threshold.
+host preparation packs geometry and releases duplicate construction
+data before tracing.
 
 ## Packing
 
@@ -50,6 +50,5 @@ process RSS. Go heap management, Metal allocations, staging geometry,
 image development and retained frame resources also hold memory. No forced
 global garbage collection is added.
 
-The [streamed readback draft](streamed-readback.md) separately bounds
-the raw-sample array during tracing. Together these remove two sources
-of duplicate data, but do not establish an eight-hour animation budget.
+[streamed readback](streamed-readback.md) separately bounds the
+raw-sample array during tracing.

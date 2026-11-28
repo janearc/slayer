@@ -99,6 +99,9 @@ var (
 	// spotStretchFloor is the least a spot's stretch is read as, so that
 	// no spot is infinitely tall.
 	spotStretchFloor = pickedNumber("spot-stretch-floor")
+	// These two numbers set the artistic scale of broken cloud streaks.
+	spotDetailScale   = pickedNumber("spot-detail-scale")
+	spotDetailOctaves = int(pickedNumber("spot-detail-octaves"))
 	// streetLonJitter is how far, as a share of the gap between storms, a
 	// storm is placed off its even place along a street.
 	streetLonJitter = pickedNumber("street-lon-jitter")
@@ -165,6 +168,11 @@ type Spot struct {
 	Size, Stretch float64
 	// Turn is how far, in radians, the gas at the heart is swirled.
 	Turn float64
+	// Detail breaks up the smooth tint with seeded, swirled cloud streaks.
+	// It is an artistic colour model, not a fluid or cloud-height simulation.
+	// Zero keeps the original look.
+	Detail float64
+	Seed   uint64
 	// Paint is the colour at the heart, blending out to the band's.
 	Paint maths.Light
 }
@@ -308,6 +316,13 @@ func (spot Spot) swirl(latitude, longitude float64, tint maths.Light,
 	across, up = across*cosine-up*sine, across*sine+up*cosine
 	latitude = spot.Lat + up
 	longitude = spot.Lon + across*stretch/cosLat
+	if spot.Detail > nought {
+		// Sample after the turn, so streaks follow the same swirl as the
+		// underlying bands. The chosen scale and modulation are art direction.
+		grain := noise.Fractal(spot.Seed, across/spot.Size*spotDetailScale,
+			up/spot.Size*spotDetailScale, 0, spotDetailOctaves)
+		in *= unity - math.Min(unity, spot.Detail)*math.Max(nought, math.Min(unity, half+grain))
+	}
 	tint = tint.Scale(tintBy * (unity - in)).Add(spot.Paint.Scale(in))
 	tintBy = tintBy + in*(unity-tintBy)
 	if tintBy > nought {

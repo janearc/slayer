@@ -102,6 +102,13 @@ var plainOverrides = []override{
 		}},
 	{"camera", "a camera of the scene by name, over the job's",
 		"a camera's name", named(job.CameraName)},
+	{"camera-wide", "a named still camera's horizontal field of view in degrees",
+		"a finite angle in degrees", func(value, _ string) (job.Override, bool) {
+			degrees, err := strconv.ParseFloat(value, 64)
+			return job.CameraWide(degrees), err == nil
+		}},
+	{"still-camera", "a checked still camera path and scene time",
+		"a camera recipe", named(job.StillCamera)},
 	{"renderer", "cpu, gpu, gpu-native-shadows or gpu-native",
 		"a renderer's name", named(job.Renderer)},
 	{"quality", "exact or preview, over the job's",

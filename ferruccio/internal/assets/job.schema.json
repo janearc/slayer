@@ -116,6 +116,12 @@
           "required": ["left", "top", "width", "height"],
           "additionalProperties": false
         },
+        "samples": {
+          "description": "The exact total samples per pixel, from 1 to 64. Say samples or rays, not both. Supported for CPU and GPU stills without a rig, wire mode, a region or lighting shortcuts.",
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 64
+        },
         "rays": {
           "description": "Rays along each side of a pixel, from 1 to 64, so 4 is sixteen rays a pixel. Unsaid, the set's count is used.",
           "type": "integer",

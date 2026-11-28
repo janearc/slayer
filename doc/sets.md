@@ -1,61 +1,74 @@
 # sets
 
-a set file is a scene written as data, in yaml, so it can be read,
-diffed and handed to anyone without reading go.
+a set is a YAML scene. it holds the world, the things in it, cameras and
+film settings. start with [the shoebox](../sets/shoebox.yaml) for direct
+world pieces, [the observatory](observatory-ecosystem.md) for seeded
+recipes on terrain, or [Webb at L2](../sets/webb-at-l2.yaml) for manufactured
+objects in space. from the checkout root, check the scene without tracing
+a frame, or draw it using the front door:
 
-it says what a scene wants, at whatever level the scene knows it: a
-hillside by its terrain and its stands of trees, a planet by its air,
-or a house box by box. the set package reads it and checks every
-value; the package each part belongs to builds it.
+```sh
+game build slayer
+game run slayer -- assess sets/webb-at-l2.yaml --width 320 --height 180 --rays 1
+game run slayer -- draw sets/webb-at-l2.yaml --width 320 --height 180 --rays 1 --out out/webb.png
+```
 
-sets/shoebox.yaml is the house under saturn, its world piece by piece,
-and house draws it. sets/kilauea-iki.yaml and the others are hillsides
-and planets, and hillside draws them.
+use a [job](../job/README.md) when you want the set, renderer, film timing
+and output choices recorded together. a job can refer to a set with
+`scene.set`; that path is relative to the job file. a set's `film.rays`
+sets the number of rays per side of a pixel. use a job's `film.samples`
+or the draw flag `--spp` for an exact total on supported stills.
 
-the later [ecosystem subset](observatory-ecosystem.md) adds recipes,
-complexity and prescribed weather. its bundled schema covers only that
-subset; the legacy fields below remain available without `$schema`.
+## schemas and stage support
 
-a set may name one of two schemas in `$schema`: version 1, the schema
-above, or version 2 (`set/ecosystem-v2.schema.json`), which has all of
-version 1 and adds scenes set in space, bodies in orbit, and cameras that
-move. one reader takes both and checks a file against the schema it names.
+unlabelled sets use the legacy reader. set `$schema` at the document root
+to opt into a bundled schema:
 
-a feature of version 2 that the reader keeps and no stage draws yet is
-refused by the session by name, with the file, the key and where it stands,
-before anything is staged.
+- [v1](../set/ecosystem.schema.json) uses
+  `https://github.com/janearc/slayer/schemas/ecosystem-v1.json`.
+- [v2](../set/ecosystem-v2.schema.json) uses
+  `https://github.com/janearc/slayer/schemas/ecosystem-v2.json`.
+  use it for `scene.setting: space`.
 
-two are drawn. `setting: space` is drawn by the session's stage for a scene
-in space (session/afloat.go), and a film's `fps` is read and has no use
-in a still. sets/webb-at-l2.yaml is the example.
+slayer uses these identifiers to select local schemas. the reader also
+checks keys, units and references. the stage checks whether the requested
+features can be drawn together, and the renderer checks what it can trace.
+`slayer assess FILE` runs the staging checks without drawing. a v2 feature
+that is read but still undrawn gives a diagnostic with the file, key and
+position. examples include declarative orbits, attitudes, star catalogues,
+instrument eyes and camera moves inside a set. put camera moves in the
+[job](../job/README.md) or a [sequence plan](../session/sequence.schema.json).
 
-a scene in space:
+## a scene in space
 
-- has no ground and no air. its sky is black unless its world half says
-  one.
-- stands each thing, a kind the manufactory makes, either at its legacy
-  east, north and height or at an explicit `position` in metres from the
-  scene's origin, and turns it by its heading or not at all.
-- is lit by `light: sun`, one distant lamp from `sun:` at any altitude,
-  as bright as sunlight at the earth at the film's exposure; or by
-  `light: none`, no lamp.
-- is seen by a fixed camera, `location.at` and `orientation.look_at`,
-  or one placed off a thing.
-- refuses by name stands, texts, ecosystems, fire fronts, fuel beds,
-  layers of air, a planet, a burning thing and a recipe.
+`setting: space` draws a scene without terrain. use `light: sun` with a
+`sun` direction, `light: moon` with a `moon` direction, or `light: none`
+for no light from that setting. world pieces can supply their own sky and
+emitters. use a fixed camera with `location.at` and `orientation.look_at`,
+or a supported camera placed off a thing.
 
-every other version 2 key is still refused by name: the date of a scene
-in space (on the ground the date works the sun, see the sun, below), the
-frame, an anchor, a globe, a sky of stars, an orbit, an attitude, an
-eye, a camera's moves and duration, and the kinds point, star, lantern,
-culture-orbital and nebula.
+place a catalogue thing with signed `east` and `north` and optional
+nonnegative `height`, or with a signed absolute `position`. `heading`
+turns it clockwise from north. `scale` is a multiplier from 0.01 through
+100 for an explicit `east`/`north` placement without attitude or
+[`part-spin`](model/spacecraft/part-spin.md). the stage refuses scale for
+deforming models.
+
+the stage supports selected recipes and stands that can be placed without
+terrain. a stand using a `within` wedge places its members at height zero.
+terrain-dependent height, slope and canopy controls are refused, as are
+texts, ecosystems, fire fronts, fuel beds and the standalone `planet`
+block. consult the [space placement guide](../set/SPACE-COORDINATES.md)
+and the [spacecraft walkthrough](model/spacecraft/guide/README.md) for
+worked examples.
 
 ## what a set says
 
 everything is under scene:
 
 - name: the scene's name.
-- light: ambient, moon or sun.
+- light: ambient, moon, sun or none. see the space setting above for
+  its supported choices.
 - location: lat and lon, in degrees. timeofday: hhmm, on a local clock.
   date: the day, as year-month-day. utc-offset: how far the clock is
   ahead of UTC, as `{value: 8, unit: h}`, from -12 to 14 hours. these
@@ -300,6 +313,14 @@ a key a block does not take is refused, saying the keys it does. a
 typo should fail loudly, never draw a picture without the thing it
 misspelled. a key said twice in one block is refused too: yaml forbids
 it, and the reader would otherwise read both.
+
+a recipe under `scene.recipes` can supply a structure built from parts.
+give its `composition` either a `file` path relative to the set or an
+`inline` description, then place the recipe under `scene.set.things`.
+the reader checks and retains the composition as part of the job input.
+the [gate set](../set/testdata/gate-composition-set.yaml) shows how to place
+a recipe. its [composition](../set/testdata/gate-composition.yaml) supplies
+the parts, connections and roads.
 
 ## places
 

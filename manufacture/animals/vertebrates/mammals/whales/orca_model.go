@@ -25,7 +25,7 @@ type orcaModel struct {
 	rest     *orcaRestSkin
 
 	bindingOnce sync.Once
-	binding     [][]skeleton.Influence
+	binding     *skeleton.Skin
 	bindingErr  error
 }
 

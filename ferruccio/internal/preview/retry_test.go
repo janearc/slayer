@@ -55,19 +55,28 @@ func TestQueueOneBadStatusReadDoesNotEndObservation(t *testing.T) {
 	}
 }
 
-// TestQueueGivingUpCancelsTheJobFirst is the anti-test: when every read in
-// the bound fails, observation ends, the job is cancelled first and the
-// error says so.
+// A persistently malformed ledger is not trusted as a status outage.
 func TestQueueGivingUpCancelsTheJobFirst(t *testing.T) {
 	plan, tools := queuedPlan(t)
 	runner := NewMockRunner(gomock.NewController(t))
 	var request queueRequest
 	submit := expectSubmit(t, runner, tools, plan, &request, nil)
-	failing := func() ([]byte, error) { return nil, errors.New("status unavailable") }
+	failing := func() ([]byte, error) { return []byte("{"), nil }
 	reads := expectStatus(t, runner, tools, failing).After(submit).Times(3)
 	expectGiveUp(t, runner, tools, failing, reads)
 	err := (queueClient{runner: runner, attempts: 3}).run(context.Background(), tools, plan, io.Discard, nil)
 	if err == nil || !strings.Contains(err.Error(), "observation given up") || !strings.Contains(err.Error(), "cancelling job 41 first") {
 		t.Fatalf("error = %v; want the give-up and the cancellation named", err)
+	}
+}
+
+func TestInvalidLedgerIsNotHiddenByLaterCommandFailure(t *testing.T) {
+	plan, tools := queuedPlan(t)
+	runner := NewMockRunner(gomock.NewController(t))
+	first := expectStatus(t, runner, tools, func() ([]byte, error) { return []byte("{"), nil })
+	expectStatus(t, runner, tools, func() ([]byte, error) { return nil, errors.New("status unavailable") }).After(first)
+	_, err := (queueClient{runner: runner, attempts: 2}).readStatus(context.Background(), tools, plan, queueRequest{}, 41, io.Discard)
+	if err == nil || errors.Is(err, errStatusUnavailable) {
+		t.Fatalf("invalid ledger treated as command outage: %v", err)
 	}
 }

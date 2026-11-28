@@ -56,6 +56,8 @@ func (work *Workspace) lookInput(now time.Time) look.Input {
 func (work *Workspace) lookScene() (*placement.DisplayScene, string) {
 	live := &work.working
 	switch {
+	case live.plan != nil:
+		return nil, "the authored map shows source coordinates only"
 	case live.failure != "":
 		return nil, "the display refused this draft: " + live.failure
 	case live.scene == nil:

@@ -1,0 +1,39 @@
+$schema: https://github.com/janearc/slayer/schemas/ecosystem-v2.json
+# Artistic prescribed cloud, not simulated atmospheric dynamics.
+scene:
+  name: Local cloud deck study
+  seed: 315
+  setting: space
+  light: none
+  film: {width: 960, height: 600, rays: 2, exposure: 1, wide: 55}
+  cameras:
+    oblique:
+      location: {at: [0, -150, 90]}
+      orientation: {look_at: [0, 0, 35]}
+  world:
+    unit: 1
+    sky:
+      horizon: {srgb_linear: [0.20, 0.42, 0.66]}
+      zenith: {srgb_linear: [0.06, 0.16, 0.35]}
+      ground: {srgb_linear: [0.20, 0.42, 0.66]}
+      source: eye
+    suns:
+      key:
+        toward: [-0.4, -0.6, 0.7]
+        colour: {srgb_linear: [1.6, 1.6, 1.5]}
+        source: eye
+    floods:
+      fill:
+        colour: {srgb_linear: [0.28, 0.38, 0.55]}
+        strength: 1
+        source: eye
+    cloud-decks:
+      cloud-bank:
+        base: [0, 0, 0]
+        size: [260, 260, 60]
+        colour: {srgb_linear: [0.83, 0.9, 1]}
+        coverage: 0.65
+        extinction: 0.05
+        scale: 35
+        seed: 315
+        source: eye

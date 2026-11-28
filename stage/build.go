@@ -14,7 +14,9 @@ import (
 	"github.com/janearc/slayer/maths"
 	"github.com/janearc/slayer/mesh"
 	"github.com/janearc/slayer/oceantex"
+	scenebodies "github.com/janearc/slayer/scene/bodies"
 	"github.com/janearc/slayer/scene/bodies/template"
+	"github.com/janearc/slayer/scene/generate"
 	"github.com/janearc/slayer/scene/medium"
 	"github.com/janearc/slayer/scene/shape"
 	"github.com/janearc/slayer/scene/sky"
@@ -57,8 +59,33 @@ var builders = map[string]builder{
 	"spheres": spheres, "lamps": lamps, "lamp-fields": crowds,
 	"beams": beams, "spots": spots,
 	"floods": floods, "sky": hang, "bodies": bodies, "suns": suns,
-	"wisps": wisps, "fizzes": fizzes, "vapor-cavities": vaporCavities,
+	"wisps": wisps, "cloud-decks": localCloudDecks, "fizzes": fizzes, "vapor-cavities": vaporCavities,
 	"imports": imports,
+}
+
+// localCloudDecks stages finite prescribed cloud, distinct from flat air.
+// Metre units keep extinction, size and the noise scale consistent.
+func localCloudDecks(world *thing.World, said set.World,
+	_ map[string]*thing.Material, shift maths.Vec) error {
+	if said.Unit() != 1 {
+		return fmt.Errorf("cloud-decks require metre world units")
+	}
+	for _, each := range said.CloudDecks() {
+		size := each.Size()
+		coverage, extinction, scale, seed := each.Weather()
+		weather := medium.NewWeather(extinction, size[2], coverage, seed, maths.Vec{})
+		weather.PatchScale = scale
+		bounds := maths.Box{Min: maths.V(-size[0]/2, 0, -size[1]/2), Max: maths.V(size[0]/2, size[2], size[1]/2)}
+		deck, err := medium.NewCloud(weather, bounds, 0, size[2])
+		if err != nil {
+			return fmt.Errorf("cloud deck %s: %w", each.Name(), err)
+		}
+		if err := deck.Feather(each.Feather()); err != nil {
+			return fmt.Errorf("cloud deck %s: %w", each.Name(), err)
+		}
+		world.AddVolume(thing.Volume{Medium: deck, Material: &thing.Material{Name: each.Name(), Colour: light(each.Colour())}, Motion: thing.Still(maths.Subspace{Origin: moved(each.Base(), shift)})})
+	}
+	return nil
 }
 
 // oceanSurface builds the world's explicitly sampled finite wave sheet, or
@@ -391,18 +418,18 @@ func keyed(run set.Motion, base, shift maths.Vec) thing.Keyed {
 // lamps lights each bulb, a black body's light from beyond its radius.
 func lamps(world *thing.World, said set.World,
 	_ map[string]*thing.Material, shift maths.Vec) error {
-	return lit(world, said.Lamps(), shift)
+	return lit(world, said.Lamps(), shift, true)
 }
 
 // crowds lights each lamp the set's lamp-fields scatter, as lamps does.
 func crowds(world *thing.World, said set.World,
 	_ map[string]*thing.Material, shift maths.Vec) error {
-	return lit(world, said.LampFields(), shift)
+	return lit(world, said.LampFields(), shift, false)
 }
 
 // lit puts each bulb in the world. A black body is worked out once for
 // each temperature and strength: a crowd says one.
-func lit(world *thing.World, bulbs []set.Lamp, shift maths.Vec) error {
+func lit(world *thing.World, bulbs []set.Lamp, shift maths.Vec, authored bool) error {
 	type shine struct{ heat, strength float64 }
 	made := map[shine]bands.Light{}
 	for _, each := range bulbs {
@@ -419,7 +446,12 @@ func lit(world *thing.World, bulbs []set.Lamp, shift maths.Vec) error {
 		at := moved(each.At(), shift)
 		bulb := emit.Point{At: at, Light: spectrum,
 			Beyond: each.Radius()}
-		world.Lamp(bulb.When(still))
+		lamp := bulb.When(still)
+		if authored {
+			world.AuthoredLamp(lamp, thing.AuthorRef{Collection: "scene.world.lamps", Name: each.Name()})
+		} else {
+			world.Lamp(lamp)
+		}
 	}
 	return nil
 }
@@ -457,9 +489,10 @@ func spots(world *thing.World, said set.World,
 		heat, strength := each.Shine()
 		cone, soft := each.Cone()
 		at := moved(each.At(), shift)
-		world.Lamp(film.Spot{At: at, Aim: each.Aim(),
+		world.AuthoredLamp(film.Spot{At: at, Aim: each.Aim(),
 			Strength: swatches.Light(swatch.Planckian(heat)).Scale(strength),
-			Cone:     cone * maths.Degree, Soft: soft * maths.Degree})
+			Cone:     cone * maths.Degree, Soft: soft * maths.Degree},
+			thing.AuthorRef{Collection: "scene.world.spots", Name: each.Name()})
 	}
 	return nil
 }
@@ -494,27 +527,28 @@ func hang(world *thing.World, said set.World,
 	return nil
 }
 
-// bodies places each body from its template: its middle at a place, at
+// bodies places each body, from its template or generated from its
+// numbers: its middle at a place, at
 // the radius the set says or its own true size in the world's unit, its
 // moons' ground tiled so finely, and its axis and aurora as the set says
 // or its template has them.
 func bodies(world *thing.World, said set.World,
 	_ map[string]*thing.Material, shift maths.Vec) error {
 	for _, each := range said.Bodies() {
-		body, err := template.Named(each.Template())
+		if _, has := each.Flowing(); has {
+			return fmt.Errorf("body %s: flowing appearance requires session staging", each.Name())
+		}
+		if each.Circles() != "" {
+			if err := circled(world, said, each, shift); err != nil {
+				return fmt.Errorf("body %s: %w", each.Name(), err)
+			}
+			continue
+		}
+		made, err := bodyOf(each)
 		if err != nil {
 			return fmt.Errorf("body %s: %w", each.Name(), err)
 		}
-		if tilt, tilted := each.Tilt(); tilted {
-			body = body.Tilting(measure.Degrees(tilt))
-		}
-		if shown, says := each.Aurora(); says && !shown {
-			body = body.WithoutAurora()
-		}
-		scale := metresPerKilometre / said.Unit()
-		if radius, sized := each.Radius(); sized {
-			scale = radius / body.Radius()
-		}
+		body, scale := dressed(each, made, said)
 		middle := moved(each.Middle(), shift)
 		if err := body.Place(world, middle, scale,
 			each.Detail()); err != nil {
@@ -522,6 +556,15 @@ func bodies(world *thing.World, said set.World,
 		}
 	}
 	return nil
+}
+
+// bodyOf is a set's body: generated from its numbers when the set says
+// them, else its template by name.
+func bodyOf(each set.Body) (scenebodies.Body, error) {
+	if planet, generated := each.Generated(); generated {
+		return generate.Make(planet)
+	}
+	return template.Named(each.Template())
 }
 
 // suns lights each sun, one way off.
@@ -532,7 +575,8 @@ func suns(world *thing.World, said set.World,
 		if err != nil {
 			return fmt.Errorf("sun %s: %w", each.Name(), err)
 		}
-		world.Lamp(thing.Sun(toward, light(each.Colour())))
+		world.AuthoredLamp(thing.Sun(toward, light(each.Colour())),
+			thing.AuthorRef{Collection: "scene.world.suns", Name: each.Name()})
 	}
 	return nil
 }

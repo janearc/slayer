@@ -1,0 +1,6 @@
+"$schema": https://github.com/janearc/slayer/schemas/job-v1.json
+scene: {set: landmark-marked-views.yaml}
+renderer: cpu
+camera: {name: disc}
+outputs:
+  picture: ../../../out/2026-11-27-flowing-marker-disc/proof.png

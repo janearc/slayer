@@ -1,0 +1,2 @@
+# Read-only feature selection for the flowing-world camera observation.
+weather-landmarks . :: go build -o bin/weather-landmarks ./cmd/weather-landmarks

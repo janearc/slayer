@@ -142,7 +142,9 @@ func TestOverlappingVolumesMultiply(t *testing.T) {
 
 // A march stops early once less than faint of what is behind still
 // shows. Behind a slab ten deep a glow of one is e to the minus ten,
-// and the early stop moves the answer by less than two thousandths.
+// and the early stop moves the answer by less than two thousandths. The
+// march that stops keeps none of what is left (settled), so the glow
+// behind may be nothing, and is not asked to be above it.
 func TestTheEarlyStopCostsUnderTwoThousandths(t *testing.T) {
 	world := glowing()
 	over := slab{density: 5, box: maths.Box{
@@ -150,7 +152,7 @@ func TestTheEarlyStopCostsUnderTwoThousandths(t *testing.T) {
 	world.AddVolume(thing.Volume{Medium: over, Material: unlit})
 	down := straightDown(50)
 	got := float64(lone(world, down, 0).R)
-	if want := math.Exp(-10); !within(got, want, 2e-3) || !(got > 0) {
+	if want := math.Exp(-10); !within(got, want, 2e-3) {
 		t.Errorf("behind the slab the glow is %v, want %v", got, want)
 	}
 }

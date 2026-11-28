@@ -231,6 +231,85 @@ func TestQueuePausedAndClaimedAreNotAcceptedImages(t *testing.T) {
 	}
 }
 
+func TestQueueReportsProgressFromTheExecutingAttempt(t *testing.T) {
+	plan, tools := queuedPlan(t)
+	tools.Queue = t.TempDir()
+	runner := NewMockRunner(gomock.NewController(t))
+	var request queueRequest
+	submit := expectSubmit(t, runner, tools, plan, &request, nil)
+	logPath := filepath.Join(tools.Queue, "00000000000000000041.0001.log")
+	running := expectStatus(t, runner, tools, func() ([]byte, error) {
+		if err := os.WriteFile(logPath, []byte("progress rows=13/90 taken=0 elapsed=4m\n"), 0600); err != nil {
+			t.Fatal(err)
+		}
+		return queueJSON(t, map[string]any{"version": 1, "jobs": []queueJob{{Sequence: 41, Attempt: 1, Request: request, State: "running", Executing: true}}}), nil
+	}).After(submit)
+	expectStatus(t, runner, tools, func() ([]byte, error) {
+		queuePNG(t, plan, 16, 12)
+		return jobSnapshot(t, request, "succeeded", "", false), nil
+	}).After(running)
+	var updates []Update
+	if err := (queueClient{runner: runner}).run(context.Background(), tools, plan, io.Discard, func(update Update) { updates = append(updates, update) }); err != nil {
+		t.Fatal(err)
+	}
+	if len(updates) < 3 || updates[1].Progress != (Progress{Phase: "Rendering", Done: 13, Total: 90}) || updates[1].Terminal || !updates[len(updates)-1].Terminal {
+		t.Fatalf("queue progress and completion = %+v", updates)
+	}
+}
+
+func TestQueueStatusOutageRecoversWithoutCancellingOrAcceptingPixels(t *testing.T) {
+	plan, tools := queuedPlan(t)
+	runner := NewMockRunner(gomock.NewController(t))
+	var request queueRequest
+	submit := expectSubmit(t, runner, tools, plan, &request, nil)
+	outage := expectStatus(t, runner, tools, func() ([]byte, error) { return nil, errors.New("status unavailable") }).Times(2).After(submit)
+	expectStatus(t, runner, tools, func() ([]byte, error) {
+		queuePNG(t, plan, 16, 12)
+		return jobSnapshot(t, request, "succeeded", "", false), nil
+	}).After(outage)
+	var updates []Update
+	err := (queueClient{runner: runner, attempts: 2}).run(context.Background(), tools, plan, io.Discard, func(update Update) {
+		updates = append(updates, update)
+		if update.State == "unavailable" {
+			if _, err := os.Stat(filepath.Join(plan.Directory, "receipt.json")); !os.IsNotExist(err) {
+				t.Fatal("outage accepted pixels")
+			}
+		}
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(updates) != 3 || updates[1].State != "unavailable" || updates[1].Terminal || !updates[2].Terminal {
+		t.Fatalf("outage observations %+v", updates)
+	}
+}
+
+func TestQueueStatusOutageStillAllowsOwnedCancellation(t *testing.T) {
+	plan, tools := queuedPlan(t)
+	runner := NewMockRunner(gomock.NewController(t))
+	var request queueRequest
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	submit := expectSubmit(t, runner, tools, plan, &request, nil)
+	outage := expectStatus(t, runner, tools, func() ([]byte, error) { return nil, errors.New("status unavailable") }).After(submit)
+	cancelled := runner.EXPECT().Run(gomock.Any(), gomock.Any()).DoAndReturn(func(_ context.Context, call invocation) ([]byte, error) {
+		want := []string{"cancel", "--queue", tools.Queue, "--agent", tools.Agent, "41"}
+		if !reflect.DeepEqual(call.Arguments, want) {
+			t.Fatalf("wrong cancellation %+v", call)
+		}
+		return nil, nil
+	}).After(outage)
+	expectStatus(t, runner, tools, func() ([]byte, error) { return jobSnapshot(t, request, "cancelled", "", false), nil }).After(cancelled)
+	err := (queueClient{runner: runner, attempts: 1}).run(ctx, tools, plan, io.Discard, func(update Update) {
+		if update.State == "unavailable" {
+			cancel()
+		}
+	})
+	if !errors.Is(err, context.Canceled) {
+		t.Fatalf("cancellation error %v", err)
+	}
+}
+
 func TestQueueFailedCancelledAndWrongDimensionsRejectImages(t *testing.T) {
 	for _, state := range []string{"failed", "cancelled", "interrupted", "succeeded"} {
 		t.Run(state, func(t *testing.T) {

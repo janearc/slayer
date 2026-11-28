@@ -1,10 +1,8 @@
 # Manufacture constructor hierarchy
 
-This is a map of the **implemented** constructor paths on
-`parts-compositions-taxonomy`. The migration is still in progress;
-the map is a snapshot for review, not a claim that the tree is finished. It
-covers the current biological families in detail and the main entry points
-for other manufactured things.
+use this source map to trace how a profile book reaches its family builder.
+for making and placing a specimen from public Go APIs, start with
+[making models](making-models.md). for scene files, see [sets](sets.md).
 
 Indentation groups related constructors and data. An arrow means a real call
 or dispatch, not inheritance. A species name under a family is usually a row

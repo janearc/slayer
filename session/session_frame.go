@@ -280,6 +280,16 @@ func (timed timedFramer) staged(at time.Duration,
 	return sequenceStaged(timed.plan, given, at)
 }
 
+// smokeFramer exposes the numbered scene's own camera through the same
+// path, zoom and lens preparation as sequenceStaged.
+type smokeFramer struct{ timedFramer }
+
+func (smoke smokeFramer) eyed(at time.Duration, given asked) (asked, error) {
+	given.at = at
+	err := smoke.plan.exposing(&given, at)
+	return given, err
+}
+
 // overlay draws the set's hud, where it has one, on a developed picture
 // of the frame. It refuses a picture of another size than the frame.
 func (made drawnLight) overlay(picture *image.RGBA) error {

@@ -9,6 +9,7 @@ import (
 	"math"
 	"os"
 	"strconv"
+	"time"
 
 	"github.com/gogpu/ui/event"
 	"github.com/gogpu/ui/geometry"
@@ -52,6 +53,26 @@ func (work *Workspace) ProofGesture(gesture string) error {
 		}
 		work.ui.HandleEvent(event.NewWheelEvent(geometry.Pt(0, deltaY), center, center, event.ModNone))
 	}
+	return nil
+}
+
+// ProofSourceCameraEdit makes the source edit used by the Observe undo proof.
+func (work *Workspace) ProofSourceCameraEdit() error {
+	if work.composition != "observe" || work.ui == nil || work.editor == nil || work.viewer == nil {
+		return fmt.Errorf("undo proof needs the Observe source editor")
+	}
+	candidate := *work.state.document
+	if err := candidate.Navigate(10, 0, 0); err != nil {
+		return err
+	}
+	if candidate.Matches(work.state.document.Text()) {
+		return fmt.Errorf("the proof source camera edit did not change the YAML")
+	}
+	work.editor.ApplyText(candidate.Text())
+	work.needsCheck = false
+	work.pending.remember(work.state, work.specimen, time.Now())
+	work.wakeNavigation(navigationDelay)
+	work.ui.Window().Context().RequestFocus(work.viewer)
 	return nil
 }
 

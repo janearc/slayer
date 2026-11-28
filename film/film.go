@@ -100,6 +100,12 @@ const golden = 2.399963229728653
 // eight times the disc's radius out from its middle; and when it is not,
 // the one way to its middle. The GPU's kernel draws the same spiral.
 func (s Sun) Spread() []maths.Vec {
+	return s.SpreadCount(spread)
+}
+
+// SpreadCount samples the same fixed golden-angle disc with the supplied
+// count. Its deterministic directions do not vary between frames.
+func (s Sun) SpreadCount(count int) []maths.Vec {
 	middle := s.Toward.Unit()
 	if !s.Disc || !(s.Size > 0) {
 		return []maths.Vec{middle}
@@ -110,9 +116,12 @@ func (s Sun) Spread() []maths.Vec {
 	}
 	across := middle.Cross(up).Unit()
 	other := middle.Cross(across)
-	ways := make([]maths.Vec, spread)
+	if count <= 0 {
+		count = spread
+	}
+	ways := make([]maths.Vec, count)
 	for i := range ways {
-		out := s.Size / 2 * math.Sqrt((float64(i)+0.5)/spread)
+		out := s.Size / 2 * math.Sqrt((float64(i)+0.5)/float64(count))
 		turn := golden * float64(i)
 		aside := across.Scale(math.Cos(turn)).Add(other.Scale(math.Sin(turn)))
 		ways[i] = middle.Scale(math.Cos(out)).Add(aside.Scale(math.Sin(out))).Unit()

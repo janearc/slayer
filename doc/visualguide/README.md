@@ -20,291 +20,51 @@ films. the source is
 
 *the same lander, looking down past its landing ring at the slabs.*
 
-contents:
+- [build and draw a first picture](#build-and-draw-a-first-picture)
+- [open a scene in Ferruccio](#open-a-scene-in-ferruccio)
+- [write a scene in YAML](#a-scene-in-yaml-step-by-step)
+- [write a scene in Go](#a-scene-in-go)
+- [view Earth with Grissom](#grissom)
 
-1. [what you need](#what-you-need)
-2. [get it and build it](#get-it-and-build-it)
-3. [Ferruccio, the friendly way in](#ferruccio-the-friendly-way-in)
-4. [the front door](#the-front-door)
-5. [your first picture and film](#your-first-picture-and-film)
-6. [a scene in YAML, step by step](#a-scene-in-yaml-step-by-step)
-7. [a scene in Go](#a-scene-in-go)
-8. [Grissom](#grissom)
-9. [where to go next](#where-to-go-next)
+## build and draw a first picture
 
-## what you need
-
-- **macOS with a Metal device** for the GPU renderer, plus Git and the Xcode
-  command-line tools (`xcode-select --install`). the CPU renderer works
-  without Metal.
-- **Go 1.27.3**, the version named in `go.mod`.
-- **Game**, the project runner slayer builds with:
-  [github.com/janearc/game](https://github.com/janearc/game), v0.5.0 or
-  newer. it reads the checkout's `.game` file for build steps, named runs
-  and checks.
-- **ffmpeg** on your PATH, for films made from jobs. pictures don't need it.
-- **the source shelf**: a folder of your own that holds the datasets
-  slayer's scenes are built from. the next section fetches it.
-
-check your tools:
+follow [building Slayer](../building.md) for tools, Game configuration
+and the source shelf. run these commands from the checkout root:
 
 ```sh
-command -v game
-game --age
-go version
-```
-
-some installations name the Game executable `game5`; use that name wherever
-this page says `game`.
-
-## get it and build it
-
-```sh
-git clone https://github.com/janearc/slayer.git
-cd slayer
-export GOWORK=off
-```
-
-`GOWORK=off` keeps an enclosing Go workspace from quietly supplying
-different modules. every command from here on runs from the checkout root.
-
-### the shelf
-
-the shelf holds the papers and datasets pinned in `sources.yaml`. a release
-doesn't include it, so name a folder of your own, outside any Git checkout,
-and set it **in your shell**:
-
-```sh
-export SLAYER_SHELF="$HOME/slayer/sources"
-game run sources-fetch
-game run sources-check
-game run sources-verify
-```
-
-the fetch is about 2 GB, most of it one elevation model of Kilauea, and
-keeps what it already has if you run it again. check holds the bytes to
-their hashes; verify also checks the source pages behind published values.
-
-put the `export` line in your shell's startup file so later builds find the
-shelf. setting it in Game's config instead doesn't reach these runs today;
-the shell does.
-
-### build
-
-```sh
-game build
-bin/slayer --age
-```
-
-`game build` checks the shelf first, then builds stamped commands into
-`bin/`. `--age` says which build you have and where it came from. rebuild
-after you change Go code.
-
-## Ferruccio, the friendly way in
-
-Ferruccio is a native workspace for writing slayer scenes. it opens a
-scene's YAML, shows the picture beside the source, lets you move, turn and
-look at things in the scene, and draws a real still through slayer. it's a
-separate Go module inside the checkout, `ferruccio/native`, with a GoGPU
-window on Metal.
-
-### build it
-
-the plain root build doesn't build Ferruccio, and the two need different cgo
-settings: slayer needs cgo, Ferruccio's macOS bridge is pure Go and needs it
-off.
-
-```sh
-export GOWORK=off
-CGO_ENABLED=1 game build
-cd ferruccio/native
-CGO_ENABLED=0 game build
-cd ../..
-```
-
-that gives you `bin/slayer` and `ferruccio/native/bin/ferruccio`.
-
-### open it
-
-`ferruccio` has three verbs: `open`, `proof` and `regress`. with nothing
-after it, at a terminal, it is `open`. the preview runs your slayer through
-Game, so tell it where both are, and give it a folder that already exists
-for the previews it draws:
-
-```sh
-mkdir -p "$HOME/ferruccio-previews"
-ferruccio/native/bin/ferruccio open --dry-run
-ferruccio/native/bin/ferruccio open \
-  --slayer "$PWD/bin/slayer" \
-  --game "$(command -v game)" \
-  --game-home "$GAME_HOME" \
-  --evidence "$HOME/ferruccio-previews" \
-  --examples ferruccio/examples \
-  sets/ferruccio-playground.yaml
-```
-
-`--dry-run` opens nothing; the second command opens the window and takes
-focus. `--game-home` is your Game configuration home, if you use one.
-`sets/ferruccio-playground.yaml` is a known good scene and reads no
-datasets; for scenes that do, add `--shelf "$SLAYER_SHELF"`.
-
-in the window: Move, Turn and Look modes (`M`, `T`, `L`), two trackballs
-(Orbit and Travel), Render fully, Preview, Source, Undo and Redo, a display
-selector (Wireframe, Solid, Edges, Rendered), a theme selector, and type
-from 16 to 24 points. Play gives the picture the window, Observe puts the
-YAML beside it, and Compose enlarges it.
-
-![Ferruccio's window in Play: a rendered ship and a two-metre visitor fill the view, with two trackballs and mode buttons around it.](images/ferruccio-1-play.jpg)
-
-*Play: the Larson ship and a two-metre visitor, rendered, with the Orbit and
-Travel trackballs.*
-
-![Ferruccio in Observe: a list of scenes on the left, the scene's YAML in the middle and the rendered picture beside it.](images/ferruccio-2-observe.jpg)
-
-*Observe: the same scene with its YAML beside the picture and the scene list
-on the left.*
-
-![Ferruccio in Play with the Wireframe display: the ship and visitor as line drawings.](images/ferruccio-3-wire.jpg)
-
-*Play in Wireframe: the live working geometry.*
-
-![Ferruccio in Play showing the webb-at-l2 scene rendered against black space.](images/ferruccio-4-webb.jpg)
-
-*Play with the `webb-at-l2` scene.*
-
-### proof
-
-`proof` draws the workspace without showing a window and exports it as a
-1600 by 1000 PNG. the pictures above were made that way:
-
-```sh
-ferruccio/native/bin/ferruccio proof --background \
-  --slayer "$PWD/bin/slayer" --game "$(command -v game)" \
-  --game-home "$GAME_HOME" --evidence "$HOME/ferruccio-previews" \
-  --file sets/ferruccio-playground.yaml --render \
-  --composition play --out play.png
-```
-
-change `--composition` to `observe` or `compose`, or drop `--render` and
-pass `--display wire` for the wireframe.
-
-## the front door
-
-`slayer` is one command with verbs. run it as `bin/slayer VERB`, or through
-Game as `game run slayer -- VERB`; the words after `--` go to slayer.
-
-- `draw` carries out a job and writes what it asks: a picture, frames, a
-  film with its sound.
-- `list` says what there is to draw and to draw with: scenes, smokes,
-  presets, stocks, tunes, voicings.
-- `assess` says whether a file will draw, drawing nothing, or judges a set
-  or the smokes.
-- `develop` turns raw light already drawn into pictures through a job's
-  print or stock.
-- `tunes` serves a tune library's audition page, or checks, films or pages
-  its tunes.
-- `cache` says what the disk caches hold, or empties them.
-- `watch` draws a job live in the terminal as you edit it.
-- `edit` lays out watch, your editor and the agent console in tmux.
-- `schema` prints the job schema, or where its copy is.
-
-```sh
-bin/slayer --help
-bin/slayer --agent-help
-bin/slayer draw --help
-bin/slayer list presets
-```
-
-`--agent-help` gives the same verb map, written for a coding agent. each
-verb's own `--help` lists its arguments and flags. `slayer` with nothing
-after it, at a terminal, is `slayer edit`.
-
-there is also `slayer render FILE`, which draws a whole set file; the YAML
-walkthrough below uses it.
-
-## your first picture and film
-
-slayer has two kinds of YAML. a **set** describes the world: ground, things,
-lights, sky. a **job** describes the photograph or film: which scene, the
-camera, the size and rays, the time, the sound, and what comes out. the
-checkout comes with a first job, `doc/examples/jobs/first-picture.yaml`:
-
-`doc/examples/jobs/first-picture.yaml`
-
-```yaml
-$schema: https://github.com/janearc/slayer/schemas/job-v1.json
-scene: {smoke: 1}
-renderer: cpu
-film: {width: 160, height: 90, rays: 1}
-at: {value: 0, unit: s}
-outputs:
-  picture: ../out/first-picture.png
-  raw: ../out/first-picture.pfm
-```
-
-it draws smoke 1, one of slayer's small numbered test scenes, at 160 by 90
-on the CPU. it needs no Metal and no terrain. check it, look at what it
-would do, then draw it:
-
-```sh
+game build slayer
 game run slayer -- assess doc/examples/jobs/first-picture.yaml
-game run slayer -- draw doc/examples/jobs/first-picture.yaml --dry-run
 game run slayer -- draw doc/examples/jobs/first-picture.yaml
 ```
 
-assess checks the input without drawing. the dry run prints the job in its
-full form and every file it would write. the draw writes
-`out/first-picture.png` and `out/first-picture.pfm`. output paths in a job
-are relative to the job file, not to your terminal.
-
-try it bigger, with more rays:
+[this job](../examples/jobs/first-picture.yaml) draws a 160 by 90 picture on
+the CPU. look for `out/first-picture.png` and `out/first-picture.pfm`. the
+PFM holds the linear light before development. to write a new picture from
+that raw after editing the job’s print settings:
 
 ```sh
-game run slayer -- draw doc/examples/jobs/first-picture.yaml --width 320 --height 180 --rays 2
+game run slayer -- develop doc/examples/jobs/first-picture.yaml out/first-picture.pfm --out out/first-picture-developed.png
 ```
 
-rays are counted per side: 2 means four rays a pixel, 4 means sixteen. going
-from 2 to 4 is roughly four times the work. more rays help edges and noise;
-they can't fix a camera pointed the wrong way.
-
-the `.pfm` holds the linear light before development. change the job's print
-settings and develop it again without tracing:
+[the film job](../examples/jobs/first-film.yaml) uses the same scene for a
+three-second film with a score. on macOS, the MP4 writer uses AVFoundation.
 
 ```sh
-game run slayer -- develop doc/examples/jobs/first-picture.yaml out/first-picture.pfm
-```
-
-### first film
-
-`doc/examples/jobs/first-film.yaml`
-
-```yaml
-$schema: https://github.com/janearc/slayer/schemas/job-v1.json
-scene: {smoke: 1}
-renderer: cpu
-film: {width: 160, height: 90, rays: 1}
-fps: 6
-duration: {value: 3, unit: s}
-sound:
-  tune: ../cheeptune/examples/sunrun.json
-  voicing: "@leap-dmg"
-outputs:
-  frames: ../out/first-film
-  movie: ../out/first-film.mp4
-```
-
-three seconds at six frames a second, with a score played on slayer's own
-synth, `cheeptune`. the scene holds still; this one checks frames, sound and
-encoding. it needs ffmpeg.
-
-```sh
-game run slayer -- draw doc/examples/jobs/first-film.yaml --dry-run
 game run slayer -- draw doc/examples/jobs/first-film.yaml
 ```
 
-it writes `out/first-film.mp4` and numbered PNGs in `out/first-film/`.
-control-c stops between frames; running the same job again on the same build
-resumes where it stopped.
+look for `out/first-film.mp4` and numbered PNGs in `out/first-film/`. use
+`slayer draw FILE --dry-run` to see the resolved job and output paths.
+
+## open a scene in Ferruccio
+
+Ferruccio is Slayer’s scene editor for Apple silicon Macs. open a set, move
+or turn an object, save the YAML and submit a preview or still to Azazel.
+start with the [Ferruccio quick start](../applications/ferruccio/quick-start.md)
+for the disk image, included example, controls and queue connection. to
+build the app from source, see [Ferruccio build instructions](../applications/ferruccio/BUILD.md).
+
+![Ferruccio with a rendered ship and a two-metre visitor, camera controls and Move, Turn and Look tools.](../applications/ferruccio/quick-start-images/workspace.png)
 
 ## a scene in YAML, step by step
 
@@ -316,8 +76,8 @@ Iki, the large dataset on the shelf. each set names the file it reads,
 are grown by slayer's manufactory from a seed. no image files go in.
 
 put the sets inside the checkout, for example in `sets/guide/`: slayer looks
-for `sources.yaml` from the YAML's own folder upward. every step is a whole
-file you can render on its own.
+for `sources.yaml` from the YAML's own folder upward. start with step 1,
+then copy and edit its file as you go. step 8 includes a complete set and job.
 
 ### step 1: ground and sky
 
@@ -365,21 +125,17 @@ scene:
 ```
 
 ```sh
-bin/slayer render sets/guide/step-1.yaml -out out/step-1.png
+game run slayer -- draw sets/guide/step-1.yaml --out out/step-1.png
 ```
 
 ![A wide grey-brown plain under a pale blue sky.](images/yaml-step-1.jpg)
 
 *step 1. the ground and the default sky.*
 
-the smallest set that draws. `terrain` cuts a window 1800 by 1300 metres out
-of the elevation model, sampled every 4 metres. a set with no terrain is
-refused, so ground and sky come together.
-
-a camera in a set stands off a named thing and points at a named thing, so
-two plain stones (`cobble`) are here as its marks: it stands 3 m above
-`the lookout` and looks toward `the far stone`, 4 degrees below level.
-`rays: 2` is four rays a pixel.
+`terrain` cuts a window 1800 by 1300 metres out of the elevation model,
+sampled every 4 metres. the camera stands 3 m above `the lookout`, pointing
+toward `the far stone` at 4 degrees below level. `rays: 2` gives four rays
+per pixel.
 
 ### step 2: the sky from earth's air
 
@@ -397,7 +153,7 @@ added under scene:
 ```
 
 ```sh
-bin/slayer render sets/guide/step-2.yaml -out out/step-2.png
+game run slayer -- draw sets/guide/step-2.yaml --out out/step-2.png
 ```
 
 ![The same plain, now under a deeper blue sky, the ground darker.](images/yaml-step-2.jpg)
@@ -411,8 +167,9 @@ because the meter puts a noon scene at mid grey. `air` needs `light: sun`.
 
 ### step 3: one made thing
 
-add a spruce recipe under `scene`, then place it under `set: things`. For a
-set in `sets/guide/`, the book path is relative to that set:
+add the spruce recipe under `scene.recipes` and add `the tree` to the
+existing `scene.set.things` block. keep the camera’s two stones. the book
+path below is relative to a set in `sets/guide/`:
 
 ```yaml
   recipes:
@@ -429,7 +186,7 @@ set in `sets/guide/`, the book path is relative to that set:
 ```
 
 ```sh
-bin/slayer render sets/guide/step-3.yaml -out out/step-3.png
+game run slayer -- draw sets/guide/step-3.yaml --out out/step-3.png
 ```
 
 ![The plain under a blue sky, with a small spruce near the left edge.](images/yaml-step-3.jpg)
@@ -452,7 +209,7 @@ changed under scene:
 ```
 
 ```sh
-bin/slayer render sets/guide/step-4.yaml -out out/step-4.png
+game run slayer -- draw sets/guide/step-4.yaml --out out/step-4.png
 ```
 
 ![The plain in low warm light, with long shadows and a warmer sky.](images/yaml-step-4.jpg)
@@ -461,8 +218,9 @@ bin/slayer render sets/guide/step-4.yaml -out out/step-4.png
 
 the sun is 250 degrees clockwise from north and 14 degrees up, behind and to
 the right of the camera, so shadows run long to the left and the sky warms.
-the meter follows. it's the two `sun` numbers that do this: `timeofday` is
-read and kept, and nothing in this build uses it yet.
+the two `sun` angles set the light. to have Slayer derive them from a
+clock time and place, provide a date and UTC offset as described in
+[the set reference](../sets.md#what-a-set-says).
 
 ### step 5: the camera placed with intent
 
@@ -483,7 +241,7 @@ the cameras block, replaced:
 ```
 
 ```sh
-bin/slayer render sets/guide/step-5.yaml -out out/step-5.png
+game run slayer -- draw sets/guide/step-5.yaml --out out/step-5.png
 ```
 
 ![A spruce left of centre with its shadow trailing left, and the crater wall beyond.](images/yaml-step-5.jpg)
@@ -513,7 +271,7 @@ added under set:
 ```
 
 ```sh
-bin/slayer render sets/guide/step-6.yaml -out out/step-6.png
+game run slayer -- draw sets/guide/step-6.yaml --out out/step-6.png
 ```
 
 ![The same view, with more spruces along the horizon and the far rim.](images/yaml-step-6.jpg)
@@ -583,8 +341,8 @@ outputs:
 ```
 
 ```sh
-bin/slayer draw sets/guide/step-7.yaml
-bin/slayer draw sets/guide/step-7-still.yaml
+game run slayer -- draw sets/guide/step-7.yaml
+game run slayer -- draw sets/guide/step-7-still.yaml
 ```
 
 the frames land in `sets/guide/step-7-frames/` and the still in
@@ -693,7 +451,7 @@ and the camera, which stands in the water:
 the file in `sets/guide/` holds every key and every digit, so draw that one:
 
 ```sh
-bin/slayer draw sets/guide/step-8-job.yaml
+game run slayer -- draw sets/guide/step-8-job.yaml
 ```
 
 ![The Alfa as a dark silhouette seen from below against faint blue-green water, a pale trail of gas at its stern.](images/yaml-step-8.jpg)
@@ -752,16 +510,15 @@ example/
   step5/main.go
 ```
 
-the module needs slayer itself. there isn't a published slayer version that
-builds as a library yet, so point at your clone with a `replace` line, as
-this example did:
+use the Go version in Slayer’s `go.mod` and point this example module at
+your checkout with a `replace` line:
 
 `go.mod`
 
 ```text
 module example.com/slayer-guide
 
-go 1.27.3
+go 1.27.4
 
 require github.com/janearc/slayer v0.0.0
 
@@ -1103,9 +860,9 @@ camera goes a quarter turn round the flower by a rule of time, and each
 developed frame goes straight to slayer's movie writer. the soundtrack is a
 `cheeptune` score built into slayer.
 
-there are no frame files and no ffmpeg here: the writer encodes through
-AVFoundation, so it works on macOS only. it wants an even width, a height
-that's a multiple of 16 (352 is 22 × 16), and 24 or 30 frames a second.
+the example sends frames directly to AVFoundation on macOS. it uses an
+even width, a height of 352 pixels and 24 frames per second. the writer
+requires an even width and a coded height that is a multiple of 16.
 
 `step5/main.go`: the camera, the sound, the film
 
@@ -1460,107 +1217,20 @@ func run(out, still string, at, seconds float64, rate int, seed uint64,
 
 </details>
 
-step 5's file holds everything steps 3 and 4 added. if you'd rather keep
-frame files and encode them yourself, write each frame with `file.PNG` and
-run ffmpeg over the folder; that's how slayer's own jobs make films.
+step 5's file includes the scene and motion from steps 3 and 4. use
+`file.PNG` to retain individual frames in a Go program. a Slayer job can
+request both frames and an MP4 through its [outputs](../../job/README.md).
 
 ## Grissom
 
-Grissom is a viewer for the sky, the earth, and the sky from a place on the
-earth. it draws triangles with Cocoa and Metal; it doesn't use slayer's ray
-tracer. it lives in `cmd/grissom`.
+Grissom is a separate Metal viewer for Earth and its sky. it can also
+show the sky from a chosen location on Earth. see
+[Grissom setup](../grissom-setup.md) to fetch the source imagery and open
+an interactive view or write PNGs and frames.
 
-![The Earth at night, Europe and Africa, the cities as points of gold light on a dark globe.](images/grissom-earth-night.jpg)
+![Earth at night with city lights visible across Europe and Africa.](images/grissom-earth-night.jpg)
 
-*the Earth at night over Europe and Africa, drawn from the Black Marble
-city lights.*
-
-```sh
-grissom draw --earth-only --earth "$GRISSOM_DATA/earth" \
-  --colourways "$GRISSOM_DATA/colourways" --earth-depth 9 --distance 4.2 \
-  --no-hud --look 15,35 --earth-image 1 --shot out/night
-```
-
-![The whole Earth by day, centred on North America, green and brown land, white ice at the top, dark ocean.](images/grissom-earth-day.jpg)
-
-*the same Earth by day, centred on North America, from the Blue Marble
-photograph.*
-
-```sh
-grissom draw --earth-only --earth "$GRISSOM_DATA/earth" \
-  --colourways "$GRISSOM_DATA/colourways" --earth-depth 9 --distance 4.2 \
-  --no-hud --look -100,30 --shot out/day
-```
-
-![North America on the globe, with orange text labels listing layers and settings at the top left and keys along the foot.](images/grissom-earth-with-display.jpg)
-
-*Grissom's display: the layer list, the lightness, colour and background
-settings, and the key help at the foot.*
-
-```sh
-grissom draw --data "$GRISSOM_DATA/sgra" --earth "$GRISSOM_DATA/earth" \
-  --sky "$GRISSOM_DATA/sky" --colourways "$GRISSOM_DATA/colourways" \
-  --earth-depth 9 --distance 4.2 --view 1 --shot out/shown
-```
-
-[![The Earth at night, the first frame of the film.](images/grissom-earth-night.jpg)](grissom-earth-turning.mp4)
-
-*the Earth turning once, 60 frames at 20 a second (7 MB). select the
-picture to download the film; GitHub doesn't play video in Markdown.*
-
-```sh
-mkdir -p out/film
-grissom film --earth-only --earth "$GRISSOM_DATA/earth" \
-  --colourways "$GRISSOM_DATA/colourways" --earth-depth 7 --distance 4.2 \
-  --no-hud --frames 60 --turns 1 --tilt 25 --into out/film
-```
-
-the frames land in `out/film`; ffmpeg joins them into the mp4.
-
-you fetch your own copy of the data (about 2 GiB) with
-`game run grissom-data` before it shows anything.
-[doc/grissom-setup.md](../grissom-setup.md) walks through the layout, the
-fetch, and four links the viewer still needs for older file names.
-`$GRISSOM_DATA` above is the data root that holds `sgra/`, `earth/`,
-`sky/` and `colourways/`.
-
-### build it
-
-it needs cgo and the macOS frameworks. the ordinary root build makes it:
-
-```sh
-CGO_ENABLED=1 game build
-```
-
-that writes `bin/grissom`. the data comes through
-[celestial-data](https://github.com/janearc/celestial-data), checked out
-beside slayer; the setup doc has the sibling layout and the
-`game run grissom-data` fetch.
-
-### run it
-
-three verbs: `window` opens the viewer, `draw` writes PNGs offscreen, `film`
-draws the earth turning, frame by frame. flags are two dashes and whole
-words. `grissom --help` lists them all. a first, small check, from the setup
-doc:
-
-```sh
-mkdir -p out
-game run grissom -- draw \
-  --data "$GRISSOM_DATA/sgra" --earth "$GRISSOM_DATA/earth" \
-  --sky "$GRISSOM_DATA/sky" --colourways "$GRISSOM_DATA/colourways" \
-  --depth 7 --earth-depth 4 --wide-depth 4 \
-  --shot "$PWD/out/check" --view -1
-```
-
-`--shot` is a prefix: this writes `out/check-sky.png`, `out/check-earth.png`
-and `out/check-standing.png`. `--dry-run` lists them and writes nothing. the
-same data flags with `window` open the viewer.
-
-in the window, drag to turn and scroll to scale. `e` switches sky and earth,
-`p` places an observer at the crosshair, `f` stands there, comma and period
-move the clock an hour, `1` to `4` toggle the detail layers, `t` changes the
-colourway, and `q` quits.
+[![Earth by day, centred on North America, with clouds and polar ice.](images/grissom-earth-day.jpg)](grissom-earth-turning.mp4)
 
 ## where to go next
 

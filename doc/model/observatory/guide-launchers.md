@@ -44,8 +44,8 @@ for the outgoing beam and the optional 64-arcsecond GALACSI pattern.
 
 Run the [golden-hour scene](../../../sets/golden-hour-summit.yaml) through Game:
 
-    game build camera-binary
-    game run hillside -- -set sets/golden-hour-summit.yaml -out out/golden-hour.png
+    game build slayer
+    game run slayer -- draw sets/golden-hour-summit.yaml --out out/golden-hour.png
 
 Its main optical instrument is north-facing at 55 degrees. The nearby
 Rubin family supplies a service wing, trucks, a crane, a mirror gantry and

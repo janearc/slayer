@@ -111,7 +111,7 @@ func (given asked) refocused(eye maths.Subspace) (lens.Thin, error) {
 // picture sees, since rays from across the aperture do not say it.
 func (stage *staging) focused(rig set.Rig, eye maths.Subspace) error {
 	focal, stop, focus := rig.Lens()
-	at, found := stage.places[focus]
+	at, found := stage.where(focus)
 	if !found {
 		return fmt.Errorf("%s: the lens is focused on %q, which "+
 			"is not on the set", stage.given.set, focus)

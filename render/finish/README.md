@@ -36,7 +36,7 @@ It reads a job (package `job`) only through its accessors: `Print`,
 ## How a stock is brightened
 
 `Roll.Print` returns transmission: the light a projector throws through
-the frame, never more than one, and dim (ninjafilm/doc/filming.md). It is
+the frame, never more than one, and dim (see [Filming](../../ninjafilm/doc/filming.md)). It is
 developed for the screen by `ninjafilm/colour`, with the exposure that
 puts a white card filmed at the stock's rating on the screen's white.
 
@@ -66,23 +66,6 @@ brightest part is 0.87 of white. Between the knee and white a print is
 a little darker than it was. A stock whose clearest is not past white
 has no shoulder.
 
-The share, 0.4, was picked on the night fire through `lantern`: 0.6
-also moved pictures with nothing past white, and 0.25 left less room
-above the knee for the highlights.
-
-What the shoulder cannot do is find detail the film has already lost.
-Pushed three stops, a fire's light lands far past the end of `lantern`'s
-curve, where the film is nearly clear whatever the light, and it comes
-out pale and nearly flat.
-
-Without it the screen clipped each part of the light at white by itself.
-A fire's red and green are past white and its blue is not, so every
-flame came out one flat yellow, at any rating.
-
-The frame number is the film's frame index, so a frame's grain is the same
-each time it is drawn and new on the next frame.
-
-## Not here
-
-No tracing, no files written (tests aside), no encoding, no sound. The
-movie and the sound are another package's.
+The shoulder cannot recover highlight detail lost in the stock's curve.
+The frame index seeds grain, so redrawing the same frame keeps the grain
+fixed and the next frame receives a new pattern.

@@ -1,21 +1,22 @@
-# Connecting a session to a comparison
+# Compare rendered regions
 
-The experimental command reads a region set, an existing snapshot and an
-explicit list of snapshot files. It hashes those files, derives draw and
-reference identities from the running executable and effective job settings,
-and draws each candidate through a session. A missing reference is drawn and
-installed without replacing an existing file. The command writes a report and
-labelled sheet after every comparison succeeds.
+`slayer compare-regions SET` draws named rectangles from a frame and compares
+them with a higher-sample reference. The command writes a linear-light
+`report.json`, a labelled `sheet.png` and the reference manifests in
+`references.json`. See `slayer compare-regions --help` for the options.
+Submit the draw through [Azazel](../../doc/azazel.md).
 
-The file list is a caller assertion, not discovered provenance. The caller
-must include every transitive input and keep the snapshot, environment-selected
-data and caches stable. A stored reference's digest detects corruption but
-cannot prove who produced an existing file. Device and runtime differences
-are not fully identified by the current manifest.
+Supply an absolute frozen `--snapshot` and explicitly list every input
+relative to it. `--complete-inputs` asserts that the list is complete and
+stable. The command cannot discover missing dependencies. Keep
+`SLAYER_SHELF` in the snapshot and use a stable `SLAYER_CACHE` outside it.
+Reference and output directories must also be outside the snapshot.
 
-The street set needs its terrain, solar spectrum and sign fonts. That list is
-not yet a proven complete closure. The command must not be treated as a
-verified street comparison until the closure and cache behavior are checked.
-The report measures candidate time and reference preparation plus read time;
-it does not yet separate scene staging from draw time or establish reference
-convergence and run-to-run variation.
+Set the full frame's width and height and the candidate and reference
+rays per side. The reference must use more rays. Keep its manifest fixed
+on another run with `--reference-plan` and measure candidate variation
+with `--repeat`. The command can install a missing reference without
+replacing an existing one. The digest checks stored bytes. Coverage of
+the source inputs and convergence of the reference need separate checks.
+
+Native GPU traversal, bloom and overlays are outside this comparison path.

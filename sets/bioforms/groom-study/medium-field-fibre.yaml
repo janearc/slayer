@@ -1,0 +1,55 @@
+# Matched short and medium cuts. Camera coordinates are east, north and up.
+"$schema": https://github.com/janearc/slayer/schemas/ecosystem-v2.json
+scene:
+  name: Native scalp fibres, complete direction field
+  seed: 27
+  setting: space
+  light: none
+  set:
+    things:
+      adult:
+        kind: adult-human-groom-medium-field
+        seed: 27
+        heading: {value: 0, unit: deg}
+        position:
+          east: {value: 0, unit: m}
+          north: {value: 0, unit: m}
+          up: {value: 0, unit: m}
+  film: {width: 416, height: 480, rays: 3, exposure: 1, wide: 33}
+  cameras:
+    front:
+      title: Part, forehead and hanging ends
+      location: {at: [0, -0.590, 1.638]}
+      orientation: {look_at: [0, -0.008, 1.569]}
+    profile:
+      title: Temple sweep, ear and nape
+      location: {at: [0.560, -0.082, 1.626]}
+      orientation: {look_at: [0, 0.018, 1.564]}
+    crown:
+      title: Rear crown and neck-length lock silhouette
+      location: {at: [0.145, 0.270, 2.013]}
+      orientation: {look_at: [0.006, 0.028, 1.602]}
+    part-detail:
+      title: Part and root flow over the crown
+      location: {at: [0.090, 0.190, 1.910]}
+      orientation: {look_at: [0.005, 0.000, 1.665]}
+  world:
+    unit: 1
+    sky:
+      horizon: {srgb_linear: [0.180, 0.180, 0.180]}
+      zenith: {srgb_linear: [0.091, 0.091, 0.091]}
+      ground: {srgb_linear: [0.061, 0.061, 0.061]}
+      source: eye
+    suns:
+      raking:
+        toward: [-0.62, -0.54, 0.43]
+        colour: {srgb_linear: [1.08, 1.08, 1.08]}
+        source: eye
+      fill:
+        toward: [0.71, -0.54, 0.29]
+        colour: {srgb_linear: [0.29, 0.29, 0.29]}
+        source: eye
+      rim:
+        toward: [0.23, 0.81, 0.56]
+        colour: {srgb_linear: [0.73, 0.73, 0.73]}
+        source: eye

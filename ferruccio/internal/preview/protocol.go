@@ -23,6 +23,12 @@ type queueJob struct {
 	Held      string       `json:"held,omitempty" yaml:"held"`
 	Executing bool         `json:"executing" yaml:"executing"`
 	Result    queueResult  `json:"result" yaml:"result"`
+	Files     []queueFile  `json:"files" yaml:"files"`
+}
+
+type queueFile struct {
+	Path   string `json:"path" yaml:"path"`
+	SHA256 string `json:"sha256" yaml:"sha256"`
 }
 
 // queueResult distinguishes a confirmed process outcome from an uncertain stop.

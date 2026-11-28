@@ -99,3 +99,33 @@ func (document *Document) ReferencedSet() string {
 	}
 	return path.Value
 }
+
+// ReferencedCamera reads a job's named camera and its zoom or path overrides.
+func (document *Document) ReferencedCamera() (name string, zoom, path bool) {
+	if document.kind != "job" {
+		return "", false, false
+	}
+	tree, err := document.Tree()
+	if err != nil {
+		return "", false, false
+	}
+	camera := member(tree.Content[0], "camera")
+	if camera != nil && camera.Kind == yaml.AliasNode {
+		camera = camera.Alias
+	}
+	return scenePath(member(camera, "name")), member(camera, "zoom") != nil, member(camera, "moves") != nil
+}
+
+// HasImportedGeometry reports whether a set declares a mesh import.
+func (document *Document) HasImportedGeometry() (bool, error) {
+	if document.kind != "set" && document.kind != "legacy-set" {
+		return false, nil
+	}
+	tree, err := document.Tree()
+	if err != nil {
+		return false, err
+	}
+	scene := member(tree.Content[0], "scene")
+	imports := member(member(scene, "world"), "imports")
+	return imports != nil && imports.Kind == yaml.MappingNode && len(imports.Content) != 0, nil
+}

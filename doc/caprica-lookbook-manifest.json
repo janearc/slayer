@@ -1,0 +1,101 @@
+{
+  "Title": "Caprica",
+  "Introduction": "Twelve views of Caprica, an Earth-like planet, and Fresno, the lava drop it orbits. Amber, the yellow gas giant close to the larger star, and Azure, the blue ice giant, are not yet included in these views.",
+  "ArtDirection": "This is invented imagery. Fresno’s temperature and age, cloud appearance, cameras and exposures are artistic choices; the scene is not presented as a scientifically realistic world. Atmospheric and cloud references inform the wider renderer, but this scene is not an implementation or validation of either cited model. The drop radius relation noted in the source handoff has not been independently pinned.",
+  "Sources": [
+    {
+      "Title": "Bruneton and Neyret — Precomputed Atmospheric Scattering (2008)",
+      "URL": "https://diglib.eg.org/items/0af15b7c-795a-4cca-97d3-4cc9b99126e4"
+    },
+    {
+      "Title": "Schneider and Vos — Nubis cloud rendering (2017)",
+      "URL": "https://d3d3g8mu99pzk9.cloudfront.net/AndrewSchneider/Nubis-Authoring-Realtime-Volumetric-Cloudscapes-with-the-Decima-Engine-Final.pdf"
+    }
+  ],
+  "Frames": [
+    {
+      "Title": "Caprica in light",
+      "Caption": "A mostly illuminated orange globe, with textured cloud tops, a dark crescent and clusters of dark flecks.",
+      "Directory": "../out/2026-11-27-caprica-01-dayside-oblique",
+      "Image": "proof.png",
+      "Raw": "light.pfm"
+    },
+    {
+      "Title": "Caprica in quarter phase",
+      "Caption": "An orange, textured day deck meets the dark blue-gray night side; dark flecks trace parts of the bright limb.",
+      "Directory": "../out/2026-11-27-caprica-02-quarter",
+      "Image": "proof.png",
+      "Raw": "light.pfm"
+    },
+    {
+      "Title": "Night crescent",
+      "Caption": "A dim blue crescent reveals green and blue ground among pale broken clouds and stars.",
+      "Directory": "../out/2026-11-27-caprica-03-night",
+      "Image": "proof.png",
+      "Raw": "light.pfm"
+    },
+    {
+      "Title": "At the terminator",
+      "Caption": "A close crop of the dark-to-orange terminator and bright curved limb, with a ragged cloud boundary.",
+      "Directory": "../out/2026-11-27-caprica-04-terminator-crop",
+      "Image": "proof.png",
+      "Raw": "light.pfm"
+    },
+    {
+      "Title": "Above the deck",
+      "Caption": "A curved orange cloud deck fills the frame, with a ridged whorl and textured tops.",
+      "Directory": "../out/2026-11-27-caprica-05-deck",
+      "Image": "proof.png",
+      "Raw": "light.pfm"
+    },
+    {
+      "Title": "Night close-up",
+      "Caption": "An intimate blue night crop with faint green terrain.",
+      "Directory": "../out/2026-11-27-caprica-06-grazing-night-close-final",
+      "Image": "proof.png",
+      "Raw": "light.pfm"
+    },
+    {
+      "Title": "North over the clouds",
+      "Caption": "A high-angle view across an orange deck, with a rough dark boundary, a bright curved limb and scattered dark flecks.",
+      "Directory": "../out/2026-11-27-caprica-07-oblique-north-orbit",
+      "Image": "proof.png",
+      "Raw": "light.pfm"
+    },
+    {
+      "Title": "A distant light",
+      "Caption": "A slender golden cloud limb curves beneath a separate point of light, which shows no surface detail.",
+      "Directory": "../out/2026-11-27-caprica-08-cloud-skim-final",
+      "Image": "proof.png",
+      "Raw": "light.pfm"
+    },
+    {
+      "Title": "Fresno",
+      "Caption": "A red-brown globe is crossed by a network of bright molten seams.",
+      "Directory": "../out/2026-11-27-caprica-09-drop-close",
+      "Image": "proof.png",
+      "Raw": "light.pfm"
+    },
+    {
+      "Title": "Fresno close-up",
+      "Caption": "A partial view of red-brown crust and luminous seams, whose bright centers approach white.",
+      "Directory": "../out/2026-11-27-caprica-10-drop-oblique-surface-crop-final",
+      "Image": "proof.png",
+      "Raw": "light.pfm"
+    },
+    {
+      "Title": "Caprica from the reverse side",
+      "Caption": "An orange reverse view of Caprica, with dark boundary bands; its framing overlaps with the earlier quarter view.",
+      "Directory": "../out/2026-11-27-caprica-11-drop-to-caprica-reverse-quarter-final",
+      "Image": "proof.png",
+      "Raw": "light.pfm"
+    },
+    {
+      "Title": "Lava-seam horizon",
+      "Caption": "Luminous seams converge near Fresno’s curved horizon; this close view shares its subject with the earlier Fresno close-up.",
+      "Directory": "../out/2026-11-27-caprica-12-drop-seam-horizon-final",
+      "Image": "proof.png",
+      "Raw": "light.pfm"
+    }
+  ]
+}

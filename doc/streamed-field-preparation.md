@@ -4,10 +4,8 @@ The renderer already reserves packed density and emission ranges for flames,
 density for wispy puffs and optional source-light grids for smoke. The shaders
 fill those fields before tracing begins.
 
-Previously their full-grid raw results were copied into additional Go arrays,
-then packed into the final scene buffers.
-
-Production preparation now uses the same streamed readback as the tracer:
+production preparation writes the resulting bands into the packed
+scene buffers using streamed readback.
 
 - Flame bands deinterleave density and RGB emission directly into their
   reserved, separate packed ranges. There are no split full-grid density
@@ -34,10 +32,8 @@ Go and Metal output storage; a short grid can fit in one band. Scene
 geometry, Metal inputs, acceleration structures and image development
 remain separate costs. This does not establish an aggregate memory cap.
 
-The density, flame and lighting shaders, grid dimensions, noise, source
-tables, interpolation and integration rules are unchanged by this host slice.
-It adds no temporal cache, weather lag, empty-space skipping or coarser
-approximation.
+streaming changes the transfer and packing of field values. frame
+selection, grid resolution and integration follow their own settings.
 
 The direct-copy input bridge is described in [streamed
 readback](streamed-readback.md).

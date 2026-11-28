@@ -6,20 +6,24 @@ import (
 	"github.com/janearc/slayer/ferruccio/native/internal/appearance"
 )
 
-// cameraControls gives the composition view the same editable camera gestures.
-func (work *Workspace) cameraControls() widget.Widget {
-	disabled := func() bool { return !work.viewer.navigable || !work.state.document.CanNavigate() }
-	move := func(yaw, pitch, zoom float64) func() {
-		return func() { work.problem(work.Navigate(yaw, pitch, zoom)) }
+// enterPlay keeps the current draft and requests its native working view.
+func (work *Workspace) enterPlay() {
+	if work.state.document.Kind() == "catalogue" || work.refuseWhileFull("opening the working view") {
+		return
 	}
+	work.composition = "play"
+	work.setupPlay()
+	if work.photographVisible() && work.acceptedPath == work.state.path {
+		work.play.renderedText = work.acceptedText
+	}
+	_ = work.SetWorkingMode("solid")
+	work.rebuild()
+}
+
+// compositionActions retains a source-editing route below the photograph.
+func (work *Workspace) compositionActions() widget.Widget {
 	return primitives.HBox(
-		work.text("Camera").Color(appearance.Cyan),
-		work.action("Left", false, disabled, move(5, 0, 0)),
-		work.action("Right", false, disabled, move(-5, 0, 0)),
-		work.action("Up", false, disabled, move(0, -5, 0)),
-		work.action("Down", false, disabled, move(0, 5, 0)),
-		work.action("Zoom +", false, disabled, move(0, 0, .9)),
-		work.action("Zoom −", false, disabled, move(0, 0, 1/.9)),
+		work.live(work.cameraEditingHint).Color(appearance.Cyan),
 		primitives.Expanded(primitives.Box()),
 		work.action("Edit YAML", false, func() bool { return false }, func() {
 			work.composition = "observe"

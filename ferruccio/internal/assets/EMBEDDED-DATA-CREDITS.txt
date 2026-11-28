@@ -1,0 +1,22 @@
+Embedded data credits
+
+Hānauma Bay elevation and water
+The embedded elevation grid in scene/hanauma/noaa-cudem-window.bin.gz
+uses a five-metre resampling of NOAA National Centers for Environmental
+Information's Hawaiʻi 1/9 arc-second CUDEM tile
+ncei19_n21x50_w157x75_2021v1.tif.
+https://www.ncei.noaa.gov/access/metadata/landing-page/bin/iso?id=gov.noaa.ngdc.mgg.dem%3A299919
+https://noaa-nos-coastal-lidar-pds.s3.amazonaws.com/dem/NCEI_ninth_Topobathy_Hawaii_9428/tiles/ncei19_n21x50_w157x75_2021v1.tif
+
+The embedded substrate grid in scene/hanauma/noaa-structure.bin.gz
+rasterizes the Structure - 2007 polygons from the NOAA/NOS/NCCOS/MSE
+Biogeography Branch. Slayer uses the result as broad substrate weights.
+https://gis.ngdc.noaa.gov/arcgis/rest/services/nccos/BenthicMapping_Hawaii_Dynamic/MapServer/10
+The derivation and checksums are recorded in scene/hanauma/README.md.
+
+Generated giant planet radii
+The numeric grid in scene/generate/fortney2007.txt transcribes giant
+planet radii from Tables 2–4 of Fortney, J. J., Marley, M. S., and Barnes,
+J. W. (2007), The Astrophysical Journal 659, 1661–1672.
+https://doi.org/10.1086/512120
+https://arxiv.org/abs/astro-ph/0612671v4

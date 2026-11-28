@@ -1,9 +1,8 @@
 # Clustered city districts
 
-`city-clustered-10000` is an independent opt-in recipe. It places exactly
+`city-clustered-10000` places
 10,000 buildings on selected lots in a 40 by 40 block grid, with two large
-continuous parks and a diagonal elevated freeway. The approved
-`city-grid-10000` default and its geometry are unchanged.
+continuous parks and a diagonal elevated freeway.
 
 [The example set](../../city-clustered-10000.yaml) has `overview`, `park` and
 `interchange` cameras. Its
@@ -12,7 +11,7 @@ through shared Slayer after the normal Game build:
 
 ```sh
 game run slayer -- draw doc/examples/jobs/city-clustered-10000.yaml
-game run slayer -- draw doc/examples/jobs/city-clustered-10000.yaml --camera interchange
+game run slayer -- draw doc/examples/jobs/city-clustered-10000.yaml --camera interchange --out out/city-interchange.png
 ```
 
 The recipe supplies district reservations, connected highway geometry

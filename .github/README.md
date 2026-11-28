@@ -8,8 +8,7 @@ and its own music synthesizer. You can make a small picture, build a
 forest, light a fictional spacecraft or put a moving world to music.
 
 **New here? [Make your first picture](../doc/getting-started.md).**
-Then follow [the build guide](../doc/building.md), or inspect your setup
-with `./bootstrap.sh --check`.
+The [build guide](../doc/building.md) covers the required tools and source shelf.
 
 > Models come from the manufactory: dimensions, profiles, branching rules
 > and seeds. We generate the geometry with math. We do not build a world
@@ -20,7 +19,7 @@ with `./bootstrap.sh --check`.
 | You want to… | Start here |
 |---|---|
 | understand Slayer and make something small | [Getting started](../doc/getting-started.md) |
-| get the tools and build | [Building and bootstrap](../doc/building.md) |
+| get the tools and build | [Building Slayer](../doc/building.md) |
 | understand the light in a picture | [How light works](../doc/light.md) |
 | choose careful science or a fast film | [Rendering modes](../doc/modes.md) |
 | understand the renderer's faster paths | [Optimizations](../doc/optimizations.md) |
@@ -70,8 +69,8 @@ game run slayer -- draw doc/examples/jobs/first-film.yaml
 ```
 
 The starter picture uses the CPU. The short film adds synthesized sound;
-movie output needs `ffmpeg`. Larger scenes have their own data and backend
-requirements.
+Slayer writes movies using AVFoundation on macOS with cgo. Larger scenes
+have their own data and backend requirements.
 
 ## Explore further
 

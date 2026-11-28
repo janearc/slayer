@@ -11,6 +11,9 @@ The renders, with a README each, are kept outside this repository, under
 `renders/2026-11-1?-moonlake-*`: the whole film at 2K is
 `renders/2026-11-10-moonlake-2k`.
 
+These are the tools, flags and measurements used for the November 2026
+film. For the current compositor interfaces, see [Omnipositor](omnipositor/README.md).
+
 ## the pieces
 
 - `sets/moonlake.yaml`: the kīlauea iki moonrise set, the camera on the
@@ -82,10 +85,13 @@ The tools read a few more variables:
 - `DEBUGMASK=d.pfm`: lightshow writes what it takes for sky, near
   trees and the rim line, for checking the masks by eye.
 
-## a frame
+## The original frame recipe
 
-Two GPU renders, once (8 s each), from the slayer root with
-`SLAYER_SHELF` set to the sources shelf:
+The film's two reference plates took 8 seconds each on the GPU. This
+recipe records their original inputs. Submit new renders through
+[Azazel](../../doc/azazel.md).
+
+The producer arguments were:
 
     hillside -set sets/moonlake.yaml -lake 1076 -moon 6 -moonglow 0.042 \
       -giants 5 -gpu -raw g5.pfm -out g5.png

@@ -4,7 +4,8 @@ The island selector spends a finite patch allowance on each view and
 rebuilds that selection independently for every frame. At the budget edge,
 small camera moves replace whole patches and change ridge shapes and shading.
 
-Optional detail controls now give the terrain a transition owner:
+in an island plan, set `detail.transition` to interpolate between
+selected terrain meshes.
 
 ```yaml
 detail:
@@ -25,10 +26,8 @@ endpoint's actual stitched triangles. World positions and shading vectors
 interpolate over the declared interval. The next target is selected after
 that interval ends, using the then-current camera.
 
-This bounded delay can lag a fast move. It does not enforce the projected
-cell-span target; limited endpoints keep that status. Geometry remains sourced
-and view-dependent. Holding the initial mesh for the whole flight is a separate
-diagnostic, not this transition policy.
+a bounded transition can lag a fast camera move. its endpoints
+retain their projected-detail status.
 
 The common refinement has its own patch allowance and uses the terrain's
 point limit. Payload bytes count lattice keys and four endpoint vectors per

@@ -150,6 +150,13 @@ func light(said set.Colour) maths.Light {
 	return maths.RGB(said.Linear())
 }
 
+// Blackbody is blackbody for a caller outside the package: a star's light
+// and the colour of its disc, at a temperature in kelvin.
+func Blackbody(kelvin, luminance float64) (bands.Light, maths.Light,
+	error) {
+	return blackbody(kelvin, luminance)
+}
+
 // blackbody is a black body's spectrum at a temperature in kelvin, and
 // its colour, both scaled so the colour's luminance is the one wanted.
 // It refuses a body so cold its light is all nought, or so hot it

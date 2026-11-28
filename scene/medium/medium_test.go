@@ -175,8 +175,14 @@ func TestSpanIsTheBall(t *testing.T) {
 		Dir: maths.V(nought, -unity, nought)}
 	for _, spanner := range mediumSpanners(t) {
 		enter, leave, ok := spanner.Span(down, nought, math.Inf(unity))
+		leaveAt := wantLeave
+		if giant, is := spanner.(Giant); is {
+			// a giant's span ends under its ramp, where nothing
+			// gets through
+			leaveAt = wantEnter + giant.Depth
+		}
 		if !ok || !(math.Abs(enter-wantEnter) <= tolerance) ||
-			!(math.Abs(leave-wantLeave) <= tolerance) {
+			!(math.Abs(leave-leaveAt) <= tolerance) {
 			t.Errorf("%T spans %v to %v, %v", spanner, enter, leave, ok)
 		}
 		if _, _, ok := spanner.Span(corner, nought, math.Inf(unity)); ok {

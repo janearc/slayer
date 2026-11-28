@@ -1,4 +1,6 @@
-# Start here
+# Earlier native frontend checkpoint
+
+For current commands and controls, see the [native guide](README.md).
 
 Open `bin/Ferruccio.app` in the parent directory. This is the current native
 GoGPU/Metal application. Earlier Atelier bundles are kept as checkpoints.

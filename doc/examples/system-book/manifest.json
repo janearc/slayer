@@ -1,0 +1,109 @@
+{
+  "Title": "The Caprica System",
+  "Introduction": "Twelve provisional perspectives of a fictional system: Caprica orbits the lava drop Fresno; Amber is a giant close to the larger star, and Azure is a blue ice giant. These are studies from related scene versions, not twelve cameras on a single unchanged snapshot.",
+  "ArtDirection": "Fresno’s temperature, its atmospheric wisps, the stars’ selected properties, cloud shapes, colours, cameras and exposures are artistic choices. Amber and Azure are fixed positions at the depicted epoch, not propagated orbits. The blue-violet crown and the binary transfer wisps are visual approximations, not simulations of an aurora or accretion. The Azure flock is staged in a local artistic scene with enlarged light cues; the animals and flight in that atmosphere are invented. Earlier Caprica and Fresno views use the prior hot-white-dwarf scene; the newer working system uses a cooler white dwarf. No comet deposition or breakup is simulated. The atmospheric and cloud references inform the wider renderer; these images do not implement or validate either paper’s full model. The drop radius relation noted in the source handoff has not been independently pinned.",
+  "Sources": [
+    {
+      "Title": "Bruneton and Neyret — Precomputed Atmospheric Scattering (2008)",
+      "URL": "https://diglib.eg.org/items/0af15b7c-795a-4cca-97d3-4cc9b99126e4"
+    },
+    {
+      "Title": "Schneider and Vos — Nubis cloud rendering (2017)",
+      "URL": "https://d3d3g8mu99pzk9.cloudfront.net/AndrewSchneider/Nubis-Authoring-Realtime-Volumetric-Cloudscapes-with-the-Decima-Engine-Final.pdf"
+    },
+    {
+      "Title": "Naish and Witton — Hatzegopteryx neck anatomy (2017)",
+      "URL": "https://pmc.ncbi.nlm.nih.gov/articles/PMC5248582/"
+    },
+    {
+      "Title": "NASA Earth Observatory — Glow-in-the-Dark Clouds",
+      "URL": "https://science.nasa.gov/earth/earth-observatory/glow-in-the-dark-clouds-89203/"
+    }
+  ],
+  "Frames": [
+    {
+      "Title": "The binary: transfer study",
+      "Caption": "A bright stellar glow and faint repeated wisps in a preliminary view of the binary; the companion and stream are not clearly resolved.",
+      "Directory": "../../../out/2026-11-27-system-transfer-preview",
+      "Image": "proof.png",
+      "Raw": "light.pfm"
+    },
+    {
+      "Title": "Amber's crown study",
+      "Caption": "A partially lit, banded giant beneath soft blue-violet wisps. The globe is cropped and does not yet show Amber’s intended yellow appearance.",
+      "Directory": "../../../out/2026-11-27-system-crown-preview",
+      "Image": "proof.png",
+      "Raw": "light.pfm"
+    },
+    {
+      "Title": "Azure",
+      "Caption": "A complete blue, softly banded globe at its authored position in the working system.",
+      "Directory": "../../../out/2026-11-27-system-azure-disc-v4",
+      "Image": "proof.png",
+      "Raw": "light.pfm"
+    },
+    {
+      "Title": "Above Azure's clouds",
+      "Caption": "A local artistic flock study at twilight. Its atmospheric clouds and enlarged light cues are composed for this view.",
+      "Directory": "../../../out/2026-11-27-azure-flock-twilight-v15-sampled",
+      "Image": "proof.png",
+      "Raw": "light.pfm"
+    },
+    {
+      "Title": "Fresno and its halo",
+      "Caption": "A complete dark-red lava drop with bright seams and a restrained halo; the authored wake is not clearly visible.",
+      "Directory": "../../../out/2026-11-27-system-fresno-haze-v2",
+      "Image": "proof.png",
+      "Raw": "light.pfm"
+    },
+    {
+      "Title": "Fresno close-up",
+      "Caption": "A close view from the earlier scene shows red-brown crust and luminous seams, with centers approaching white.",
+      "Directory": "../../../out/2026-11-27-caprica-10-drop-oblique-surface-crop-final",
+      "Image": "proof.png",
+      "Raw": "light.pfm"
+    },
+    {
+      "Title": "Caprica in quarter phase",
+      "Caption": "An orange textured day deck meets the dark blue-gray night side; dark flecks trace parts of the bright limb.",
+      "Directory": "../../../out/2026-11-27-caprica-02-quarter",
+      "Image": "proof.png",
+      "Raw": "light.pfm"
+    },
+    {
+      "Title": "Caprica's night crescent",
+      "Caption": "A dim blue crescent reveals green and blue ground among pale broken clouds and stars.",
+      "Directory": "../../../out/2026-11-27-caprica-03-night",
+      "Image": "proof.png",
+      "Raw": "light.pfm"
+    },
+    {
+      "Title": "Above Caprica's deck",
+      "Caption": "A curved orange cloud deck fills the frame, with a ridged whorl and textured tops.",
+      "Directory": "../../../out/2026-11-27-caprica-05-deck",
+      "Image": "proof.png",
+      "Raw": "light.pfm"
+    },
+    {
+      "Title": "Caprica's terminator",
+      "Caption": "A close crop of the dark-to-orange terminator and bright curved limb, with a ragged cloud boundary.",
+      "Directory": "../../../out/2026-11-27-caprica-04-terminator-crop",
+      "Image": "proof.png",
+      "Raw": "light.pfm"
+    },
+    {
+      "Title": "Caprica and Fresno",
+      "Caption": "Caprica’s blue-green face and clouds appear beneath Fresno. This brighter development clips Fresno and some highlights, so its lava surface is not resolved.",
+      "Directory": "../../../out/2026-11-27-system-caprica-fresno-pair-minus2",
+      "Image": "proof.png",
+      "Raw": "light.pfm"
+    },
+    {
+      "Title": "Amber in light",
+      "Caption": "A cream-and-tan banded portrait of Amber in a simplified local scene retaining the binary; wisps, auxiliary lights, other planets and comets are omitted. Its current colour is less yellow than the intended appearance.",
+      "Directory": "../../../out/2026-11-27-system-amber-local-final",
+      "Image": "proof.png",
+      "Raw": "light.pfm"
+    }
+  ]
+}

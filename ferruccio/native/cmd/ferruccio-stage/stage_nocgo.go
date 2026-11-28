@@ -10,7 +10,7 @@ import (
 )
 
 // stage explains why a helper built without Slayer's Cgo cannot stage.
-func stage(_ context.Context, _, _, _ string) (stagewire.Snapshot, error) {
+func stage(_ context.Context, _, _, _ string, _ stagewire.Camera, _ string) (stagewire.Snapshot, error) {
 	return stagewire.Snapshot{}, fmt.Errorf("staging helper requires a Cgo-enabled build")
 }
 

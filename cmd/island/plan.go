@@ -38,6 +38,15 @@ type sourcePlan struct {
 	Offset float64 `yaml:"height-offset-metres" json:"height-offset-metres"`
 }
 
+type proceduralPlan struct {
+	Seed       uint64  `yaml:"seed" json:"seed"`
+	Base       float64 `yaml:"base-metres" json:"base-metres"`
+	Height     float64 `yaml:"height-metres" json:"height-metres"`
+	Wavelength float64 `yaml:"wavelength-metres" json:"wavelength-metres"`
+	Fine       float64 `yaml:"fine-metres" json:"fine-metres"`
+	MadeUp     bool    `yaml:"made-up" json:"made-up"`
+}
+
 type plan struct {
 	VolumeLighting *volumeLightingPlan `yaml:"volume-lighting" json:"volume-lighting,omitempty"`
 	Clouds         []cloudPlan         `yaml:"cloud-layers" json:"cloud-layers,omitempty"`
@@ -45,6 +54,7 @@ type plan struct {
 	Radius         float64             `yaml:"radius-metres" json:"radius-metres"`
 	Anchor         location            `yaml:"anchor" json:"anchor"`
 	Sources        []sourcePlan        `yaml:"sources" json:"sources"`
+	Procedural     *proceduralPlan     `yaml:"procedural-ground" json:"procedural-ground,omitempty"`
 	RasterBudget   struct {
 		CacheBytes    int64 `yaml:"cache-total-bytes" json:"cache-total-bytes"`
 		CacheTiles    int   `yaml:"cache-tiles-per-source" json:"cache-tiles-per-source"`
@@ -62,16 +72,17 @@ type plan struct {
 		North float64 `yaml:"north" json:"north"`
 	} `yaml:"region" json:"region"`
 	Detail struct {
-		Transition    *terrainTransitionPlan `yaml:"transition" json:"transition,omitempty"`
-		Patches       int                    `yaml:"patches" json:"patches"`
-		Evaluations   int                    `yaml:"evaluations" json:"evaluations"`
-		Depth         int                    `yaml:"depth" json:"depth"`
-		Side          int                    `yaml:"side" json:"side"`
-		Points        int                    `yaml:"points" json:"points"`
-		CellPixels    float64                `yaml:"cell-pixels" json:"cell-pixels"`
-		MinimumHeight float64                `yaml:"minimum-height-metres" json:"minimum-height-metres"`
-		MaximumHeight float64                `yaml:"maximum-height-metres" json:"maximum-height-metres"`
-		Normals       *struct {
+		Transition      *terrainTransitionPlan `yaml:"transition" json:"transition,omitempty"`
+		Patches         int                    `yaml:"patches" json:"patches"`
+		Evaluations     int                    `yaml:"evaluations" json:"evaluations"`
+		Depth           int                    `yaml:"depth" json:"depth"`
+		Side            int                    `yaml:"side" json:"side"`
+		Points          int                    `yaml:"points" json:"points"`
+		CellPixels      float64                `yaml:"cell-pixels" json:"cell-pixels"`
+		MinimumHeight   float64                `yaml:"minimum-height-metres" json:"minimum-height-metres"`
+		MaximumHeight   float64                `yaml:"maximum-height-metres" json:"maximum-height-metres"`
+		NormalFootprint string                 `yaml:"normal-footprint" json:"normal-footprint,omitempty"`
+		Normals         *struct {
 			Longitude float64 `yaml:"longitude-deg" json:"longitude-deg"`
 			Latitude  float64 `yaml:"latitude-deg" json:"latitude-deg"`
 		} `yaml:"normal-step" json:"normal-step,omitempty"`
@@ -134,6 +145,15 @@ func readPlan(path string) (*plan, error) {
 	if err := node.Decode(&plan); err != nil {
 		return nil, err
 	}
+	if (plan.Procedural == nil) == (len(plan.Sources) == 0) {
+		return nil, fmt.Errorf("island: choose procedural-ground or one or more raster sources")
+	}
+	if (plan.Procedural != nil) != (plan.Model == "authored-procedural") {
+		return nil, fmt.Errorf("island: height-model must name the selected source")
+	}
+	if p := plan.Procedural; p != nil && (plan.Detail.MinimumHeight > p.Base || plan.Detail.MaximumHeight < p.Base+p.Height+p.Fine) {
+		return nil, fmt.Errorf("island: terrain height bounds must enclose the procedural source")
+	}
 	for index := range plan.Sources {
 		if !filepath.IsAbs(plan.Sources[index].File) {
 			plan.Sources[index].File = filepath.Join(filepath.Dir(absolute), plan.Sources[index].File)
@@ -166,6 +186,7 @@ func (plan plan) terrain(sphere frame.Sphere, sources island.Heights) (*island.T
 		detail.NormalLongitude = plan.Detail.Normals.Longitude
 		detail.NormalLatitude = plan.Detail.Normals.Latitude
 	}
+	detail.MeshFootprintNormals = plan.Detail.NormalFootprint == "mesh"
 	return island.New(sphere, sources, island.Region{West: plan.Region.West,
 		South: plan.Region.South, East: plan.Region.East, North: plan.Region.North}, detail)
 }

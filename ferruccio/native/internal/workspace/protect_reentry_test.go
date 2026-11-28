@@ -54,3 +54,18 @@ func TestRepeatedOpenRequestsKeepOneDirtyDraftPrompt(t *testing.T) {
 		t.Fatalf("repeated open requests left %d prompts, want one", got)
 	}
 }
+
+func TestQuitRequestProtectsAnUnsavedDraft(t *testing.T) {
+	work := libraryEventWorkspace(t)
+	draft := work.state.document.Text() + "\n# unsaved\n"
+	work.state.document.Replace(draft)
+	work.wantQuit.Store(true)
+	work.Tick()
+	if work.closing || len(work.ui.Window().OverlayContentWidgets()) != 1 {
+		t.Fatal("quit did not protect the unsaved draft")
+	}
+	work.ui.HandleEvent(event.NewKeyEvent(event.KeyPress, event.KeyEscape, 0, event.ModNone))
+	if work.closing || work.state.document.Text() != draft {
+		t.Fatal("cancelling quit changed the draft or closed the app")
+	}
+}

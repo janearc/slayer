@@ -11,8 +11,8 @@ import (
 )
 
 // stage runs Slayer staging inside this short-lived helper process.
-func stage(ctx context.Context, path, source, kind string) (stagewire.Snapshot, error) {
-	return workspace.StageSnapshot(ctx, path, source, kind)
+func stage(ctx context.Context, path, source, kind string, camera stagewire.Camera, detail string) (stagewire.Snapshot, error) {
+	return workspace.StageDetailSnapshot(ctx, path, source, kind, camera, detail)
 }
 
 // filmPresets exposes the producer's output-size table to the app.

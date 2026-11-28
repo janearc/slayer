@@ -1,0 +1,2 @@
+# Build the local twelve-view HTML generator, without a render or a sweep.
+caprica-lookbook . :: go build -o bin/caprica-lookbook ./cmd/caprica-lookbook

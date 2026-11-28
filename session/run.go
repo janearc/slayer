@@ -36,6 +36,7 @@ import (
 
 // asked is what the command was asked to draw, and how
 type asked struct {
+	detail *WorkingDetail
 	// preparedSet freezes imported geometry under the job's source identity.
 	preparedSet *set.Set
 	// oceanSpectrum is the continuous spectrum model estimate captured while
@@ -890,7 +891,8 @@ func drawMeasured(world *thing.World, given asked,
 		}
 		eye, glass := eyeFor(given, across), lensFor(given)
 		if given.onGPU {
-			return gpu.ExactMeasured(world, eye, glass, given.at, given.width,
+			return gpu.ExactWithInitialMedia(framesMode(given), world, eye,
+				glass, given.at, given.width,
 				given.height, given.exactSamples, given.initialMedia)
 		}
 		keeping := trace.Keeping{}
@@ -994,7 +996,7 @@ func drawMeasured(world *thing.World, given asked,
 
 // exactSamplesRefusal prevents a drawing path from ignoring the total count.
 func exactSamplesRefusal(given asked) error {
-	if given.glass != nil || given.frame != nil || given.region != nil || given.wire || given.composite != nil || given.optics.opened != nil || given.optics.closing != nil || given.restir || given.skyLooks || given.fastLighting || given.cachedLighting || given.nativeMeshes || given.nativeShadows {
+	if given.glass != nil || given.frame != nil || given.region != nil || given.wire || given.composite != nil || given.optics.opened != nil || given.optics.closing != nil || given.restir || given.skyLooks || given.fastLighting || given.cachedLighting {
 		return errors.New("exact samples: this renderer or drawing mode is not supported yet")
 	}
 	return nil

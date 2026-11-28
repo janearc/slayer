@@ -1,6 +1,10 @@
 # Manufactory constructor index
 
-This index lists exported `New`, `Read` and `Embedded` functions and methods, including their prefixed variants, in production Go under `manufacture`, grouped by package directory. It complements the [constructor hierarchy](manufacture-constructor-hierarchy.md), which explains the family dispatch and shared builders. Receivers are shown as declared; species selectors are profile-backed where described in that hierarchy. Tests and testdata are excluded.
+for using the public factory API, see the
+[constructor reference](constructor-reference.md). this source index
+locates the exported `New`, `Read` and `Embedded` APIs in `manufacture`.
+the [constructor hierarchy](manufacture-constructor-hierarchy.md) shows
+which family builders those APIs call.
 
 ## `manufacture`
 

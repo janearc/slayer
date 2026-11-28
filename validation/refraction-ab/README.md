@@ -61,16 +61,11 @@ render; its SHA-256 appears in `sha256sums.txt`.
 The original four job YAMLs
 in the gallery retain their explicit relative output paths. The compact job
 plus `--out` replacement changes only the scene/output path coordinates: all
-other validated job settings are identical. To assess/draw a generated job
-through the Game tests lane, use the pinned Slayer binary and the existing
-Puzzlemouth interface:
-
-```sh
-game5 lane tests -- "$SLAYER_BIN" assess "$WORK/a1-10/job.yaml" --out "$OUT/a1-10.png"
-game5 lane tests -- "$SLAYER_BIN" draw "$WORK/a1-10/job.yaml" --out "$OUT/a1-10.png" --fresh
-```
-
-Repeat with the other job directories and output filenames. The checked-in
+other validated job settings are identical. Set `SLAYER_CACHE` to an
+absolute cache directory, then assess each generated job with
+`slayer assess JOB --out PNG`. To draw, submit `slayer draw JOB --out PNG --fresh`
+through [Azazel](../../doc/azazel.md), using distinct output paths.
+The checked-in
 render evidence used Game5 511afb9, source commit
 `f7889fb8fdfa167c2c12bb671d2d0f0ffab742c9`, and an unstamped custom Slayer
 binary with the hash in `sha256sums.txt`; exact commands and output logs are in

@@ -1,242 +1,70 @@
-# azazel
+# Azazel scheduler design
 
-Azazel carries rendering work inside Slayer. It keeps the host usable,
-records what ran, and resumes work from verified results after interruption.
-This document describes the work being built, including the parts that do
-not exist yet. A completed primitive does not establish a working queue.
+Azazel owns render admission and job supervision. Slayer owns scene
+interpretation and rendering. A request wraps a foreground command and
+its argument array. Game builds and checks the software. See
+[the operator guide](../doc/azazel.md) for current commands and policy.
 
-The current foreground queue is documented in [the human guide](../doc/azazel.md).
-It is under validation; verified output publication and shared migration
-remain unfinished. The pressure-policy update below supersedes the earlier
-per-job memory-ceiling proposal for this rollout.
+## Requests and identity
 
-## boundaries
+The request contract carries an agent, idempotency key, executable,
+arguments, working directory, environment, declared input files, resource
+lane and timeout. Submit validates the schema and records executable and
+input hashes. Execution checks those identities again. Clients declare
+the referenced inputs whose identity matters.
 
-Azazel lives under `azazel/` in the Slayer module, on its own branch.
-Its resource accounting must not import the tracer, Metal, catalogue
-readers, or physics. Renderer adapters compose those packages later.
+The durable ledger gives each submission a sequence. Retrying unchanged
+content with the same agent and key returns the existing acknowledgement.
+Changed content with that key is refused. Output locations belong to the
+producer. Choose fresh destinations for new work.
 
-Nilgai normalizes observations; Celestial owns physical quantities and
-models; Celestial-data obtains archive products. Those responsibilities
-remain with their packages.
+## Admission and stopping
 
-Azazel owns admission and renewable leases for its render jobs. Game builds
-and tests software; it is not the render scheduler. Direct Slayer renders
-and GPU tests currently need operator coordination with Azazel's queue.
+One dispatcher owns a queue. It selects eligible CPU and GPU work
+independently and starts Azazel-owned supervisors. The default is two CPU
+attempts and four GPU attempts, with five seconds between GPU starts.
+Live tuning can change the GPU concurrency and spacing.
 
-A Carrie pane discovers and presents that state through its configurable
-provider interface. Carrie does not schedule or own jobs.
+The queue checks available disk and system memory pressure. Unknown
+samples hold new work. Low disk latches a stop. Elevated memory pressure
+also latches a stop under the default policy. The observe policy reports
+pressure while allowing work to continue. Reported process-group residency
+helps diagnose load. Disk and pressure stops require explicit resume.
 
-The common admission operation must cover both reading the available
-budget and reserving it. Two callers must not each spend the same room.
+## Utilization under backlog
 
-Every render start needs an Azazel grant, including the first. A render lease
-is renewed by its supervisor and persists in the queue. An expired deadline
-does not establish that the old render has stopped: the inherited attempt
-lock and process group remain recovery fences.
+The GPU scheduling target is 100% device utilization while runnable GPU
+jobs wait, subject to host checks and attempt ownership. Measure the GPU
+counter and sample time alongside completed work per unit time. A busier
+device can still deliver less throughput. Scheduler status records active
+attempts, the device observation and the reason admission is held.
 
-## what a job carries
+CPU work can proceed while GPU work runs. Other GPU users and unrelated
+queues do not share Azazel leases. Operators coordinate them separately.
 
-A submitted job names its requester, source and executable identities,
-arguments, working directory, input hashes, expected outputs, resource
-limits and timeout. Render tasks also name the scene, exact frame times,
-dimensions, sampling, device and output roles.
+## Lifetime and results
 
-Changing an identity changes the result key. An output path alone is not
-an input identity.
+Each attempt has a renewable lease, a supervisor, a process group and an
+attempt lock inherited by the command. A stopped dispatcher leaves active
+supervisors running. Restart adopts surviving supervisors and requeues
+attempts that never executed. Lease expiry alone does not authorize replay.
+An uncertain attempt stays fenced until the worker or operator resolves it.
 
-The engine protocol follows the original typed message design. Messages
-are generated from the contract, bounded and checked before action.
-The revised wire and file contracts need review before integration.
+The queue records command success, failure, cancellation and interruption.
+It retains failed attempts without automatically retrying them. The
+producer owns its outputs and any verification it performs.
+[Gallery publication](pages/README.md) observes jobs independently and
+records its own failures.
 
-An unknown feature must receive an explicit refusal; it must never become
-a picture with that feature quietly omitted.
+## Private admission experiments
 
-## admission and stopping
+A separate set of budget and storage primitives explores cross-engine
+admission and durable reservation records. These contracts are distinct
+from the live queue's lease and dispatch mechanism.
 
-Admission evaluates measured host conditions and outstanding reservations
-under a shared lock. Unknown measurements hold work. A hold
-records its reason and does not turn a queued job into a failed result.
-The scheduler's observation records remain readable while work is held.
-
-Thread limits apply to each process. Worker counts and concurrent jobs
-also consume the shared budget. Render processes default to eight Go workers,
-configurable per request. A queue slot or a `GOMAXPROCS` value alone is not
-a memory limit.
-
-The current rollout uses system memory pressure and records peak measured
-group residency. An RSS estimate is metadata, not a stop threshold, and the
-worker does not impose a small Go heap. The earlier reservation primitives
-remain available for designs that require them; they do not establish the
-aggregate admission or permission to restore an RSS ceiling.
-
-The running-job monitor measures the job's process group, not just its
-first process. Elevated system pressure stops the group. A sampled
-monitor can react only after a sample; it is not a kernel-enforced cap.
-
-The Darwin measurement and termination behavior must be established by a
-bounded platform check before it is relied upon.
-
-The worker defaults to four GPU attempts and two CPU attempts. GPU starts
-are spaced five seconds apart by default; both settings can be tuned live.
-Admission samples system pressure and available disk. The operator can
-choose whether elevated memory pressure stops work or is only recorded.
-
-Accumulated swap alone does not stop or hold a job.
-Under the disk floor or elevated pressure,
-running work stops and waiting work stays stopped.
-
-A host stop is latched and needs an explicit resume; a later favorable
-sample does not silently release the queue. These are configurable host
-policies, not physical constants or permission for a caller to raise them.
-
-## utilization under backlog
-
-The scheduling target is 100% GPU utilization while runnable GPU work is
-waiting. Admission should expand to use available capacity, subject to
-system pressure, disk safety and established attempt ownership. A fixed
-one-job limit does not satisfy this target merely because a job is running.
-
-Measure the GPU counter's name, value and sample time alongside completed
-work per unit time. Device and renderer counters must remain distinguishable.
-An admission change must improve useful throughput; a larger busy percentage
-alone does not establish that more work is being completed.
-
-CPU work remains independently eligible while GPU work runs. Bound aggregate
-admission and use the requested render worker count. Direct GPU users and
-Azazel do not yet share a grant, so transition coordination remains necessary.
-
-When backlog remains below the utilization target, expose the limiting
-reason: host pressure, disk, lane admission, recovery, or renderer work
-submission. If admission is the limit, increase it within measured capacity.
-If the renderer is the limit, profile and improve its submission pipeline.
-
-Acceptance needs measured backlog runs covering CPU/GPU overlap, capacity
-increases and pressure-driven holds. Restart and cancellation must retain
-every request and prevent duplicate execution with concurrent attempts.
-Bounded process tests cover overlap and dispatcher restart without replay.
-Full workload performance and the remaining publication checks are still open.
-
-## lifetime and results
-
-An attempt has a private output directory and an identified process group.
-It cannot publish a frame merely by naming it. Azazel verifies the bytes,
-hash, dimensions, frame identity and expected role before publication.
-
-Publication must preserve an existing immutable result, including a race
-with another publisher. An incomplete attempt is not a completed frame.
-
-The engine must deliver exactly the expected frames before `done` can be
-accepted. A responsive process that makes no progress is stalled; progress
-within a frame counts. An honest long first frame must not be killed merely
-because no previous frame has supplied a timing estimate.
-
-Cancellation is idempotent. Closing the parent's input must end an engine
-within its stated grace, including one stuck while releasing resources.
-Timeout and stop handling reach child processes. A restarted runner must
-establish process identity before signaling an old group.
-
-A failed test is a stored failed result, not a reason to rerun it until
-it passes. Retry rules distinguish unavailable infrastructure from invalid
-input and refusals. Verification failures and exhausted retries remain
-visible.
-
-Health, metrics and the result gallery report missing checks as missing.
-
-## implementation order
-
-1. Pure resource quantities and admission decisions, with tests and
-   anti-tests derived from this document.
-2. Typed durable records, atomic publication, reservations and stop state.
-3. Generated file and engine contracts, reviewed before their integration.
-4. Process identity, group supervision and host measurements, with generated
-   mocks and bounded real-process checks where the operating system matters.
-5. Queue composition and Azazel-owned render admission.
-6. Pzm entry points, declared configuration, flags, status and service health.
-7. Slayer engine adapter, verified render results and restart behavior.
-8. Gallery, cache, baselines and the remaining original-plan features.
-
-Each step follows tests, anti-tests, a readme, types and function signatures,
-verification against those signatures, then one function at a time.
-Focused checks establish red, green and resistance to deliberate faults.
-Acceptance review and the full relevant gates follow a ready branch.
-
-## first primitive: reserved memory
-
-The first function answers one question: does a positive memory request fit
-inside the configured memory ceiling after existing reservations?
-It takes a budget and request as separate private structures and returns a
-predicate. Counts are unsigned bytes, not physical mass or a percentage.
-
-- A zero request is refused, so an omitted ceiling cannot become unbounded.
-- A budget already reserved past its ceiling is refused.
-- An exact fit is allowed.
-- One byte above the unreserved capacity is refused.
-- Arithmetic must work through the entire unsigned range. It must never
-  grant work because adding two counts wrapped around.
-- The predicate performs no allocation, I/O, host measurement or reservation.
-  Its answer is used inside the later locked admission transaction.
-
-Tests compare small authored byte ledgers, full-width boundaries, and an
-independent arbitrary-precision sum. Anti-tests cover zero and broken
-budgets, spending existing reservations, and arithmetic overflow.
-This predicate alone cannot start, limit or stop a job.
-
-## second primitive: measured host admission
-
-A pure policy decision evaluates a supplied host sample. It returns one
-private decision value, carrying a reason instead of granting authority.
-It reads no clock, process, file, configuration or flag service. The later
-locked admission transaction must also check outstanding reservations.
-
-The caller supplies a positive finite load ceiling, a positive swap ceiling
-in bytes, and a positive free-disk floor in bytes. There are no hidden
-defaults.
-
-Each measurement has its own known bit: a measured zero swap is
-different from a failed swap read. Load must be finite and nonnegative.
-A zero swap ceiling is an invalid omitted threshold. To allow measured
-zero swap and hold any positive byte, supply a ceiling of one byte.
-
-Decisions have this precedence:
-
-1. Invalid policy refuses admission.
-2. An already latched stop remains stopped, even with favorable samples.
-3. Known free disk below its floor reports low disk, even when another
-   measurement is unavailable. Missing load must not mask a known disk stop.
-4. Any unknown measurement or invalid load holds admission as unknown.
-5. Load at or above its ceiling holds admission.
-6. Swap at or above its ceiling holds admission.
-7. Otherwise the host conditions permit admission. Exact disk floor is
-   permitted; exact load or swap ceiling is held.
-
-The zero decision is unknown, so an omitted decision is never a grant.
-The function does not write the stop latch or terminate a process. A later
-state transition must persist the low-disk stop before any later sample can
-release work. This predicate cannot establish the monitoring or stop path.
-
-Tests pair safe cases with unknown, invalid, stopped and boundary cases,
-including every combination of measurement availability. Rapid checks
-that increasing free disk cannot withdraw a ready decision, while changing
-numerical conditions cannot clear a supplied stop latch.
-
-Those properties test policy invariants independently of its branch order.
-
-## prerequisites to resolve
-
-The October plan requires Pzm's share/idler and sealed configuration verbs.
-Pzm main `804658c3` reserves `share`, `check-config`, `edit-config` and
-`seal` but does not implement them. They must be provided by Pzm; Azazel
-must not install another parser or declare its own versions.
-
-Flipr is not required. Admission uses host measurements, outstanding
-reservations and the latched stop; no external flag-service decision is
-a prerequisite for starting work.
-
-The original plans are in Vanguard `4d51ba4` and Lamb-debacle `f7e5ddc`.
-The October review's root location is superseded by the current Slayer
-location. Its frame-count, stall-clock and verification findings remain
-requirements.
-
-Historical descriptions of renderer APIs require checking against the
-current Slayer base, `57510cb`.
+- [Ordinary admission proposals](ADMISSION-DESIGN.md)
+- [Reservation proposals](RESERVATION-DESIGN.md) and
+  [owned reservation proposals](OWNED-RESERVATIONS.md)
+- [Stop transition draft](STOP-DESIGN.md)
+- [Work limit values](WORK-LIMITS.md)
+- [Locked publication transaction](TRANSACTION.md)

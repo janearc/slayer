@@ -1,0 +1,9 @@
+"$schema": https://github.com/janearc/slayer/schemas/job-v1.json
+scene: {set: 07-oblique-north-orbit.yaml}
+renderer: gpu-native
+shortcuts: {restir: off}
+film: {width: 800, height: 800, rays: 4, wide: 40, exposure: 0.0013}
+camera: {name: 07-oblique}
+outputs:
+  picture: ../../../out/2026-11-27-caprica-07-oblique-north-orbit/proof.png
+  raw: ../../../out/2026-11-27-caprica-07-oblique-north-orbit/light.pfm

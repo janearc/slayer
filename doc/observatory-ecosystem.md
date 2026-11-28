@@ -1,130 +1,51 @@
-# An observatory above the forest
+# an observatory above the forest
 
-[The YAML scene](observatory-ecosystem.yaml) is the integration scene: a
-manufactured observatory on volcanic terrain, a seeded forest, and mist shared
-by the grove. After the [Game setup](developing.md), run the fixed preset:
+[the set](observatory-ecosystem.yaml) places a manufactured observatory
+on volcanic terrain with a seeded forest and mist shared by the grove.
+after the [Game setup](developing.md), draw it from the checkout root:
 
 ```sh
-game build
+game build slayer
 game run observatory
 ```
 
-The PNG is written to `out/observatory.png`. The USGS DEM must be unpacked on
-the source shelf. The scene uses the GPU; it
-does not silently fall back to the CPU when Metal is unavailable.
+the PNG is written to `out/observatory.png`. the USGS elevation model must
+be unpacked on the source shelf. the scene requests the GPU and requires
+Metal.
 
-The terrain fields come from the existing Kilauea forest set. The site and
-introduced coast redwoods are fictional. Recipe dimensions, weather, and camera
-settings are authored scene choices, not measured conditions at Kilauea or
-specifications copied from a real observatory.
+the elevation model is from Kilauea. the observatory site, its coast
+redwoods and weather are authored.
 
-## Recipes and specimens
+## recipes and specimens
 
-`recipes` describes what can be made. `set.things` places individual specimens
-and `set.stands` places groups. Each has an explicit seed. Changing a specimen's
-placement must not change its construction.
+`scene.recipes` describes what can be made. `scene.set.things` places
+individual specimens and `scene.set.stands` places groups. each has an
+explicit seed. changing a specimen's placement keeps its construction.
 
-An observatory is an assembly: enclosure, opening, mount, and telescope. Its
-dimensions and pointing are explicit recipe inputs. Arrays can later place many
-instances of an antenna recipe using the same distinction between construction
-and arrangement.
+the observatory recipe supplies dimensions and pointing for its enclosure,
+opening, mount and telescope. the set uses the
+[bundled v1 schema](../set/ecosystem.schema.json). see
+[sets](sets.md#schemas-and-stage-support) for validation and version choice.
 
-The bundled [JSON Schema](../set/ecosystem.schema.json) defines the opt-in
-ecosystem v1 subset of Set: recipes, pinhole films, placement and weather. Its
-`$schema` ID selects that subset; validation never fetches the URL. Puzzlemouth
-checks structure; Go checks references and construction.
+## detail and clearance
 
-This schema intentionally excludes legacy `scene.hud`, `scene.planet` and
-`scene.world`; `set.assets`, `set.bounded_box` and `set.texts`; film `print`,
-`frame`, `lens`, `shutter` and `glimpses`; camera `eye`; and stand `within`. It
-is not a schema for the full legacy Set language.
+the scene defaults to `quick`. the forest chooses `clumps`, and the
+observatory chooses `demo`. these names select model representations.
+see the [catalogue](catalogue.md) for the levels available on each kind.
 
-Files using those legacy fields keep the reader without `$schema`.
-The schema does not turn domain relationships into rules.
+`exclude` leaves a clearing 40 metres beyond the observatory’s enclosing
+circle. the stand places up to 5,000 trees above 1,150 metres. the model’s
+shared meshes let the renderer reuse foliage across specimens.
 
-Legacy sets without `$schema` retain their existing reader and diagnostics;
-their YAML front door also goes through Puzzlemouth. No new CLI parser or flags
-were added for these recipes.
+## atmosphere
 
-The bundled schema and contextual source excerpts require Puzzlemouth
-v0.1.4, which requires Go 1.27.3.
+the forest and its weather share one mist volume over the union of the
+trees’ canopy footprints. the terrain forms the bottom. the mist tops out
+at the lower of the canopy height and the prescribed depth. overlap
+keeps the same extinction. coverage sets a noise threshold, wind moves
+the patches, and boundary fade softens their edges.
 
-## Complexity
-
-The scene gives a default, with overrides on specimens and stands. It uses the
-four names:
-
-- `hull`: the specimen's coarse silhouette.
-- `clumps`: coarse foliage surfaces or assembly detail.
-- `quick`: a working preview of the specimen.
-- `demo`: individual foliage or close-view assembly detail.
-
-The four conifers support all four levels. Coast redwood and giant sequoia now
-carry recursively branched shoots with individual needles or scales. Their
-surface detail changes across levels; their physical leaf lengths do not.
-
-Shared mesh groups reuse the shoots on both CPU and GPU. [Conifer
-foliage](model/vegetation/conifer-foliage.md) records the rules, botanical sources, and model
-choices. The two original spruces retain their legacy previews.
-
-These remain authored crown approximations. They do not model the full range of
-mature, damaged, or reiterated crowns.
-
-The optical observatory has a hollow drum and dome with an open slit, an
-alt-azimuth mount, open truss, and monolithic or separated hexagonal mirror
-panels. It is a visual instrument recipe, not an optical bench: there is no
-guarantee of an unobstructed beam at every pointing.
-
-Seeded construction and placement stay fixed across complexity levels. `Bounds`
-retains a common physical extent for clearance and atmosphere.
-
-Every kind whose recipe has a `madeAt` method takes all four levels (hull,
-clumps, quick, demo), among them the two loose shoots, the observatories and
-the [spacecraft templates](model/spacecraft/space-observatories.md). Only these kinds accept
-`quick` alone: bonfire, boulder, campfire, can, cobble, fern, home, the
-seven lasers, log, maser, pebble, spotlight and strobe; unsupported levels
-are refused.
-
-## Atmosphere
-
-The forest refers to one weather description. Its shared field occupies the
-union of specimen canopy footprints, from the terrain up to the smaller of mist
-depth and canopy height. Overlapping canopies do not multiply its extinction.
-
-Clearance is measured beyond the named object's enclosing circle; it keeps tree
-bases outside that clearing.
-
-The sample uses explicitly prescribed mist. Its extinction, depth, and coverage
-are authored appearance controls. Coverage is a noise threshold, not a
-calibrated cloud fraction: zero is clear and one fills the footprint. Wind moves
-the patches; optional boundary fade softens each canopy edge.
-
-The scattering colour, 0.95 grey, is also authored.
-
-These are not values derived from the [redwood
-references](model/vegetation/redwood-atmosphere.md), and the scene does not claim a moisture
-balance or condensation simulation.
-
-A physical grove model would require sourced species and environmental
-parameters. It should coexist with an explicitly authored atmosphere; the source
-notes distinguish evidence from those modelling decisions.
-
-## What reaches the GPU
-
-Recipes make ordinary meshes or mesh groups. The GPU pools shoot meshes, reuses
-their local instance hierarchies, and instances complete specimens through the
-forest. A stand repeats four seeded specimens; it does not store separately
-expanded needle geometry for all 5,000 trees.
-
-The encoder samples the shared mist on the CPU into a bounded density grid once
-per picture; the GPU reads that grid. It requests four samples through the mist
-depth, subject to the existing 192-cell longest-axis cap.
-
-Thin canopy edges in a kilometre scale field can be blurred or missed. The CPU
-evaluates the field directly; agreement is approximate, not bit equality.
-
-The integration render has one observatory, 5,000 trees, and one mist volume.
-
-Deciduous trees, Joshua trees, saguaros, brush, radomes and antenna arrays
-are not provided. [General fire recipes](model/fire/fire-recipes.md) stand
-independently of trees.
+the CPU samples the field directly. the GPU samples a bounded density
+grid prepared on the CPU, so thin canopy edges can be missed. the mist
+describes an authored appearance. [redwood atmosphere notes](model/vegetation/redwood-atmosphere.md)
+record the sources that would inform a physical model.

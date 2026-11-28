@@ -12,6 +12,83 @@
 # says why, in never. used, never released: the bytes are not shipped.
 
 sources:
+  - key: hanika-2021-shadow-terminator
+    title: "Hacking the Shadow Terminator"
+    by: "Johannes Hanika"
+    year: 2021
+    doi: 10.1007/978-1-4842-7185-8_4
+    from: https://jo.dreggn.org/home/2021_terminator.pdf
+    licence: "CC BY-NC-ND 4.0; copyright 2021 NVIDIA. Author-hosted chapter, local study only; no redistribution."
+    sha256: 5ce04eb83b5c43a9c6649d229f99dba448d23917dccb161a0907ed26766fc625
+    bytes: 1219576
+    fetched: 2026-11-27
+  - key: han-sun-2007-normal-map-filtering
+    title: "Frequency Domain Normal Map Filtering"
+    by: "Charles Han, Bo Sun, Ravi Ramamoorthi and Eitan Grinspun"
+    year: 2007
+    doi: 10.1145/1276377.1276412
+    from: https://www.cs.columbia.edu/cg/pdfs/123-normalmap.pdf
+    licence: "Authors' institutional copy; licence unspecified. Local study only; no redistribution."
+    sha256: 2c940bd1799c4c727630608f891864fde1fb629c11daa38b8907452eb6a16f73
+    bytes: 7568432
+    fetched: 2026-11-27
+  - key: chiang-li-burley-2019-shadow-terminator
+    title: "Taming the Shadow Terminator"
+    by: "Matt Jen-Yuan Chiang, Yining Karl Li and Brent Burley"
+    year: 2019
+    doi: 10.1145/3306307.3328172
+    from: https://www.yiningkarlli.com/projects/shadowterminator/shadow_terminator_v1_1.pdf
+    licence: "Author-hosted ACM paper; local research only, no redistribution."
+    sha256: 0bd3279cdcdb1fe44e273c9497d6bf245cb9efe55587a2d20149ec623a584962
+    bytes: 4043193
+    fetched: 2026-11-27
+  - key: nasa-cassini-shadows-on-saturn
+    title: "Shadows on Saturn (PIA12737): Mimas's shadow and ring shadows, Cassini near-infrared image"
+    by: "NASA/JPL/Space Science Institute"
+    year: 2010
+    from: https://science.nasa.gov/photojournal/shadows-on-saturn/
+    licence: "NASA/JPL/Space Science Institute credited; local study only, no redistribution or implied endorsement. Dynamic page; hash pins fetched HTML, not linked images."
+    sha256: 4ba0692fa22c0ff77f2fed8dcdb84ec78b8818f56f6557c7f5086934e9938578
+    bytes: 269298
+    fetched: 2026-11-27
+  - key: pharr-jakob-humphreys-2023-film-imaging
+    title: "Physically Based Rendering, fourth edition, section 5.4: Film and Imaging"
+    by: "Matt Pharr, Wenzel Jakob and Greg Humphreys"
+    year: 2023
+    from: https://pbr-book.org/4ed/Cameras_and_Film/Film_and_Imaging
+    licence: "CC BY-NC-ND 4.0, copyright 2004–2023 authors; local study only, no redistribution. HTML page and external assets may change; hash pins fetched HTML only."
+    sha256: 0f82959dc14b235410e475e156a041fef820c3ff256dce26f966dd52d4bf2366
+    bytes: 555079
+    fetched: 2026-11-27
+  - key: bruneton-neyret-2008-atmosphere
+    title: "Precomputed Atmospheric Scattering"
+    by: "Eric Bruneton and Fabrice Neyret"
+    year: 2008
+    doi: 10.1111/j.1467-8659.2008.01245.x
+    from: https://inria.hal.science/inria-00288758/document
+    licence: "Authors' institutional copy; copyright 2008 authors and Eurographics/Blackwell. Local study only; no redistribution."
+    sha256: d9b7a840aeaf5c2c5f5ddacbcfc927e2b03640cd738a9ff0addc41dcbe06fab2
+    bytes: 2234928
+    fetched: 2026-11-27
+  - key: schneider-vos-2017-nubis
+    title: "Nubis: Authoring Real-Time Volumetric Cloudscapes with the Decima Engine"
+    by: "Andrew Schneider and Nathan Vos, Guerrilla Games"
+    year: 2017
+    from: https://d3d3g8mu99pzk9.cloudfront.net/AndrewSchneider/Nubis-Authoring-Realtime-Volumetric-Cloudscapes-with-the-Decima-Engine-Final.pdf
+    licence: "Authors' presentation; licence unspecified. Local study only; no redistribution."
+    sha256: 0143f9b829e11c1ec30ed50223971450032c8be26f87ac73027fa380332cf9ae
+    bytes: 13672078
+    fetched: 2026-11-27
+  - key: schott-2024-terrain-amplification
+    title: "Terrain Amplification using Multi-scale Erosion"
+    by: "Hugo Schott, Eric Galin, Eric Guérin, Axel Paris and Adrien Peytavie"
+    year: 2024
+    doi: 10.1145/3658200
+    from: https://hal.science/hal-04565030v1/file/2024-MultiScaleHydro-Author.pdf
+    licence: "Authors' institutional copy; licence unspecified. Local study only; no redistribution."
+    sha256: 85a42371d704166f92ec6497cef98c0d458072285b75a7e3a13616344551203a
+    bytes: 31664872
+    fetched: 2026-11-27
   - key: perez-vega-2024-bridge-reflections
     title: "Polarised light pollution on river water surfaces caused by artificial light at night from illuminated bridges and surroundings"
     by: "Catherine Pérez Vega, Franz Hölker, Karolina M. Zielinska-Dabkowska, Andreas Jechow"

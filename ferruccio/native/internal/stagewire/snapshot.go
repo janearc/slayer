@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"math"
+	"time"
 
 	"github.com/janearc/slayer/maths"
 	"github.com/janearc/slayer/scene/shape"
@@ -20,10 +21,18 @@ type Snapshot struct {
 	Version    int                      `json:"version"`
 	Scene      placement.DisplayScene   `json:"scene"`
 	Notice     string                   `json:"notice"`
+	Frame      *FilmFrame               `json:"frame,omitempty"`
 	Meshes     []*placement.DisplayMesh `json:"meshes,omitempty"`
 	Places     []MeshPlace              `json:"places,omitempty"`
 	MeshCount  int                      `json:"mesh_count,omitempty"`
 	BatchCount int                      `json:"batch_count,omitempty"`
+}
+
+// FilmFrame identifies one inspection frame on the producer's film clock.
+// Number is one-based. Still snapshots have no FilmFrame.
+type FilmFrame struct {
+	Number, Count int
+	Time          time.Duration
 }
 
 // MeshPlace references a single shared mesh and its staged transform.
@@ -65,10 +74,16 @@ func Write(out io.Writer, snapshot Snapshot) error {
 
 // Read rejects incomplete, extra, and structurally invalid output.
 func Read(in io.Reader) (Snapshot, error) {
+	return readSized(in, -1)
+}
+
+// readSized uses a known whole-stream size only as an upper bound for
+// allocations; -1 preserves streaming behavior when the size is unknown.
+func readSized(in io.Reader, size int64) (Snapshot, error) {
 	var snapshot Snapshot
 	buffered := bufio.NewReader(in)
 	if magic, err := buffered.Peek(len(binaryMagic)); err == nil && (string(magic) == binaryMagic || string(magic) == binaryMagicWithOrigins) {
-		return readBinaryBatches(buffered)
+		return readBinaryBatches(buffered, size)
 	}
 	decoder := json.NewDecoder(buffered)
 	decoder.DisallowUnknownFields()
@@ -121,8 +136,42 @@ func vector(value maths.Vec) bool { return finite(value.X) && finite(value.Y) &&
 // validate refuses geometry that could make the display draw invalid indices.
 func validate(snapshot Snapshot) error {
 	scene := snapshot.Scene
+	if frame := snapshot.Frame; frame != nil && (snapshot.Version < 5 || frame.Number < 1 || frame.Number > frame.Count) {
+		return fmt.Errorf("invalid staged film frame")
+	}
 	if snapshot.Version < 5 && len(scene.Origins) != 0 {
 		return fmt.Errorf("staged authored origins require version 5")
+	}
+	if err := validateLights(snapshot.Version, scene.Lights); err != nil {
+		return err
+	}
+	if len(scene.VolumeBounds) > placement.VolumeBoundLimit || scene.OmittedVolumeBounds < 0 ||
+		(snapshot.Version < 5 && (len(scene.VolumeBounds) != 0 || scene.OmittedVolumeBounds != 0)) {
+		return fmt.Errorf("unexpected staged volume bounds")
+	}
+	for _, bound := range scene.VolumeBounds {
+		if !bound.Valid() {
+			return fmt.Errorf("invalid staged volume bound")
+		}
+	}
+	if len(scene.GiantBoundaries) > placement.GiantBoundaryLimit || (snapshot.Version < 5 && len(scene.GiantBoundaries) > 0) {
+		return fmt.Errorf("unexpected staged gas giant boundaries")
+	}
+	for _, boundary := range scene.GiantBoundaries {
+		if !boundary.Valid() {
+			return fmt.Errorf("invalid staged gas giant boundary")
+		}
+	}
+	if len(scene.GlobeOutlines) > placement.GlobeOutlineLimit || (snapshot.Version < 5 && len(scene.GlobeOutlines) > 0) {
+		return fmt.Errorf("unexpected staged globe outlines")
+	}
+	for _, outline := range scene.GlobeOutlines {
+		if !outline.Valid() {
+			return fmt.Errorf("invalid staged globe outline")
+		}
+	}
+	if scene.SkyGradient != nil && (snapshot.Version < 5 || !scene.SkyGradient.Valid()) {
+		return fmt.Errorf("invalid staged sky gradient")
 	}
 	for id, origin := range scene.Origins {
 		if id == "" || !vector(origin) {
@@ -131,7 +180,7 @@ func validate(snapshot Snapshot) error {
 	}
 	if (snapshot.Version != 1 && snapshot.Version != 2 && snapshot.Version != 3 && snapshot.Version != 4 && snapshot.Version != 5) || snapshot.Notice == "" || scene.Width <= 0 || scene.Height <= 0 ||
 		!shape.ValidPlacement(scene.Eye) || !vector(scene.Focus) || !finite(scene.Lens.Wide) || !finite(scene.Lens.Pixel) ||
-		scene.Lens.Wide < 0 || scene.Lens.Wide >= math.Pi || scene.Lens.Pixel < 0 || (len(scene.Objects) == 0 && len(scene.Batches) == 0) {
+		scene.Lens.Wide < 0 || scene.Lens.Wide >= math.Pi || scene.Lens.Pixel < 0 || (snapshot.Version < 5 && len(scene.Objects) == 0 && len(scene.Batches) == 0) {
 		return fmt.Errorf("invalid staged snapshot camera or metadata")
 	}
 	if snapshot.Version == 1 && (len(scene.Objects) != 1 || scene.Objects[0].ID != "scene.world") {
@@ -140,7 +189,7 @@ func validate(snapshot Snapshot) error {
 	if snapshot.Version != 3 && snapshot.Version != 4 && snapshot.Version != 5 && len(scene.Batches) != 0 {
 		return fmt.Errorf("older staged snapshot has unexpected batches")
 	}
-	if (snapshot.Version == 3 || snapshot.Version == 4 || snapshot.Version == 5) && (len(scene.Objects) != 0 || len(scene.Batches) == 0) {
+	if snapshot.Version >= 3 && len(scene.Objects) != 0 {
 		return fmt.Errorf("staged snapshot requires batches")
 	}
 	seen := make(map[*placement.DisplayMesh]bool)
@@ -188,6 +237,20 @@ func validate(snapshot Snapshot) error {
 				return err
 			}
 		}
+	}
+	return nil
+}
+
+func validateLights(version int, lights []placement.DisplayLight) error {
+	if len(lights) > placement.LightLimit || (version < 5 && len(lights) != 0) {
+		return fmt.Errorf("unexpected staged lights")
+	}
+	seen := make(map[int]bool, len(lights))
+	for _, light := range lights {
+		if !light.Valid() || seen[light.Ordinal] {
+			return fmt.Errorf("invalid staged light")
+		}
+		seen[light.Ordinal] = true
 	}
 	return nil
 }

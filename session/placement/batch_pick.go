@@ -8,7 +8,7 @@ import (
 
 // batchHit intersects the displayed triangles and preserves the staged
 // authored group. Unknown and non-editable groups remain occluding world.
-func (scene *DisplayScene) batchHit(ray maths.Ray, maximum float64) (DisplayHit, bool) {
+func (scene *DisplayScene) batchHit(ray maths.Ray, near, maximum float64) (DisplayHit, bool) {
 	length := ray.Dir.Len()
 	if length == 0 || math.IsInf(length, 0) || math.IsNaN(length) {
 		return DisplayHit{}, false
@@ -22,7 +22,7 @@ func (scene *DisplayScene) batchHit(ray maths.Ray, maximum float64) (DisplayHit,
 			continue
 		}
 		if batch.HasBounds {
-			if _, _, hit := batch.Bounds.Hit(ray, 0, nearest); !hit {
+			if _, _, hit := batch.Bounds.Hit(ray, near, nearest); !hit {
 				continue
 			}
 		}
@@ -37,7 +37,7 @@ func (scene *DisplayScene) batchHit(ray maths.Ray, maximum float64) (DisplayHit,
 		}
 		for index := 0; index < len(batch.Places); {
 			if batch.HasBounds && len(batch.pickBlocks) > 0 && index%PlacementBlockSize == 0 {
-				_, _, blockHit := batch.pickBlocks[index/PlacementBlockSize].Hit(ray, 0, nearest)
+				_, _, blockHit := batch.pickBlocks[index/PlacementBlockSize].Hit(ray, near, nearest)
 				if !blockHit {
 					index += PlacementBlockSize
 					continue
@@ -60,13 +60,16 @@ func (scene *DisplayScene) batchHit(ray maths.Ray, maximum float64) (DisplayHit,
 				}
 				point := place.Out(local.Point(distance))
 				worldDistance := point.Sub(ray.At).Len()
-				if worldDistance >= nearest {
+				if worldDistance < near || worldDistance >= nearest {
 					continue
 				}
 				nearest = worldDistance
 				found = DisplayHit{ID: "scene.world", Name: "world", Point: point, Distance: worldDistance}
-				if batch.Authored && (batch.Author.Collection == "scene.set.things" || batch.Author.Collection == "scene.set.stands") && batch.Mesh.Notice == "" {
-					found.ID, found.Name = batch.Author.Collection+"/"+batch.Author.Name, batch.Author.Name
+				if batch.Authored && batch.Mesh.Notice == "" {
+					switch batch.Author.Collection {
+					case "scene.set.things", "scene.set.stands", "scene.world.imports":
+						found.ID, found.Name = batch.Author.Collection+"/"+batch.Author.Name, batch.Author.Name
+					}
 				}
 			}
 		}

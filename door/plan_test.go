@@ -365,3 +365,24 @@ func TestNewEnvRefusesWhatIsMissing(t *testing.T) {
 		t.Error("a variable set to nothing was taken as said")
 	}
 }
+
+func TestDrawKeepsNamedStillCameraAngle(t *testing.T) {
+	directory := t.TempDir()
+	still := written(t, directory, "still.yaml", stillJob(t, ""))
+	film := written(t, directory, "film.yaml", filmJob(t, ""))
+	env := envIn(t, context.Background(), directory)
+	said := drew(t, env, still, "--dry-run", "--camera", "eye", "--camera-wide", "31.25")
+	if !strings.Contains(said, "name: eye") || strings.Count(said, "value: 31.25") != 2 {
+		t.Fatalf("named still angle did not reach the job: %s", said)
+	}
+	for _, args := range [][]string{
+		{still, "--camera-wide", "31.25"},
+		{still, "--camera", "eye", "--camera-wide", "180"},
+		{film, "--camera", "eye", "--camera-wide", "31.25"},
+	} {
+		got := running(Tool(env), append([]string{"draw", "--dry-run"}, args...)...)
+		if got.code == 0 || !strings.Contains(got.wrongSaid, "camera-wide") {
+			t.Fatalf("invalid override %v: %+v", args, got)
+		}
+	}
+}

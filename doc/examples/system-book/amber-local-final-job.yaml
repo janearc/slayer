@@ -1,0 +1,8 @@
+"$schema": https://github.com/janearc/slayer/schemas/job-v1.json
+scene: {set: amber-rebase-local-v2.yaml}
+renderer: gpu-native
+shortcuts: {restir: off}
+film: {width: 800, height: 800, rays: 2, exposure: 0.003, wide: 45}
+print: {knee: 0.8, top: 4, stops: -18}
+camera: {name: amber}
+outputs: {picture: ../../../out/2026-11-27-system-amber-local-final/proof.png, raw: ../../../out/2026-11-27-system-amber-local-final/light.pfm}

@@ -1,0 +1,6 @@
+"$schema": https://github.com/janearc/slayer/schemas/job-v1.json
+scene: {set: giant-azure-v3.yaml}
+renderer: gpu-native
+shortcuts: {restir: off}
+camera: {name: disc}
+outputs: {picture: ../../../out/2026-11-27-giant-azure-disc-v3/proof.png}

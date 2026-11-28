@@ -16,6 +16,7 @@ import (
 type Update struct {
 	State, Held string
 	Sequence    uint64
+	Progress    Progress
 	// Terminal confirms the process outcome is a cleanup authority; interrupted is false.
 	Terminal bool
 }
@@ -25,9 +26,8 @@ const (
 	pollInterval = 500 * time.Millisecond
 	// cancellationWindow bounds recovery after the caller's context has ended.
 	cancellationWindow = 5 * time.Second
-	// statusAttempts is how many consecutive failed, malformed or unmatched
-	// status reads end observation. It was chosen: with the backoff below, a
-	// ledger being rewritten has about half a minute to settle.
+	// statusAttempts bounds one batch of failed, malformed or unmatched reads.
+	// A command outage retries another batch; an invalid ledger ends observation.
 	statusAttempts = 6
 	// statusBackoffCap bounds the wait between failed status reads, which
 	// starts at one poll interval and doubles.
@@ -46,14 +46,15 @@ func RunObserved(ctx context.Context, tools Tools, plan *Plan, output io.Writer,
 	}
 }
 
-// queueClient owns only short-lived Azazel subprocesses, never a queue worker.
+// queueClient calls Azazel and observes the exact submitted request.
 type queueClient struct {
 	runner   Runner
 	interval time.Duration
-	// attempts is the number of consecutive failed status reads that ends
-	// observation; zero or one means the first failure does.
+	// attempts bounds one batch of reads; zero or one means one read per batch.
 	attempts int
 }
+
+var errStatusUnavailable = errors.New("Azazel status command unavailable")
 
 // run binds one prepared plan to one durable external request.
 func (client queueClient) run(ctx context.Context, tools Tools, plan *Plan, output io.Writer, notify func(Update)) error {
@@ -114,6 +115,7 @@ func (client queueClient) recoverAcknowledgement(tools Tools, plan *Plan, reques
 
 // observe accepts pixels only after this plan's verified job succeeds.
 func (client queueClient) observe(ctx context.Context, tools Tools, plan *Plan, request queueRequest, sequence uint64, output io.Writer, notify func(Update)) error {
+	var worker workerDispatch
 	for {
 		if err := ctx.Err(); err != nil {
 			return client.cancelOwned(tools, plan, request, sequence, output, notify, err)
@@ -123,11 +125,29 @@ func (client queueClient) observe(ctx context.Context, tools Tools, plan *Plan, 
 			if ctx.Err() != nil {
 				return client.cancelOwned(tools, plan, request, sequence, output, notify, ctx.Err())
 			}
+			if errors.Is(err, errStatusUnavailable) {
+				if notify != nil {
+					notify(Update{State: "unavailable", Held: "Queue status unavailable · retrying", Sequence: sequence})
+				}
+				if err := sleep(ctx, statusBackoffCap); err != nil {
+					return client.cancelOwned(tools, plan, request, sequence, output, notify, err)
+				}
+				continue
+			}
 			cause := fmt.Errorf("Azazel status unreadable after %d tries; observation given up, cancelling job %d first; frozen input retained: %w", max(client.attempts, 1), sequence, err)
 			return client.cancelOwned(tools, plan, request, sequence, output, notify, cause)
 		}
+		now := time.Now()
+		workerMessage := worker.update(tools, plan, observation, now)
 		if notify != nil {
-			notify(observation.update())
+			update := observation.updateAt(now)
+			if workerMessage != "" {
+				update.Held = workerMessage
+			}
+			if update.State == "running" && observation.job.Attempt > 0 {
+				update.Progress = readAttemptProgress(tools.Queue, sequence, observation.job.Attempt)
+			}
+			notify(update)
 		}
 		if observation.job.State == "interrupted" {
 			return fmt.Errorf("%w; frozen input retained pending confirmed descendant quiescence", jobFailure(tools, observation.job))
@@ -142,6 +162,9 @@ func (client queueClient) observe(ctx context.Context, tools Tools, plan *Plan, 
 			if observation.job.State != "succeeded" || observation.job.Result.ExitCode != 0 {
 				return jobFailure(tools, observation.job)
 			}
+			if err := plan.verifyFilmReference(observation.job); err != nil {
+				return err
+			}
 			if err := plan.record(tools); err != nil {
 				return err
 			}
@@ -154,10 +177,11 @@ func (client queueClient) observe(ctx context.Context, tools Tools, plan *Plan, 
 }
 
 // readStatus reads and matches this plan's job, retrying a failed, malformed
-// or unmatched read with a doubling wait that is capped. It returns the last
-// error once the attempts are spent or the context ends.
+// or unmatched read with a doubling wait that is capped. It distinguishes a
+// command outage from a ledger that was read but failed identity validation.
 func (client queueClient) readStatus(ctx context.Context, tools Tools, plan *Plan, request queueRequest, sequence uint64, output io.Writer) (observedJob, error) {
 	backoff := client.interval
+	var invalidLedger bool
 	for attempt := 1; ; attempt++ {
 		raw, err := client.invoke(ctx, tools, plan, output, "status", "--queue", tools.Queue)
 		if err == nil {
@@ -165,8 +189,12 @@ func (client queueClient) readStatus(ctx context.Context, tools Tools, plan *Pla
 			if observation, err = readObservation(raw, request, sequence); err == nil {
 				return observation, nil
 			}
+			invalidLedger = true
 		}
 		if attempt >= client.attempts || ctx.Err() != nil {
+			if !invalidLedger && ctx.Err() == nil {
+				return observedJob{}, fmt.Errorf("%w: %v", errStatusUnavailable, err)
+			}
 			return observedJob{}, err
 		}
 		if waitError := sleep(ctx, backoff); waitError != nil {

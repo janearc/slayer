@@ -17,11 +17,28 @@ import (
 )
 
 // ExactMeasured dispatches exactly count samples per pixel through Metal.
-// This first path supports a pinhole and software traversal; it refuses
-// curved rays and other unsupported scene features through the encoder.
 func ExactMeasured(world *thing.World, eye maths.Subspace, lens film.Sensor,
 	at time.Duration, width, height, count int, media []trace.InitialMedium,
 ) (*frame.Frame, Profile, error) {
+	return ExactWithInitialMedia(Software, world, eye, lens, at, width, height, count, media)
+}
+
+// ExactWithInitialMedia draws exact primary sample totals with the chosen
+// traversal. The scene encoder and native acceleration are shared with
+// legacy draws, while the rays retain their exact per-pixel layout.
+func ExactWithInitialMedia(mode Mode, world *thing.World, eye maths.Subspace,
+	lens film.Sensor, at time.Duration, width, height, count int,
+	media []trace.InitialMedium,
+) (*frame.Frame, Profile, error) {
+	selected, err := traversalFor(mode)
+	if err != nil {
+		return nil, Profile{}, err
+	}
+	switch mode {
+	case Software, NativeMeshes, NativeShadows:
+	default:
+		return nil, Profile{}, unsupported{"exact samples with accelerated lighting"}
+	}
 	started := time.Now()
 	var spent timing
 	if width < 1 || height < 1 || count < 1 || count > 64 || width > math.MaxInt32/count {
@@ -38,8 +55,8 @@ func ExactMeasured(world *thing.World, eye maths.Subspace, lens film.Sensor,
 	if _, ok := pinholeOf(lens); !ok {
 		return nil, Profile{}, unsupported{"exact samples through a non-pinhole lens"}
 	}
-	encoded, _, err := preparedWithInitialMedia(world, nil, eye, lens, at,
-		[2]int{fineWidth, height}, softwareTraversal, cellsFor(softwareTraversal), nil, media, &spent)
+	encoded, firsts, err := preparedWithInitialMedia(world, nil, eye, lens, at,
+		[2]int{fineWidth, height}, selected, cellsFor(selected), nil, media, &spent)
 	if err != nil {
 		return nil, spent.profile(time.Since(started)), err
 	}
@@ -53,16 +70,24 @@ func ExactMeasured(world *thing.World, eye maths.Subspace, lens film.Sensor,
 	headerStruct.patch(encoded.header.bytes, values{"look": wholes(1, encoded.counts.beams,
 		encoded.counts.fields, flag(scrooge.Asked()))})
 	start := time.Now()
-	kernel, err := metal.Open(encoded.source(softwareTraversal), "trace")
+	kernel, err := metal.Open(encoded.source(selected), "trace")
 	spent.compile = time.Since(start)
 	if err != nil {
 		return nil, spent.profile(time.Since(started)), err
 	}
 	defer kernel.Close()
 	kernel.FixBands(bandRows)
+	if selected != softwareTraversal {
+		if err := encoded.accelerate(kernel, &spent); err != nil {
+			return nil, spent.profile(time.Since(started)), err
+		}
+	}
 	spent.device = kernel.Device()
 	inputs := encoded.inputs()
-	if err = encoded.lit(kernel, copied(kernel, inputs), softwareTraversal, &spent); err != nil {
+	if selected.primary() {
+		inputs = append(inputs, firsts)
+	}
+	if err = encoded.lit(kernel, copied(kernel, inputs), selected, &spent); err != nil {
 		return nil, spent.profile(time.Since(started)), err
 	}
 	for _, input := range inputs {

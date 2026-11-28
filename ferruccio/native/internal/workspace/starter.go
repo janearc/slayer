@@ -10,7 +10,6 @@ import (
 	"path/filepath"
 
 	"github.com/janearc/puzzlemouth/yamlfile"
-	"github.com/janearc/slayer/ferruccio/native/internal/picking"
 )
 
 // starterReceipt binds a real pre-rendered view to its exact editable source.
@@ -22,7 +21,7 @@ type starterReceipt struct {
 	Height         int    `json:"height" yaml:"height"`
 }
 
-// openStarter gives the opening world real pixels and native picking before input.
+// openStarter gives the opening world real pixels before staging.
 func (work *Workspace) openStarter(directory string) error {
 	raw, err := os.ReadFile(filepath.Join(directory, "receipt.json"))
 	if err != nil {
@@ -59,19 +58,14 @@ func (work *Workspace) openStarter(directory string) error {
 	if config.Width != receipt.Width || config.Height != receipt.Height || config.Width < 1 || config.Height < 1 || config.Width > 4096 || config.Height > 4096 {
 		return fmt.Errorf("starting picture has unexpected dimensions")
 	}
-	geometry, err := picking.New(work.state.document.Text(), float64(config.Width)/float64(config.Height))
-	if err != nil {
-		return err
-	}
 	if err := work.showImage(picturePath); err != nil {
 		return err
 	}
-	work.play.geometry, work.play.renderedText = geometry, work.state.document.Text()
+	work.play.renderedText = work.state.document.Text()
 	work.output = picturePath
 	work.acceptedGeneration, work.acceptedPath, work.acceptedText = work.generation, work.state.path, work.state.document.Text()
-	work.viewer.SetNavigable(work.state.document.CanNavigate())
 	work.autoPreview = false
 	work.status = "Larson playground · ready to explore"
-	work.caption = "Pre-rendered starting view · grab the ship · drag to change it · scroll to approach"
+	work.caption = "Pre-rendered starting view · " + chooseWorkingView
 	return nil
 }

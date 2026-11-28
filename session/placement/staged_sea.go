@@ -62,18 +62,39 @@ func finiteSea(sea stagedSea, low, high maths.Vec) (StagedBatch, error) {
 			}
 		}
 	}
+	return seaRectangle(sea, minX, maxX, minZ, maxZ, "Sea shown as a finite mean-level proxy; waves and coastline are not shown")
+}
+
+// seaAroundEye draws a square under the eye, sized by local camera height
+// with a minimum half-width in scene units for water-level cameras.
+func seaAroundEye(sea stagedSea, eye maths.Vec) (StagedBatch, error) {
+	local := sea.At.In(eye)
+	scale := sea.At.Scale
+	if scale == 0 {
+		scale = 1
+	}
+	reach := max(25/scale, math.Abs(local.Y)*4)
+	return seaRectangle(sea, local.X-reach, local.X+reach, local.Z-reach, local.Z+reach,
+		"Sea shown as a finite mean-level proxy around the camera; waves and coastline are not shown")
+}
+
+func seaRectangle(sea stagedSea, minX, maxX, minZ, maxZ float64, notice string) (StagedBatch, error) {
 	if !displayFinite(minX) || !displayFinite(maxX) || !displayFinite(minZ) || !displayFinite(maxZ) || minX >= maxX || minZ >= maxZ {
 		return StagedBatch{}, fmt.Errorf("finite sea proxy has invalid scene bounds")
 	}
-	a, b := maths.V(minX, 0, minZ), maths.V(maxX, 0, minZ)
-	c, d := maths.V(minX, 0, maxZ), maths.V(maxX, 0, maxZ)
-	builder := newDisplayBuilder()
-	builder.triangle([3]maths.Vec{a, c, b}, [3]maths.Vec{}, false, maths.Local(), sea.Colour)
-	builder.triangle([3]maths.Vec{b, c, d}, [3]maths.Vec{}, false, maths.Local(), sea.Colour)
-	mesh, err := builder.finish()
+	mesh, err := flatProxyMesh(minX, maxX, minZ, maxZ, sea.Colour)
 	if err != nil {
 		return StagedBatch{}, err
 	}
-	mesh.Notice = "Sea shown as a finite mean-level proxy; waves and coastline are not shown"
+	mesh.Notice = notice
 	return StagedBatch{Mesh: mesh, Places: []maths.Subspace{sea.At}, Author: sea.Author, Authored: sea.Authored}, nil
+}
+
+func flatProxyMesh(minX, maxX, minZ, maxZ float64, colour maths.Light) (*DisplayMesh, error) {
+	a, b := maths.V(minX, 0, minZ), maths.V(maxX, 0, minZ)
+	c, d := maths.V(minX, 0, maxZ), maths.V(maxX, 0, maxZ)
+	builder := newDisplayBuilder()
+	builder.triangle([3]maths.Vec{a, c, b}, [3]maths.Vec{}, false, maths.Local(), colour)
+	builder.triangle([3]maths.Vec{b, c, d}, [3]maths.Vec{}, false, maths.Local(), colour)
+	return builder.finish()
 }

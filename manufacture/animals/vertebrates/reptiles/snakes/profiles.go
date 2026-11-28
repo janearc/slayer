@@ -8,6 +8,7 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/janearc/slayer/bioforms/pigment"
 	"github.com/janearc/slayer/manufacture/profilecheck"
 	"github.com/janearc/slayer/maths"
 	"gopkg.in/yaml.v3"
@@ -29,10 +30,13 @@ type Head struct {
 
 // Pattern uses linear RGB reflectances. Repeat is the approximate number of
 // markings along the full body; Contrast is the strength of the markings.
+// Mottle varies the dorsal and flank palette in local metres. Warp bends
+// the dorsal motifs through a separate, seeded field in the same chart.
 type Pattern struct {
 	Kind                    string
 	Base, Mark, Belly, Edge maths.Light
 	Repeat, Contrast        float64
+	Mottle, Warp            pigment.Mottle
 }
 
 // Profile describes one illustrative specimen, not the limits of a species.
@@ -55,7 +59,10 @@ type Book struct{ profiles map[string]Profile }
 
 // Read checks a book and retains no references to the input bytes.
 func Read(file string, raw []byte) (*Book, error) {
-	rows, err := profilecheck.Rows[Profile](file, raw, "snake profile book", "snake profile", nil)
+	rows, err := profilecheck.Rows[Profile](file, raw, "snake profile book", "snake profile",
+		func(_ *yaml.Node, path string) bool {
+			return path == "pattern.mottle" || path == "pattern.warp"
+		})
 	if err != nil {
 		return nil, err
 	}
@@ -196,6 +203,12 @@ func (p Profile) Validate() error {
 	}
 	if !within(p.Pattern.Contrast, 0, 1) {
 		return bad("pattern.contrast")
+	}
+	if !p.Pattern.Mottle.Valid() {
+		return bad("pattern.mottle")
+	}
+	if !p.Pattern.Warp.Valid() {
+		return bad("pattern.warp")
 	}
 	return nil
 }

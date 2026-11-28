@@ -2,8 +2,12 @@ package workspace
 
 import (
 	"context"
+	"os"
+	"path/filepath"
 	"strings"
 	"testing"
+
+	"github.com/gogpu/ui/event"
 
 	"github.com/janearc/slayer/ferruccio/internal/draft"
 	"github.com/janearc/slayer/film"
@@ -48,5 +52,73 @@ func TestGeneratedMemberSelectsReadOnlyGroup(t *testing.T) {
 	}
 	if err := work.changePose(1, 0, 0); err == nil {
 		t.Fatal("keyboard movement changed a read-only group")
+	}
+}
+
+// Move mode shifts the authored rectangle as one edit, including undo and redo.
+func TestGroupRegionMovesThroughWindow(t *testing.T) {
+	source := strings.Replace(addRecipeFixture, "setting: space", "setting: ground", 1)
+	source = strings.Replace(source, "  film:", `    stands:
+      grove:
+        kind: yurt
+        count: 3
+        seed: 4
+        habit: scatter
+        area: {west: 0x10, south: 0o2, east: 3.0e1, north: 0b101000} # Keep region note.
+  film:`, 1)
+	document, err := draft.Open("scene.yaml", []byte(source))
+	if err != nil {
+		t.Fatal(err)
+	}
+	work := playWorkspace(t)
+	work.state.document = document
+	work.editor.SetText(source)
+	id := "scene.set.stands/grove"
+	work.play.selected = id
+	if readout := work.playReadout(); !strings.Contains(readout, "region editable") {
+		t.Fatalf("numeric region was not selectable: %q", readout)
+	}
+	work.setPlayMode("move")
+	focusPlayViewer(work)
+	work.working.dirty = false
+	work.ui.HandleEvent(event.NewKeyEvent(event.KeyPress, event.KeyRight, 0, event.ModShift))
+	changed := document.Text()
+	if got, ok := document.GroupArea(id); !ok || got != [4]float64{17, 2, 31, 40} {
+		t.Fatalf("shifted area = %v, %t", got, ok)
+	}
+	if work.editor.Text() != changed || !work.working.dirty {
+		t.Fatal("move did not synchronize source and trigger staging")
+	}
+	if !strings.Contains(changed, "# Keep region note.") {
+		t.Fatal("move lost the region comment")
+	}
+	work.ui.HandleEvent(event.NewKeyEvent(event.KeyPress, event.KeyZ, 'z', event.ModSuper))
+	if document.Text() != source {
+		t.Fatal("one undo did not restore the entire region")
+	}
+	work.ui.HandleEvent(event.NewKeyEvent(event.KeyPress, event.KeyZ, 'Z', event.ModSuper|event.ModShift))
+	if document.Text() != changed {
+		t.Fatal("redo did not restore the region move")
+	}
+	path := filepath.Join(t.TempDir(), "moved.yaml")
+	if err := document.Save(path); err != nil {
+		t.Fatal(err)
+	}
+	raw, err := os.ReadFile(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	reopened, err := draft.Open(path, raw)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got, ok := reopened.GroupArea(id); !ok || got != [4]float64{17, 2, 31, 40} {
+		t.Fatalf("saved area = %v, %t", got, ok)
+	}
+	work.setPlayMode("turn")
+	focusPlayViewer(work)
+	work.ui.HandleEvent(event.NewKeyEvent(event.KeyPress, event.KeyRight, 0, event.ModNone))
+	if document.Text() != changed {
+		t.Fatal("turn edited the group region")
 	}
 }

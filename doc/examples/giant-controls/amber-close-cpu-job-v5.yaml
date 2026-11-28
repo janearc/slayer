@@ -1,0 +1,6 @@
+"$schema": https://github.com/janearc/slayer/schemas/job-v1.json
+scene: {set: giant-amber-v4.yaml}
+renderer: cpu
+shortcuts: {restir: off}
+camera: {name: close}
+outputs: {picture: ../../../out/2026-11-27-giant-amber-close-cpu-v5/proof.png}

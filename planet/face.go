@@ -146,6 +146,20 @@ type Face struct {
 // on a surface square to it given band by band.
 func NewFace(body Body, pole, star, eye maths.Vec, light bands.Light,
 	exposure float64) *Face {
+	return newFace(body, pole, eye, star, eye, light, exposure)
+}
+
+// NewFaceFixed makes a face with a world-space prime meridian independent
+// of the eye. The caller carries prime with the body as it turns. Lighting
+// still uses the actual eye; this only fixes the flow's longitude frame.
+// A zero or pole-parallel prime uses the same upright fallback as frameOf.
+func NewFaceFixed(body Body, pole, prime, star, eye maths.Vec,
+	light bands.Light, exposure float64) *Face {
+	return newFace(body, pole, prime, star, eye, light, exposure)
+}
+
+func newFace(body Body, pole, prime, star, eye maths.Vec, light bands.Light,
+	exposure float64) *Face {
 	columns := make([][]Layer, len(body.zones))
 	norths := make([]float64, len(body.zones))
 	for i, zone := range body.zones {
@@ -165,7 +179,7 @@ func NewFace(body Body, pole, star, eye maths.Vec, light bands.Light,
 		stacks[i] = stacksOf(column, light, body.gravity)
 	}
 	ladders := laddersOf(body, light)
-	ways := frameOf(pole.Unit(), eye)
+	ways := frameOf(pole.Unit(), prime)
 	face := &Face{pole: pole.Unit(), star: star.Unit(), eye: eye,
 		storms: body.storms, ways: ways,
 		whirls: body.storms.vortices(ways), flow: body.flow,

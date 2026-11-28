@@ -1,14 +1,10 @@
 # designing a sound for the studio machine
 
-this page is for a model that will write a studio voicing: an instrument
-or a set of them. you cannot hear what you write. so this page says what
-each number does to the sound in plain words, and gives seven instruments
-that are known to work, which you change a little at a time.
-
-`SCORING.md` has every field's range and every error. read its section
-"the studio machine" first. the short of it: a voicing is JSON, its
-`machine` is `"studio"`, and each channel has a `kind` that picks how its
-sound is made.
+a studio voicing is JSON with `machine: "studio"`. each channel
+selects an engine with `kind` and gives its settings. start with an
+instrument below and change it one setting at a time.
+[studio fields and bounds](SCORING.md#the-studio-machine) gives
+the accepted values.
 
 ## choosing a kind
 
@@ -312,7 +308,8 @@ open hat add a drum with `noise_decay` 0.3.
   this machine does not have. `fm` gets near an electric piano; `analog`
   with a slow attack gets near a string section, in the way a 1970s
   synthesiser did.
-- a loudness mark changes how loud a note is, and not yet how bright.
+- a loudness mark sets note level. an analogue filter with
+  `accent` or `snap` can also respond to the mark.
 - one reverb and one delay for the whole voicing.
 - the named `modal` sets are simple physics of ideal objects, not
   measurements of real instruments. `modes.go` says where each number

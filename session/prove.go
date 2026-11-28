@@ -216,6 +216,9 @@ func (session *Session) Prove(index int, proving Proving) (fermat.Proof,
 // anything is staged: a closed session, no such frame, a proof of
 // nothing, or a session that draws on the gpu.
 func (session *Session) provable(index int, proving Proving) error {
+	if session.given.detail != nil {
+		return fmt.Errorf("scene detail is available only as a working view")
+	}
 	if session.closed {
 		return errClosed
 	}

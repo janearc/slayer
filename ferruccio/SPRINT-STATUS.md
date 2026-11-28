@@ -1,7 +1,7 @@
 # Ferruccio sprint status
 
-Status on 25 November 2026, based on road revision `f9b1965d`. This is a
-development checkpoint, not a release or acceptance of the whole editor.
+Historical checkpoint from 25 November 2026 at road revision `f9b1965d`.
+For current commands and capabilities, see the [Ferruccio guide](README.md).
 
 ## What works in tests
 

@@ -29,7 +29,7 @@ Paths are relative to the job file.
 | `$schema` | the schema's name; required |
 | `scene` | which scene; required; exactly one form, below |
 | `sources` | source names, identifiers and optional notes for attribution |
-| `film` | the picture's size, rays and lens |
+| `film` | frame size, sample count, lens and optional crop |
 | `renderer` | `cpu`, `gpu`, `gpu-native-shadows` or `gpu-native` |
 | `quality` | `exact` (the default) or `preview` |
 | `vibes`, `fastlight` | flags, each `on` or `off` |
@@ -73,15 +73,21 @@ Exactly one of:
 
 ### film
 
-`preset`, `width`, `height`, `rays`, `wide`, `tall`, `exposure`,
-`aperture`, `focus`, `mode`. All are optional. A preset gives width and height, and some give a rate; a key
-written beside a preset stands over it.
+a preset supplies width and height, and some presets supply a frame
+rate. explicit values override the preset.
 
-`samples` instead gives the exact total samples per pixel, from 1 to 64;
-do not write it beside `rays`, which remains the number along each side.
-Exact samples support CPU and software-GPU stills without a physical rig,
-aperture, wire mode or region. `--spp` overrides either form; `--rays` restores the
-legacy per-side form. Do not give both flags together.
+choose one sampling setting:
+
+- `rays` sets samples per side. `rays: 3` gives nine samples per pixel.
+- `samples` sets the total directly, from 1 to 64. `samples: 7` gives
+  seven samples per pixel.
+
+exact sample counts support full-frame pinhole stills on the CPU
+and the software traversal path on Metal. native traversal, wire
+mode, compositing, cached lighting and lighting shortcuts are excluded.
+use `--spp` to select the total or `--rays` to select the per-side
+count. each replaces the job’s sampling setting. supply one flag.
+use per-side sampling for `slayer prove`.
 
 `mode: wire` draws the edges of what the picture's first rays meet, in
 place of their light: the same rays, camera, time and things as the
@@ -122,6 +128,9 @@ The presets are data, in `presets.yaml`:
 `imax` and `imax-2k` are the sizes the moonlake recipes use. The rest are
 picked.
 
+`exposure` sets the positive scale of light in the frame. when absent,
+the scene supplies it.
+
 `wide` is the angle across the picture and `tall` the angle down it, in
 degrees. A job says at most one. In portrait, `wide: 55` sees about 85
 degrees down; `tall` is the way to say what a tall frame should see.
@@ -141,14 +150,15 @@ kernel makes those rays and the frame costs what a pinhole's does. A set
 whose film has a rig takes its lens from the rig, and an aperture over
 it is refused.
 
-Bounds: width and height from 1 to 8192. Rays along a pixel's side are
-from 1 to 16 for a whole picture and 1 to 64 for a region.
+width and height are from 1 to 8192. the job accepts 1 to 64 rays
+per side, subject to the renderer’s total workload limits.
 
 `region` names a rectangle in the full picture, counting from the top left:
 `{left: 20, top: 30, width: 80, height: 60}`. The rectangle must be
 nonempty and fit the resolved picture. Its pixels keep the full picture's
-camera and scale. A region is a still; unsupported renderers and effects
-are refused. `slayer draw --region 20,30,80,60` stands over the job.
+camera and scale. `slayer draw JOB --region 20,30,80,60` overrides
+the job. see [region draw support](../doc/frame-regions-plan.md#supported-draws)
+for the renderer and development limits.
 
 ### flags and shortcuts
 
@@ -174,8 +184,12 @@ A shortcut is one named approximation, `on` or `off`:
   rays a pixel each takes four, at sixteen each takes one. At one ray a
   pixel nothing changes. Sky-lit shade is a little rougher within a
   pixel.
+- `restir` samples direct light from positioned lamps by reusing
+  candidates across nearby pixels and earlier frames. it takes priority
+  over the lamp store and shared sky looks. see [ReSTIR](../doc/restir.md)
+  for supported scenes and the sources of bias.
 
-`fastlight` is the flag for the light shortcuts, those two today.
+`fastlight` requests all three light shortcuts.
 `vibes` is the flag for films to watch and not to measure: every flag
 and every shortcut.
 
@@ -185,30 +199,23 @@ Each of those is read from the command line, then the job, then the
 set. With nothing said a shortcut is off.
 
 An individual shortcut can stand over an umbrella flag, including an umbrella explicitly set off.
-To disable both light shortcuts unconditionally, set `lamp-store` and
-`sky-looks` off by name. Turning off only the lamp store while shared
+to disable all light shortcuts unconditionally, set `lamp-store`,
+`sky-looks` and `restir` off by name. Turning off only the lamp store while shared
 sky looks remain enabled is refused.
 
 A set says the two flags under `scene`, the same words. It says no
 shortcuts.
 
 Refused, by name: any shortcut on the cpu, through a rig's lens, for a
-named scene, or beside a proof (`-prove`), which replays pixels on the
-exact tracer; `lamp-store` with more than eight lamps or beside
-`volume-lighting: cached`; `sky-looks` without `lamp-store`, since they
-are drawn by one mode of the kernel.
+named scene without shortcut support, or beside a proof.
+`lamp-store` supports up to sixteen lamps. `sky-looks` requires
+`lamp-store`. `volume-lighting: cached` conflicts with `lamp-store`
+and `restir`. ReSTIR requires a pinhole and closed shutter.
 
 `doc/fast-light.md` has the measurements and what each shortcut gets
 wrong. Surfaces do not read the lamp store, and should not be made to:
 a surface point lies between cells that are inside its own trunk or
 under its own ground, which hold no light, so it darkens in patches.
-
-A second light shortcut, `disc-shadows`, was built and taken out again
-on 12 November 2026 (commit 13adcc0e holds it): one shadow ray a camera
-ray toward a point on the moon's or sun's disc in place of eight. It
-drew correctly and saved nothing: a shadow ray through a forest of five
-thousand trees costs about 35 nanoseconds, and removing every surface
-shadow ray from the cloud sea changed no timing that could be read.
 
 The schema's line for each flag and shortcut is its documentation: the
 editor shows it on hover and the door's help prints it (`Switches`).
@@ -229,9 +236,11 @@ knows the scene, refuses one that is not the scene's.
 
 A still says `at`. A film says `fps` and `duration`, and may say `start`
 and `scene-duration`. A job says one or the other. A film preset's rate is
-used when the job says no `fps`. Frame `i` of a film is at
-`start + i / fps`; with `scene-duration`, the scene's time is stretched
-over the film's span, as in a sequence plan.
+used when the job says no `fps`. the frame count is
+`duration * fps` rounded to the nearest whole frame, with a minimum
+of one. frame `i` opens at `start + i / fps` in scene time. with
+`scene-duration`, it opens at `start + scene-duration * i / frame-count`.
+sound and titles continue to follow playback time.
 
 ### shutter
 
@@ -286,7 +295,9 @@ By role, each a path: `picture` (a still), `raw` (a still's light, as a
 `.pfm`), `frames` (a film's directory of numbered pictures), `movie` (the
 film as an `.mp4`, with its sound), `note` (one line for the renders page).
 A still writes `picture`; a film writes `frames`, `movie` or both. A job
-with no outputs is drawn to the default place its verb names.
+with no outputs is drawn to the default place its verb names. MP4
+writing and audio-file decoding use AVFoundation on macOS with cgo.
+use `outputs.frames` for a frame sequence without a movie.
 
 ## Precedence
 
@@ -416,32 +427,7 @@ The note above left these open; each was chosen here.
   chosen over exported options because it is the smaller door, and the
   job it makes is checked through the same schema as a file.
 
-## Tests
+## checks
 
-Every test that says something works is answered by an anti-test, marked
-`// anti-test of TestX` above it (`go run ./tools/antitests ./job/`).
-The keys have the most of them: a key that misses an input reuses a stale
-picture.
-
-They hold that each knob of the job moves the whole key, the
-picture's key or the light's as it should, that each file the job reads
-(set, frames, theme, tune, voicing, sound file, beats, cue sheet) moves
-the keys when its bytes change, that a file that is absent, present or
-unreadable is three keys, and that what is not a picture (outputs, limits,
-the note, key order) is not in them.
-
-### Tests with no anti-test, and why
-
-None. Every test in the package has an anti-test.
-
-### Tests that draw
-
-None. No test draws, reads a shelf or stages a scene. The suite is about
-0.4 s (`GOWORK=off GOMAXPROCS=3 go test -count=1 ./job/`), all quick.
-
-### A frame that is a link
-
-A frames folder's digest follows a frame that is a symbolic link and
-takes the bytes it points at, so a linked frame changed where it is kept
-changes every key (`TestAFrameThatIsALinkIsKeyedByWhatItPointsAt`). It
-took only regular files until the test pass of 12 November found it.
+`game test -- ./job` checks schema validation, path resolution, and
+job identity. this package checks jobs without tracing a scene.

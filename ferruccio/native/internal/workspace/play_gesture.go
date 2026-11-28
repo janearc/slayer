@@ -19,11 +19,14 @@ func (view *imageView) imagePoint(point geometry.Point) (geometry.Point, bool) {
 
 // imageBounds is shared by selection and presentation; it never crops pixels.
 func (view *imageView) imageBounds() geometry.Rect {
-	bounds := view.Bounds()
 	aspect := view.aspect
 	if aspect <= 0 && view.source != nil && view.source.Bounds().Dy() > 0 {
 		aspect = float64(view.source.Bounds().Dx()) / float64(view.source.Bounds().Dy())
 	}
+	return fitImageBounds(view.Bounds(), aspect)
+}
+
+func fitImageBounds(bounds geometry.Rect, aspect float64) geometry.Rect {
 	if bounds.IsEmpty() || aspect <= 0 || math.IsNaN(aspect) || math.IsInf(aspect, 0) {
 		return geometry.Rect{}
 	}

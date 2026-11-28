@@ -27,5 +27,5 @@ observed operations on this filesystem, not a durable transaction, a
 hardware power-loss result or a measured production observation cadence.
 
 The storageprobe build tag keeps these explicit flush requests out of an
-ordinary suite. The Game recipe opts in. Go's successful Sync call does
+ordinary suite. Opt in with the build tag when measuring a volume. Go's successful Sync call does
 not reveal whether its full-flush path or fallback supplied the success.

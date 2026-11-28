@@ -129,7 +129,7 @@ scene:
         size: [400, 400, 0.1]
         source: eye
   recipes:
-    profile-kelp: {alga: {family: kelp, file: ../manufacture/algae/kelp/kelp.yaml, species: macrocystis-pyrifera, condition: moderate, forest: true}}
+    profile-kelp: {alga: {family: kelp, file: '@builtin', species: macrocystis-pyrifera, condition: moderate, forest: true}}
     profile-orca: {animal: {family: whale, file: ../manufacture/animals/vertebrates/mammals/whales/profiles.yaml, species: orca, pose: swim}}
     profile-harbor-bay: {animal: {family: pinniped, file: ../manufacture/animals/vertebrates/mammals/pinnipeds/profiles.yaml, species: harbor-seal, study: bay}}
   set:

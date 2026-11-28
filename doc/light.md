@@ -1,18 +1,15 @@
 # How light works in Slayer
 
-Slayer follows rays backwards from the camera to discover what light
-arrives at each pixel. Geometry decides where a ray goes; materials and
-media decide what is emitted, reflected, scattered, absorbed or transmitted.
-The renderer keeps the result linear until photographic development.
+Slayer traces rays from the camera through geometry, materials and
+media. each path contributes emission, reflected light and light
+transmitted or scattered through the scene. the result stays linear
+until development.
 
 ## Lights and things that glow
 
-A visible glowing surface and a lamp have different jobs. Surface emission
-makes the surface bright when seen. An explicit lamp supplies illumination
-to other surfaces and scattering media. Emission from a volume appears
-along camera rays, but the tracer does not solve general indirect lighting
-from every glowing object onto everything nearby. Scene construction must
-supply the corresponding lamp when that effect is needed.
+surface and volume emission make the emitter visible along a camera
+ray. add an explicit lamp when that emitter should also illuminate
+nearby surfaces or scattering media.
 
 The default surface mixture weights emission by the portion retained by
 the surface after reflection and transmission. A CPU material can opt into
@@ -43,18 +40,16 @@ in the ocean sky-scatter integral.
 
 ## Surfaces and shadows
 
-At the first surface, shading combines colour, emission, explicit lamps,
-visible sky and supported reflected/refracted light. Opaque geometry blocks
-shadow rays. Volumes attenuate light on those paths too. Shadow work asks
-whether a lamp is visible; it does not make the space between lamp and wall
-visible to the camera.
+surface shading combines material colour, emission, lamps, sky and
+supported reflections and refractions. opaque geometry blocks shadow
+rays. volumes attenuate the light that reaches the surface.
 
-Mirrors have one followed bounce. Refraction uses Snell's law and an
-unpolarized Fresnel share, with up to eight clear-surface crossings. The
-tracer starts rays in air; it does not infer that a camera is underwater.
-After a refracted path has already bent, some reflected branches are paid
-for but not followed. These are material modeling limits even with every
-optional shortcut off.
+mirrors have one followed bounce. refraction uses Snell’s law and an
+unpolarized Fresnel share, with up to eight clear-surface crossings.
+some reflected branches after a refraction are left untraced. rays
+start in air by default. set the camera’s `initial-media` stack
+explicitly to start in a clear medium such as water. see
+[camera support](renderer.md#cameras-and-time) for the backend limits.
 
 Measured n and k data can drive supported metal
 finishes; [materials](materials.md) separates that implementation from the
@@ -113,9 +108,8 @@ geometry and medium transmission. This is single scattering: clouds do
 not repeatedly illuminate one another, and isotropic painted mist does
 not model measured droplet asymmetry or polarization.
 
-See
-[volume environment lighting](model/sky/volume-environment-lighting.md) for equations,
-controls and the optional incident-sky interpolation grid.
+see [volume environment lighting](model/sky/volume-environment-lighting.md)
+for the equations and incident-sky interpolation grid.
 
 ## The three kinds of stored light
 
@@ -126,20 +120,16 @@ controls and the optional incident-sky interpolation grid.
 - A **render cache** stores a completed deterministic result so unchanged
   work can be reused. It should preserve that path's answer exactly.
 
-These are not interchangeable. The fast lamp store can soften a shadow
-inside mist by a cell. Surface shading does not read that grid. Shared
-`sky-looks` changes how the surface sky directions are distributed among
-pixel rays. Read [fast light](fast-light.md) before using either in a
-measurement; [modes](modes.md) gives practical choices.
+the fast lamp store can soften a shadow inside mist by a cell. surface
+shading uses its own light queries. the [lighting flags](flags.md)
+cover other approximations, including shared sky samples and ReSTIR.
 
 ## Colour, bands and the darkroom
 
-Visible rendering carries RGB light; that is not a continuous spectral
-transport solution. The tracer transports radiance, not coherent complex
-amplitude: it does not compute interference fringes, polarization or
-wavefront diffraction through gaps between objects. Spectral-band renders are separate requests with
-backend-specific support. False colour assigns display colours to those
-results; it is not the eye's view. See [bands](bands.md).
+visible rendering carries RGB radiance. [spectral bands](bands.md)
+are separate requests with backend-specific support and false-colour
+display. the transport model omits interference, polarization and
+wavefront diffraction.
 
 Linear RGB can exceed one. A PFM keeps that range. A PNG has already gone
 through exposure, tone mapping and display encoding. Bloom spreads bright
@@ -155,7 +145,5 @@ surface with no illumination from a bright surface hidden behind mist.
 Check whether a glowing object has a lamp, whether the medium receives
 sky light, and which scattering normalization the set selected.
 
-Compare
-one small direct-light reference before enabling caches or shortcuts.
-For beams, inspect continuity and shadows across moving frames as well
-as the still: a coarse spatial sample can miss a narrow feature entirely.
+compare a small direct-light reference before enabling shortcuts.
+inspect narrow beams across moving frames for gaps or unstable shadows.

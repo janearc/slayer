@@ -1,0 +1,9 @@
+"$schema": https://github.com/janearc/slayer/schemas/job-v1.json
+scene: {set: caprica/caprica-lookbook.yaml}
+renderer: gpu-native
+shortcuts: {restir: off}
+film: {width: 1080, height: 960, rays: 3, wide: 40, exposure: 0.0013}
+camera: {name: 02-quarter}
+outputs:
+  picture: ../../../../out/2026-11-27-system-half-07-caprica-quarter/proof.png
+  raw: ../../../../out/2026-11-27-system-half-07-caprica-quarter/light.pfm

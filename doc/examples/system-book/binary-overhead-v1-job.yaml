@@ -1,0 +1,7 @@
+"$schema": https://github.com/janearc/slayer/schemas/job-v1.json
+scene: {set: binary-overhead-v1.yaml}
+renderer: gpu-native
+shortcuts: {restir: off}
+film: {width: 800, height: 800, rays: 2, wide: 55}
+camera: {name: binary-overhead}
+outputs: {picture: ../../../out/2026-11-27-system-binary-overhead-v1/proof.png, raw: ../../../out/2026-11-27-system-binary-overhead-v1/light.pfm}

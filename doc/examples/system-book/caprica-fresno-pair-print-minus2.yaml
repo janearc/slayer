@@ -1,0 +1,6 @@
+"$schema": https://github.com/janearc/slayer/schemas/job-v1.json
+scene: {set: caprica-fresno-pair-v1.yaml}
+renderer: gpu-native
+camera: {name: pair-view}
+film: {width: 800, height: 800, rays: 2, wide: 65}
+print: {knee: 0.8, top: 4, stops: -2}

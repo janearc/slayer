@@ -14,9 +14,6 @@ The temporary volume was not identified in that log, so do not transfer
 the result to a later root.
 
 The [design](DESIGN.md) says exactly what each observation can establish.
-The measurements are not a production cadence or a durability guarantee.
-Run the `azazel-storage-probe` Game recipe through the coordinated queue.
-
-Its explicit storageprobe build tag keeps drive flushes out of ordinary
-test suites. A comment correction narrows the failed-rename check to its
-actual absent-source refusal. No further flush run is needed for wording.
+The explicit `storageprobe` build tag keeps the drive-flush checks out of
+ordinary test suites. The failed-rename witness checks an absent source.
+The measurements describe those fixtures on their test volume.

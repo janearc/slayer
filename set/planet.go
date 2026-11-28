@@ -1,6 +1,7 @@
 package set
 
 import (
+	"fmt"
 	"math"
 	"slices"
 
@@ -32,6 +33,9 @@ type Planet struct {
 	zones                 []Zone
 	pole                  [2]float64
 	chart                 float64
+	shadowFill            float64
+	sunDiscDegrees        float64
+	sunDiscSamples        float64
 	rings                 []Ring
 	sky                   *[3]float64
 	storms                *Storms
@@ -420,6 +424,71 @@ func (made Set) Planet() (Planet, bool) {
 		return Planet{}, false
 	}
 	return *made.planet, true
+}
+
+// GeneratedSize supplies the generated body's derived radius and gravity
+// to an authored flowing appearance. Radius is in metres.
+func (made Planet) GeneratedSize(name string, radius, gravity, fromStar float64) Planet {
+	made.name, made.radius, made.gravity, made.fromStar = name, radius, gravity, fromStar
+	return made
+}
+
+// FlowingDescription records all authored optical choices for the draw.
+// The weather's numeric values are printed separately by the session.
+func (made Planet) FlowingDescription() string {
+	storms := "none"
+	if made.storms != nil {
+		s := made.storms
+		storms = fmt.Sprintf("seed %g turbulence %g eddies %g stretch %g edge %g folds %g spots %+v jets %v swarm %v cap %q clearing %q churn %q strength %g", s.seed, s.turbulence, s.eddies, s.stretch, s.edge, s.folds, s.spots, s.jets, s.swarm, s.cap, s.clearing, s.churn, s.churning)
+	}
+	return fmt.Sprintf("deck %g chart %g shadow fill %g sun disc degrees %g zones %+v columns %+v storms %s", made.deck, made.chart, made.shadowFill, made.sunDiscDegrees, made.zones, made.columns, storms)
+}
+
+// ShadowFill is the invented share of the prelit face retained in a shadow.
+// It is an artistic fill, not a simulation of penumbra or scattered light.
+func (made Planet) ShadowFill() float64 { return made.shadowFill }
+
+// SunDiscDegrees is the full angular diameter of the distant uniform sun.
+// Zero keeps the point-direction shadow; positive values sample its disc.
+func (made Planet) SunDiscDegrees() float64 { return made.sunDiscDegrees }
+
+// SunDiscSamples is the deterministic angular visibility sample count.
+func (made Planet) SunDiscSamples() int { return int(made.sunDiscSamples) }
+
+// flowing reads the same atmospheric and weather descriptions as planet,
+// but the generated body supplies its name, radius, gravity and orbit.
+func (reading reader) flowing(into **Planet) step {
+	return func(_, value *yaml.Node) error {
+		made := &Planet{columns: map[string][]Layer{}, chart: unsaid, sunDiscSamples: 8}
+		var madeUp, said bool
+		all := reading.planetKeys(made, &madeUp, &said)
+		keys := map[string]step{}
+		for _, key := range []string{"made_up", "deck", "chart", "columns", "zones", "storms", "weather"} {
+			keys[key] = all[key]
+		}
+		keys["shadow_fill"] = reading.number(&made.shadowFill, 0, 1)
+		keys["sun_disc_degrees"] = reading.number(&made.sunDiscDegrees, 0, 10)
+		keys["sun_disc_samples"] = reading.whole(&made.sunDiscSamples, 8, 64)
+		if err := reading.keys(value, keys, nil); err != nil {
+			return err
+		}
+		if err := reading.all(value, "a flowing appearance", "made_up", "deck", "columns", "zones", "weather"); err != nil {
+			return err
+		}
+		if !said || !madeUp {
+			return reading.refuse(value, "a flowing appearance says made_up: true")
+		}
+		if err := reading.covered(value, made); err != nil {
+			return err
+		}
+		if made.storms != nil && made.storms.churn != "" {
+			if _, has := made.columns[made.storms.churn]; !has {
+				return reading.refuse(value, "the storms name a missing churn column")
+			}
+		}
+		*into = made
+		return nil
+	}
 }
 
 // planet reads the set's planet. it must say made_up: true, since slayer

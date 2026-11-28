@@ -1,0 +1,9 @@
+"$schema": https://github.com/janearc/slayer/schemas/job-v1.json
+scene: {set: ../azure-primary-v1.yaml}
+renderer: gpu-native
+shortcuts: {restir: off}
+film: {width: 1080, height: 960, rays: 3, wide: 55, exposure: 0.003}
+camera: {name: azure-primary}
+outputs:
+  picture: ../../../../out/2026-11-27-system-half-03-azure/proof.png
+  raw: ../../../../out/2026-11-27-system-half-03-azure/light.pfm

@@ -1,0 +1,9 @@
+"$schema": https://github.com/janearc/slayer/schemas/job-v1.json
+scene: {set: 01-dayside-oblique.yaml}
+renderer: gpu-native
+shortcuts: {restir: off}
+film: {width: 800, height: 800, rays: 4, wide: 40, exposure: 0.0013}
+camera: {name: 01-dayside}
+outputs:
+  picture: ../../../out/2026-11-27-caprica-01-dayside-oblique/proof.png
+  raw: ../../../out/2026-11-27-caprica-01-dayside-oblique/light.pfm

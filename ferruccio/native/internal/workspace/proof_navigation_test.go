@@ -134,3 +134,24 @@ func TestProofGestureRejectsUnknownOrUnavailableViewer(t *testing.T) {
 }
 
 var _ widget.Widget = (*imageView)(nil)
+
+func TestObserveProofEditsSourceAndUndoesWithPhotographVisible(t *testing.T) {
+	work := cameraWorkspace(t)
+	work.composition = "observe"
+	work.working.photograph = work.viewer.source
+	work.viewer.SetNavigable(false)
+	work.ui.SetRoot(work.viewer)
+	before := work.ProofText()
+	if err := work.ProofSourceCameraEdit(); err != nil {
+		t.Fatal(err)
+	}
+	if changed := work.ProofText(); changed == before || work.pending.text != changed {
+		t.Fatal("Observe did not apply and queue the source camera edit")
+	}
+	if err := work.ProofUndo(before); err != nil {
+		t.Fatal(err)
+	}
+	if work.state.document.Text() != before || work.pending.text != before {
+		t.Fatal("Observe undo did not restore and queue the original source")
+	}
+}

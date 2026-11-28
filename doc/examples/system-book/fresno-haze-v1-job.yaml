@@ -1,0 +1,8 @@
+"$schema": https://github.com/janearc/slayer/schemas/job-v1.json
+scene: {set: fresno-haze-v1.yaml}
+renderer: gpu-native
+shortcuts: {restir: off}
+film: {width: 640, height: 400, rays: 1}
+print: {knee: 0.7, top: 8, stops: -24.8}
+camera: {name: fresno-haze}
+outputs: {picture: ../../../out/2026-11-27-system-fresno-haze-v1/proof.png, raw: ../../../out/2026-11-27-system-fresno-haze-v1/light.pfm}

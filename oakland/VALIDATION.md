@@ -1,9 +1,9 @@
 # Oakland integration checks
 
-This is a local review build, not a release or an independent review verdict.
-Game5 511afb9 runs the work with Go 1.27.3, two processors and Go parallelism
-one. The renderer uses Cgo on macOS. The existing local Celestial replacement
-remains in go.mod; it is a build prerequisite, not a published dependency pin.
+This records the 15 November 2026 integration checks. The original
+checkout used Game5 511afb9, Go 1.27.3, two processors, Go parallelism one
+and a local Celestial replacement. See [the current build guide](../doc/building.md)
+for checkout prerequisites.
 
 ## Contracts exercised
 
@@ -76,5 +76,5 @@ atmosphere model or calibrated optical measurement.
 Packaged Ferruccio 540a635 also renders the imported study in native Metal
 windows and changes the actual camera through a drag. Its captures15/16
 include raw previews, source receipts and import sidecars. The image
-export is from the GoGPU widget tree, not the OS compositor. See the app's
-native/VALIDATION.md for gesture measurements and remaining UI limits.
+export is from the GoGPU widget tree. See the
+[original native validation](../ferruccio/native/VALIDATION.md) for measurements.

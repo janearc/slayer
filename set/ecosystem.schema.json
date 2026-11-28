@@ -1023,8 +1023,63 @@
       ],
       "additionalProperties": false
     },
+    "poseClip": {
+      "type": "object",
+      "properties": {
+        "timing": {"enum": ["linear", "smooth"]},
+        "keys": {
+          "type": "array", "minItems": 1, "maxItems": 256,
+          "items": {
+            "type": "object",
+            "properties": {
+              "at": {
+                "type": "object",
+                "properties": {"value": {"type": "number", "minimum": 0, "maximum": 86400}, "unit": {"const": "s"}},
+                "required": ["value", "unit"], "additionalProperties": false
+              },
+              "turns": {"type": "object", "propertyNames": {"minLength": 1}, "additionalProperties": {"$ref": "#/$defs/poseAngles"}},
+              "root-offset": {"$ref": "#/$defs/poseOffset"},
+              "root-turns": {"$ref": "#/$defs/poseAngles"}
+            },
+            "required": ["at"], "additionalProperties": false
+          }
+        },
+        "attachments": {
+          "type": "object", "maxProperties": 16, "propertyNames": {"minLength": 1},
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "bone": {"type": "string", "minLength": 1},
+              "kind": {"type": "string", "minLength": 1},
+              "offset": {"$ref": "#/$defs/poseOffset"},
+              "turns": {"$ref": "#/$defs/poseAngles"},
+              "scale": {"type": "number", "minimum": 0.0001, "maximum": 100}
+            },
+            "required": ["bone", "kind"], "additionalProperties": false
+          }
+        }
+      },
+      "required": ["keys"], "additionalProperties": false
+    },
+    "poseAngles": {
+      "type": "array", "minItems": 3, "maxItems": 3,
+      "items": {"type": "number", "minimum": -360, "maximum": 360}
+    },
+    "poseOffset": {
+      "type": "array", "minItems": 3, "maxItems": 3,
+      "items": {"type": "number", "minimum": -100000, "maximum": 100000}
+    },
     "recipe": {
       "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "kind": {"enum": ["adult-human-neutral", "adult-human-reaching", "adult-human-male-study", "adult-human-details", "adult-human-cheek-scar", "adult-human-auricle", "adult-human-auricle-thin-skin", "adult-human-groom-fibre", "adult-human-groom-medium", "adult-human-groom-medium-layered", "adult-human-groom-medium-field", "adult-human-groom-medium-field-wisps", "adult-human-body-hair", "adult-human-facial-hair", "adult-human-vellus-study", "adult-human-wider-stance"]},
+            "pose-clip": {"$ref": "#/$defs/poseClip"}
+          },
+          "required": ["kind", "pose-clip"],
+          "additionalProperties": false
+        },
         {
           "type": "object",
           "properties": {
@@ -1094,9 +1149,17 @@
                 }
               ],
               "additionalProperties": false
-            }
+            },
+            "pose-clip": {"$ref": "#/$defs/poseClip"}
           },
           "required": ["animal"],
+          "allOf": [{
+            "if": {"required": ["pose-clip"]},
+            "then": {"properties": {"animal": {
+              "properties": {"family": {"const": "whale"}, "representation": {"const": "skin"}},
+              "not": {"required": ["pose"]}
+            }}}
+          }],
           "additionalProperties": false
         },
         {
@@ -1705,6 +1768,43 @@
             "mcrn-larson",
             "mcrn-larson-landed",
             "human-scale-2m",
+            "adult-human-neutral",
+            "adult-human-reaching",
+            "adult-human-reach-clip",
+            "adult-human-male-study",
+            "adult-human-details",
+            "adult-human-cheek-scar",
+            "adult-human-auricle",
+            "adult-human-auricle-thin-skin",
+            "adult-human-thin-skin",
+            "adult-human-groom-fibre",
+            "adult-human-groom-medium",
+            "adult-human-groom-medium-layered",
+            "adult-human-groom-medium-field",
+            "adult-human-groom-medium-field-wisps",
+            "adult-human-body-hair",
+            "adult-human-facial-hair",
+            "adult-human-vellus-study",
+            "adult-human-wider-stance",
+            "adult-human-iris-brown",
+            "adult-human-iris-hazel",
+            "adult-human-iris-blue",
+            "adult-chest-light-low-contrast",
+            "adult-chest-light-high-contrast",
+            "adult-chest-light-high-chroma",
+            "adult-chest-medium-low-contrast",
+            "adult-chest-medium-high-contrast",
+            "adult-chest-medium-high-chroma",
+            "adult-chest-dark-low-contrast",
+            "adult-chest-dark-high-contrast",
+            "adult-chest-dark-high-chroma",
+            "adult-chest-study-broad",
+            "adult-chest-study-long",
+            "adult-chest-study-asymmetric",
+            "tissue-study-opaque",
+            "tissue-study-2mm",
+            "tissue-study-4mm",
+            "tissue-study-8mm",
             "hatz-gargoyle",
             "alfa-hero",
             "sampan",
@@ -2057,6 +2157,43 @@
             "mcrn-larson",
             "mcrn-larson-landed",
             "human-scale-2m",
+            "adult-human-neutral",
+            "adult-human-reaching",
+            "adult-human-reach-clip",
+            "adult-human-male-study",
+            "adult-human-details",
+            "adult-human-cheek-scar",
+            "adult-human-auricle",
+            "adult-human-auricle-thin-skin",
+            "adult-human-thin-skin",
+            "adult-human-groom-fibre",
+            "adult-human-groom-medium",
+            "adult-human-groom-medium-layered",
+            "adult-human-groom-medium-field",
+            "adult-human-groom-medium-field-wisps",
+            "adult-human-body-hair",
+            "adult-human-facial-hair",
+            "adult-human-vellus-study",
+            "adult-human-wider-stance",
+            "adult-human-iris-brown",
+            "adult-human-iris-hazel",
+            "adult-human-iris-blue",
+            "adult-chest-light-low-contrast",
+            "adult-chest-light-high-contrast",
+            "adult-chest-light-high-chroma",
+            "adult-chest-medium-low-contrast",
+            "adult-chest-medium-high-contrast",
+            "adult-chest-medium-high-chroma",
+            "adult-chest-dark-low-contrast",
+            "adult-chest-dark-high-contrast",
+            "adult-chest-dark-high-chroma",
+            "adult-chest-study-broad",
+            "adult-chest-study-long",
+            "adult-chest-study-asymmetric",
+            "tissue-study-opaque",
+            "tissue-study-2mm",
+            "tissue-study-4mm",
+            "tissue-study-8mm",
             "hatz-gargoyle",
             "alfa-hero",
             "sampan",
@@ -3608,6 +3745,14 @@
               },
               "aurora": {
                 "type": "boolean"
+              },
+              "circles": {
+                "type": "string"
+              },
+              "phase": {
+                "type": "number",
+                "minimum": -360,
+                "maximum": 360
               }
             },
             "required": [
@@ -3615,6 +3760,69 @@
               "middle",
               "detail"
             ],
+            "additionalProperties": false
+          }
+        },
+        "binaries": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "generate": {
+                "type": "object",
+                "properties": {
+                  "primary": {
+                    "type": "object",
+                    "properties": {
+                      "mass": {"type": "number", "minimum": 0, "maximum": 300},
+                      "age": {"type": "number", "minimum": 0, "maximum": 14000000000}
+                    },
+                    "required": ["mass", "age"],
+                    "additionalProperties": false
+                  },
+                  "companion": {
+                    "type": "object",
+                    "properties": {
+                      "mass": {"type": "number", "minimum": 0, "maximum": 300},
+                      "temperature": {"type": "number", "minimum": 0, "maximum": 200000},
+                      "radius": {"type": "number", "minimum": 0, "maximum": 2000}
+                    },
+                    "required": ["mass", "temperature", "radius"],
+                    "additionalProperties": false
+                  },
+                  "separation": {"type": "number", "minimum": 0, "maximum": 1000000},
+                  "eccentricity": {"type": "number", "minimum": 0, "maximum": 0.99},
+                  "inclination": {"type": "number", "minimum": -180, "maximum": 180},
+                  "drop": {
+                    "type": "object",
+                    "properties": {
+                      "mass": {"type": "number", "minimum": 0, "maximum": 300},
+                      "temperature": {"type": "number", "minimum": 0, "maximum": 200000},
+                      "age": {"type": "number", "minimum": 0, "maximum": 14000000000},
+                      "distance": {"type": "number", "minimum": 0, "maximum": 1000000},
+                      "phase": {"type": "number", "minimum": -360, "maximum": 360},
+                      "made_up": {"type": "boolean"}
+                    },
+                    "required": ["mass", "temperature", "age", "distance"],
+                    "additionalProperties": false
+                  }
+                },
+                "required": ["primary", "companion", "separation", "eccentricity"],
+                "additionalProperties": false
+              },
+              "middle": {
+                "$ref": "#/$defs/triple"
+              },
+              "drop_at": {
+                "$ref": "#/$defs/triple"
+              },
+              "time": {"type": "number", "minimum": 0, "maximum": 14000000000}
+            },
+            "oneOf": [
+              {"required": ["middle"]},
+              {"required": ["drop_at"]}
+            ],
+            "required": ["generate", "time"],
             "additionalProperties": false
           }
         },
@@ -3638,6 +3846,25 @@
               "colour",
               "source"
             ],
+            "additionalProperties": false
+          }
+        },
+        "cloud-decks": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "base": {"$ref": "#/$defs/triple"},
+              "size": {"$ref": "#/$defs/triple"},
+              "colour": {"$ref": "#/$defs/colour"},
+              "coverage": {"type": "number", "exclusiveMinimum": 0, "maximum": 1},
+              "extinction": {"type": "number", "exclusiveMinimum": 0},
+              "scale": {"type": "number", "exclusiveMinimum": 0},
+              "feather": {"type": "number", "minimum": 0},
+              "seed": {"type": "integer", "minimum": 0},
+              "source": {"type": "string"}
+            },
+            "required": ["base", "size", "colour", "coverage", "extinction", "scale", "seed", "source"],
             "additionalProperties": false
           }
         },

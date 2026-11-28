@@ -1,0 +1,94 @@
+# The studio reference eases into a reach, holds, and returns to neutral.
+"$schema": https://github.com/janearc/slayer/schemas/ecosystem-v2.json
+scene:
+  name: Adult human reach clip
+  seed: 27
+  setting: space
+  light: none
+  recipes:
+    reach:
+      kind: adult-human-neutral
+      pose-clip:
+        timing: smooth
+        keys:
+          - at: {value: 0, unit: s}
+          - at: {value: 1.4, unit: s}
+            turns:
+              thorax: [0, 8.021409131831525, 0]
+              head: [0, -5.729577951308233, 0]
+              left-clavicle: [0, 0, 5.729577951308233]
+              left-upper-arm: [0, 0, 22.918311805232932]
+              left-forearm: [-14.32394487827058, 0, 0]
+          - at: {value: 2, unit: s}
+            turns:
+              thorax: [0, 8.021409131831525, 0]
+              head: [0, -5.729577951308233, 0]
+              left-clavicle: [0, 0, 5.729577951308233]
+              left-upper-arm: [0, 0, 22.918311805232932]
+              left-forearm: [-14.32394487827058, 0, 0]
+          - at: {value: 3.2, unit: s}
+        attachments:
+          wrist-marker:
+            bone: left-hand
+            kind: can
+            offset: [0.018, -0.028, 0.030]
+            scale: 0.35
+  set:
+    things:
+      adult:
+        recipe: reach
+        seed: 27
+        position:
+          east: {value: 0, unit: m}
+          north: {value: 0, unit: m}
+          up: {value: 0, unit: m}
+  film:
+    width: 600
+    height: 800
+    rays: 8
+    exposure: 1
+    wide: 31
+  cameras:
+    three-quarter:
+      title: Front left at mid-body height
+      location: {at: [2.08597, -2.08597, 0.86]}
+      orientation: {look_at: [0, 0, 0.86]}
+    left-shoulder:
+      title: Left shoulder and upper arm
+      location: {at: [0.90, -0.72, 1.28]}
+      orientation: {look_at: [0.21, 0, 1.27]}
+  world:
+    unit: 1
+    materials:
+      floor:
+        colour: {srgb_linear: [0.095, 0.106, 0.117]}
+        source: eye
+    boxes:
+      studio:
+        material: floor
+        middle: [0, 0, -0.15]
+        size: [160, 160, 0.30]
+        source: eye
+    sky:
+      horizon: {srgb_linear: [0.092, 0.104, 0.118]}
+      zenith: {srgb_linear: [0.052, 0.060, 0.070]}
+      ground: {srgb_linear: [0.070, 0.081, 0.091]}
+      source: eye
+    suns:
+      key:
+        toward: [-0.44, -0.80, 0.62]
+        colour: {srgb_linear: [1.26, 1.22, 1.18]}
+        source: eye
+      fill:
+        toward: [0.82, -0.46, 0.35]
+        colour: {srgb_linear: [0.42, 0.44, 0.48]}
+        source: eye
+      rim:
+        toward: [0.26, 0.84, 0.58]
+        colour: {srgb_linear: [0.53, 0.55, 0.58]}
+        source: eye
+    floods:
+      room:
+        colour: {srgb_linear: [0.11, 0.12, 0.13]}
+        strength: 1
+        source: eye

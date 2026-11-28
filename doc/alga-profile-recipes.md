@@ -1,6 +1,8 @@
 # An alga from a profile book
 
-An alga recipe reads one checked kelp book relative to its set:
+an alga recipe reads a kelp book relative to its set. the
+[kelp forest set](../sets/kelp-forest.yaml) places such a recipe under
+`scene.set.things`. the recipe uses this form:
 
 ```yaml
 scene:
@@ -17,8 +19,8 @@ scene:
 `family`, `file` and `species` are required; `kelp` is the supported family.
 The species must match the book. `condition` selects a named water condition
 and defaults to the book's moderate water; `forest` requests the authored
-stand instead of one plant and defaults to false. The example book is
-`manufacture/algae/kelp/kelp.yaml`. It holds one species, its dimensions,
+stand instead of one specimen and defaults to false. the
+[example book](../manufacture/algae/kelp/kelp.yaml) holds one species, its dimensions,
 looks, shared motion choices, water conditions and provenance.
 
 The checked values and exact source bytes are retained by the recipe and job.

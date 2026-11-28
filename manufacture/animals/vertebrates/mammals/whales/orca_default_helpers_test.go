@@ -9,14 +9,25 @@ import (
 
 // Existing anatomical witnesses use the embedded orca, while profile tests
 // construct other models directly and never change this default.
-func orcaSkeleton() (*skeleton.Skeleton, error)    { return defaultOrcaModel().orcaSkeleton() }
-func orcaRest() *orcaRestSkin                      { return defaultOrcaModel().orcaRest() }
-func orcaTrunkProfile() *orcaTrunkTable            { return defaultOrcaModel().orcaTrunkProfile() }
-func orcaBinding() ([][]skeleton.Influence, error) { return defaultOrcaModel().orcaBinding() }
-func orcaField(p maths.Vec) float64                { return defaultOrcaModel().orcaField(p) }
-func orcaMouthLine(x float64) float64              { return defaultOrcaModel().orcaMouthLine(x) }
-func orcaTeeth(p maths.Vec) float64                { return defaultOrcaModel().orcaTeeth(p) }
-func orcaEyeCentre() maths.Vec                     { return defaultOrcaModel().orcaEyeCentre() }
+func orcaSkeleton() (*skeleton.Skeleton, error) { return defaultOrcaModel().orcaSkeleton() }
+func orcaRest() *orcaRestSkin                   { return defaultOrcaModel().orcaRest() }
+func orcaTrunkProfile() *orcaTrunkTable         { return defaultOrcaModel().orcaTrunkProfile() }
+func orcaBinding() ([][]skeleton.Influence, error) {
+	model := defaultOrcaModel()
+	skin, err := model.orcaBinding()
+	if err != nil {
+		return nil, err
+	}
+	binding := make([][]skeleton.Influence, len(model.orcaRest().relieved))
+	for i := range binding {
+		binding[i] = skin.Influences(i)
+	}
+	return binding, nil
+}
+func orcaField(p maths.Vec) float64   { return defaultOrcaModel().orcaField(p) }
+func orcaMouthLine(x float64) float64 { return defaultOrcaModel().orcaMouthLine(x) }
+func orcaTeeth(p maths.Vec) float64   { return defaultOrcaModel().orcaTeeth(p) }
+func orcaEyeCentre() maths.Vec        { return defaultOrcaModel().orcaEyeCentre() }
 func orcaBind(bones *skeleton.Skeleton, spans []mammals.Span, p maths.Vec) []skeleton.Influence {
 	return defaultOrcaModel().orcaBind(bones, spans, p)
 }

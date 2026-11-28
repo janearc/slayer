@@ -1,12 +1,9 @@
 # Render optimization controls and preflight
 
-Every optimization must have its own independent control, including changes
-that preserve the exact picture. A preflight is advisory: it never enables a
-shortcut or changes a job's authored settings.
-
-Record the effective settings with the job and include them in
-workload-profile identities. A preset may fill in choices, but each choice
-must remain separately inspectable and changeable.
+a workload preflight estimates host memory from a matching recorded
+profile. it leaves the job settings in place. record the effective
+sampling, backend, detail and shortcut settings with the profile.
+[the optimization catalogue](optimizations.md) covers automatic reuse.
 
 ## Before starting a job
 
@@ -31,7 +28,7 @@ for an upfront peak estimate.
 | Retained GPU geometry | Frame sessions retain tree and packed geometry; disk tree caching has a separate Go API. |
 | Projected-size geometry | Some terrain and forest adapters select view-dependent representations; the general Heard film path does not. |
 | Texture filtering | Selected textures can use pixel footprints when sampling. Filtering alone does not reduce stored geometry. |
-| Volume/scattering shortcuts | Lighting shortcuts exist under job `shortcuts`. |
+| Volume/scattering shortcuts | Set the supported [lighting flags](flags.md) under job `shortcuts`. |
 | Output delivery | A job can choose raster, rays and frame rate. |
 
 Six frames per second means fewer temporal samples; it does not make each

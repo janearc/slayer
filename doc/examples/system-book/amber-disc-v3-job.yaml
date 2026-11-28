@@ -1,0 +1,7 @@
+"$schema": https://github.com/janearc/slayer/schemas/job-v1.json
+scene: {set: amber-disc-v2.yaml}
+renderer: gpu-native
+shortcuts: {restir: off}
+film: {width: 640, height: 400, rays: 1, exposure: 0.003, wide: 60}
+camera: {name: amber-disc}
+outputs: {picture: ../../../out/2026-11-27-system-amber-disc-v3/proof.png, raw: ../../../out/2026-11-27-system-amber-disc-v3/light.pfm}

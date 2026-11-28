@@ -19,17 +19,24 @@ import (
 )
 
 func TestRenderSetupControlsFitSmallestWindow(t *testing.T) {
-	for _, size := range []float32{16, 18, 20, 24} {
+	for _, size := range []float32{16, 18, 20, 22, 24} {
 		work := settingsWorkspace(t, "")
 		work.size, work.theme = size, appearance.Theme()
+		work.renderSubmitError = strings.Repeat("could not create the render folder ", 100)
 		ctx := uitest.NewMockContext()
 		ctx.WindowSizeVal = smallestWindow
 		root := work.renderSetupSheet()
 		root.Layout(ctx, geometry.Loose(smallestWindow))
-		for _, id := range []string{"Output size", "Render camera", "Render backend", "Cancel", "Render"} {
+		for _, id := range []string{"Output size", "Render camera", "Samples per pixel", "Render backend", "Choose render destination", "Render details…", "Cancel", "Render"} {
 			point, found := centreOf(root, id, geometry.Point{})
 			if !found || point.X < 0 || point.Y < 0 || point.X > smallestWindow.Width || point.Y > smallestWindow.Height {
 				t.Fatalf("size %v: %s found %v at %v", size, id, found, point)
+			}
+		}
+		for _, id := range []string{"Output size", "Render backend"} {
+			control := libraryWidget(root, id).(interface{ Bounds() geometry.Rect })
+			if control.Bounds().Width() < 440 {
+				t.Fatalf("size %v: %s has only %v points for its label", size, id, control.Bounds().Width())
 			}
 		}
 	}
@@ -58,7 +65,14 @@ func TestRenderSetupOffscreenEvidence(t *testing.T) {
 	work.ui.Window().HandleResize(1600, 1000)
 	work.renderSetupOpen = true
 	work.renderPresets = presets
-	work.renderSampling = preview.Profile{Rays: 2}
+	source, err := os.ReadFile(filepath.Join(examples, "full-render-check.yaml"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	work.renderFilm, err = preview.ReadFullFilm("set.yaml", string(source))
+	if err != nil {
+		t.Fatal(err)
+	}
 	work.renderCameras = []string{"arrival"}
 	for i, preset := range presets {
 		if preset.Name == "imax" {
@@ -87,10 +101,18 @@ func TestRenderSetupOffscreenEvidence(t *testing.T) {
 }
 
 func TestRenderEstimateUsesChosenSizeAndActualLegacySampling(t *testing.T) {
+	source, err := os.ReadFile("../../../examples/full-render-check.yaml")
+	if err != nil {
+		t.Fatal(err)
+	}
+	film, err := preview.ReadFullFilm("set.yaml", string(source))
+	if err != nil {
+		t.Fatal(err)
+	}
 	work := &Workspace{
-		renderAuthored: preview.Profile{Width: 320, Height: 200, Rays: 2},
-		renderSampling: preview.Profile{Rays: 2},
-		renderPresets:  []stagewire.FilmPreset{{Name: "half-portrait", Width: 1080, Height: 960}},
+		renderSetupOpen: true,
+		renderFilm:      film,
+		renderPresets:   []stagewire.FilmPreset{{Name: "half-portrait", Width: 1080, Height: 960}},
 	}
 	if got := work.renderEstimate(); !strings.Contains(got, "4 samples per pixel") || !strings.Contains(got, "256,000 primary samples") {
 		t.Fatalf("authored estimate %q", got)
@@ -103,10 +125,36 @@ func TestRenderEstimateUsesChosenSizeAndActualLegacySampling(t *testing.T) {
 	if got := work.renderEstimate(); !strings.Contains(got, "GPU") {
 		t.Fatalf("GPU estimate %q", got)
 	}
-	work.renderBackendChoice = 0
+	work.renderBackendChoice = 2
+	if got := work.renderEstimate(); !strings.Contains(got, "Native mesh traversal") {
+		t.Fatalf("native GPU estimate %q", got)
+	}
 	work.renderSamplesChoice = 7
+	if got := work.renderEstimate(); !strings.Contains(got, "Native mesh traversal") ||
+		!strings.Contains(got, "7 samples per pixel") || !strings.Contains(got, "7,257,600 primary samples") {
+		t.Fatalf("native GPU exact sampling estimate %q", got)
+	}
+	work.renderBackendChoice = 0
 	if got := work.renderEstimate(); !strings.Contains(got, "7 samples per pixel") || !strings.Contains(got, "7,257,600 primary samples") {
 		t.Fatalf("exact estimate %q", got)
+	}
+}
+
+func TestRenderEstimateResolvesPhysicalRowsAndCountsShutterGlimpses(t *testing.T) {
+	source := strings.Replace(addRecipeFixture, "film: {width: 640, height: 400, wide: 40, rays: 1, exposure: 1}",
+		"film: {width: 640, rays: 2, frame: {width: 36, height: 24}, lens: {focal: 50, stop: 8, focus: first}, shutter: 0.5, glimpses: 2}", 1)
+	film, err := preview.ReadFullFilm("set.yaml", source)
+	if err != nil {
+		t.Fatal(err)
+	}
+	work := &Workspace{renderFilm: film, renderSetupOpen: true, renderSetupChoice: 1,
+		renderPresets: []stagewire.FilmPreset{{Name: "matching", Width: 24, Height: 15}, {Name: "wrong", Width: 24, Height: 12}}}
+	if got := work.renderEstimate(); !strings.Contains(got, "24 × 16 · 4 samples per pixel per glimpse · 2 shutter glimpses · 3,072 primary samples") {
+		t.Fatalf("rig estimate %q", got)
+	}
+	work.renderSetupChoice = 2
+	if got := work.renderEstimate(); !strings.Contains(got, "does not match the physical frame") {
+		t.Fatalf("incompatible preset estimate %q", got)
 	}
 }
 
@@ -138,10 +186,11 @@ func TestReferencedJobSetCamerasAndChangedFileRefusal(t *testing.T) {
 	if err := os.WriteFile(setPath, append(raw, []byte("\n# changed\n")...), 0600); err != nil {
 		t.Fatal(err)
 	}
+	work.renderSubmitError = "Previous destination unavailable"
 	control := libraryWidget(work.root, "Render")
 	bounds := control.(interface{ ScreenBounds() geometry.Rect }).ScreenBounds()
 	clickLibraryPoint(work, geometry.Pt((bounds.Min.X+bounds.Max.X)/2, (bounds.Min.Y+bounds.Max.Y)/2))
-	if !strings.Contains(work.renderSetupError, "referenced set changed") || work.Running() {
+	if work.renderSubmitError != "" || !strings.Contains(work.renderSetupError, "referenced set changed") || work.Running() {
 		t.Fatal("stale referenced set was submitted")
 	}
 }

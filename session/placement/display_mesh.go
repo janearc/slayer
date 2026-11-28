@@ -20,6 +20,8 @@ type displayBuilder struct {
 	components      displayComponents
 	// heightFields enables labeled height-field approximations for staged views.
 	heightFields bool
+	// localPicking uses a light face index in the cached working view.
+	localPicking bool
 	// material is the name of the material of the part being added.
 	material string
 }
@@ -28,6 +30,28 @@ type displayBuilder struct {
 // position and edge tables made.
 func newDisplayBuilder() *displayBuilder {
 	return &displayBuilder{vertices: map[DisplayVertex]uint32{}, positions: map[maths.Vec]uint32{}, edges: map[uint64]struct{}{}}
+}
+
+// newStagedDisplayBuilder reserves bounded tables for a known triangle mesh.
+// Larger meshes otherwise repeatedly grow and rehash all three tables.
+func newStagedDisplayBuilder(solid shape.Shape) *displayBuilder {
+	faces := 0
+	switch made := solid.(type) {
+	case *mesh.Mesh:
+		faces = made.FaceCount()
+	case *shape.Mesh:
+		faces = len(made.Faces)
+	}
+	if faces < 1024 {
+		return newDisplayBuilder()
+	}
+	vertices := min(faces, 65536)
+	edges := vertices + vertices/2
+	return &displayBuilder{
+		vertices:  make(map[DisplayVertex]uint32, vertices),
+		positions: make(map[maths.Vec]uint32, vertices),
+		edges:     make(map[uint64]struct{}, edges),
+	}
 }
 
 // thing adds one part to the display mesh. Hidden parts are skipped. The
@@ -42,6 +66,7 @@ func (builder *displayBuilder) thingAt(part thing.Thing, at time.Duration) error
 	if part.Hidden() {
 		return nil
 	}
+	builder.skin.materialLimits |= materialLimits(part.Material)
 	colour := maths.Light{}
 	builder.material = ""
 	if part.Material != nil {
@@ -103,6 +128,9 @@ func (builder *displayBuilder) surface(solid shape.Shape, at maths.Subspace, col
 		hitter, ok := displayHitter(solid)
 		if !ok || !shape.ValidPlacement(at) {
 			return fmt.Errorf("native display component %T has no valid placed hitter", solid)
+		}
+		if native, ok := solid.(*mesh.Mesh); ok && builder.localPicking {
+			hitter = native.NewPicker()
 		}
 		builder.components = append(builder.components, displayComponent{hitter: hitter, at: at, material: builder.material})
 	}

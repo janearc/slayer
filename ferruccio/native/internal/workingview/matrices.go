@@ -1,21 +1,24 @@
 package workingview
 
 import (
+	"math"
+
 	"github.com/janearc/slayer/maths"
 	"github.com/janearc/slayer/session/placement"
-	"math"
 )
 
 type matrix [16]float32
 
 // frameMatrix maps native local points into their parent frame.
 func frameMatrix(frame maths.Subspace, inverse bool) matrix {
+	origin := frame.Origin
+	frame.Origin = maths.Vec{}
 	transform := frame.Out
 	if inverse {
 		transform = frame.In
+		origin = transform(origin.Neg())
 	}
-	origin := transform(maths.V(0, 0, 0))
-	axes := []maths.Vec{transform(maths.XAxis).Sub(origin), transform(maths.YAxis).Sub(origin), transform(maths.ZAxis).Sub(origin), origin}
+	axes := [...]maths.Vec{transform(maths.XAxis), transform(maths.YAxis), transform(maths.ZAxis), origin}
 	var result matrix
 	for column, axis := range axes {
 		result[column*4] = float32(axis.X)
@@ -24,6 +27,13 @@ func frameMatrix(frame maths.Subspace, inverse bool) matrix {
 	}
 	result[15] = 1
 	return result
+}
+
+// instanceMatrix subtracts the eye in float64 before uploading the placement.
+// Its axes remain in the world frame for working-view lighting.
+func instanceMatrix(place maths.Subspace, eye maths.Vec) matrix {
+	place.Origin = place.Origin.Sub(eye)
+	return frameMatrix(place, false)
 }
 
 // cameraMatrix preserves the native pinhole's horizontal field and pixel shape.
@@ -42,9 +52,13 @@ func cameraMatrix(scene *placement.DisplayScene, width, height int) matrix {
 		aspect = float32(float64(scene.Width) * pixel / float64(scene.Height))
 	}
 	// Local working-view clipping in metres; WebGPU depth is zero to one.
-	const near, far = float32(.05), float32(100000)
+	const near, far = float32(placement.DisplayNear), float32(placement.DisplayFar)
 	projection := matrix{0: horizontal, 5: horizontal * aspect, 10: far / (near - far), 11: -1, 14: far * near / (near - far)}
-	return multiply(projection, frameMatrix(scene.Eye, true))
+	// Instance origins are already relative to the eye. Apply only the
+	// eye's inverse orientation and scale here.
+	eye := scene.Eye
+	eye.Origin = maths.Vec{}
+	return multiply(projection, frameMatrix(eye, true))
 }
 
 // multiply returns left times right for two 4 by 4 matrices.

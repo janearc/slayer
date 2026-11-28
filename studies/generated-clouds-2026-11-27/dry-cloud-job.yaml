@@ -1,0 +1,6 @@
+$schema: https://github.com/janearc/slayer/schemas/job-v1.json
+scene: {set: dry-cloud.yaml}
+camera: {name: quarter}
+renderer: gpu-native
+film: {width: 800, height: 800, rays: 1, exposure: 0.003}
+outputs: {picture: ../../out/studies/2026-11-27-cloud-dry-cloud/proof.png}

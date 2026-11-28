@@ -32,7 +32,8 @@ game run slayer -- list library
 game run slayer -- draw doc/examples/jobs/first-film.yaml --dry-run
 ```
 
-Then draw the job normally. `ffmpeg` must be available for movie output.
+Then draw the job normally. Slayer writes movies through AVFoundation on
+macOS with cgo; this path does not require `ffmpeg`.
 A tune marked as looping repeats to fill the film. A nonlooping tune ends
 and leaves silence; a longer soundtrack is cut at the film's end. A still
 cannot have sound. Choosing a voicing changes synthesis, not the written
@@ -42,7 +43,7 @@ A supplied recording uses a different sound form:
 
 ```yaml
 sound:
-  file: audio/song.opus
+  file: audio/song.m4a
   from: {value: 12, unit: s}
   score: audio/song-score.yaml
 ```

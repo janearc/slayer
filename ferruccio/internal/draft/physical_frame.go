@@ -11,15 +11,25 @@ import (
 
 // PhysicalFrame reads the dimensions of an explicitly authored set rig.
 func (document *Document) PhysicalFrame() ([2]float64, bool) {
-	var size [2]float64
+	_, film := document.physicalFilm()
+	return physicalFrame(film)
+}
+
+// physicalFilm reads the checked set tree and its authored film.
+func (document *Document) physicalFilm() (tree, film *yaml.Node) {
 	if document.kind != "set" && document.kind != "legacy-set" {
-		return size, false
+		return nil, nil
 	}
 	tree, err := document.Tree()
 	if err != nil {
-		return size, false
+		return nil, nil
 	}
-	film := member(member(tree.Content[0], "scene"), "film")
+	return tree, member(member(tree.Content[0], "scene"), "film")
+}
+
+// physicalFrame reads a frame only when its supporting rig is present.
+func physicalFrame(film *yaml.Node) ([2]float64, bool) {
+	var size [2]float64
 	frame := member(film, "frame")
 	if frame == nil || member(film, "lens") == nil || member(film, "shutter") == nil || member(film, "glimpses") == nil {
 		return size, false
@@ -33,10 +43,11 @@ func (document *Document) PhysicalFrame() ([2]float64, bool) {
 		if value == nil {
 			return size, false
 		}
-		size[i], err = strconv.ParseFloat(value.Value, 64)
-		if err != nil || math.IsNaN(size[i]) || math.IsInf(size[i], 0) || size[i] < 1 || size[i] > 1000 {
+		dimension, err := strconv.ParseFloat(value.Value, 64)
+		if err != nil || math.IsNaN(dimension) || math.IsInf(dimension, 0) || dimension < 1 || dimension > 1000 {
 			return size, false
 		}
+		size[i] = dimension
 	}
 	return size, true
 }
@@ -48,20 +59,22 @@ func (document *Document) SetPhysicalFrame(size [2]float64) error {
 			return fmt.Errorf("physical frame dimensions must be between 1 and 1000 mm")
 		}
 	}
-	current, ok := document.PhysicalFrame()
+	tree, film := document.physicalFilm()
+	current, ok := physicalFrame(film)
 	if !ok {
 		return fmt.Errorf("the set does not have a complete physical film rig")
 	}
 	if current == size {
 		return nil
 	}
-	tree, err := document.Tree()
-	if err != nil {
-		return err
-	}
-	frame := member(member(member(tree.Content[0], "scene"), "film"), "frame")
+	frame := member(film, "frame")
 	setNumber(member(frame, "width"), size[0])
 	setNumber(member(frame, "height"), size[1])
+	return document.replacePhysicalFilm(tree, "frame")
+}
+
+// replacePhysicalFilm validates an encoded rig edit before replacing source.
+func (document *Document) replacePhysicalFilm(tree *yaml.Node, section string) error {
 	var encoded bytes.Buffer
 	encoder := yaml.NewEncoder(&encoded)
 	encoder.SetIndent(2)
@@ -72,7 +85,7 @@ func (document *Document) SetPhysicalFrame(size [2]float64) error {
 		return err
 	}
 	if _, err := document.read(encoded.Bytes()); err != nil {
-		return fmt.Errorf("frame edit would make invalid set YAML: %w", err)
+		return fmt.Errorf("%s edit would make invalid set YAML: %w", section, err)
 	}
 	document.source = bytes.Clone(encoded.Bytes())
 	return nil

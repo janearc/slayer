@@ -1,11 +1,11 @@
 # Region light
 
-A CPU still may draw a rectangle of its full frame as linear light. The
-session preserves the full camera dimensions and meters the full view
-before applying the rectangle. Each row uses the frame's cancellation and
-retention contract. The caller must key kept rows by rectangle.
+A CPU or software-traversal GPU still can draw a rectangle as linear light.
+The session checks the rectangle against the resolved full frame and keeps
+the full camera dimensions. CPU retained rows use local row numbers, and
+callers must key them by the rectangle's origin and dimensions.
 
-The session refuses region output on paths that do not yet preserve it.
-Developed pictures and overlays may need full-frame coordinates and
-neighbouring light; callers must check those effects before publishing a
-picture. The rectangle is checked against the resolved size before drawing.
+Native GPU traversal and unsupported draw modes return a refusal.
+Development and overlays can depend on neighbouring light outside the
+rectangle. See [region comparison](../render/regioncompare/session-wiring.md)
+for the diagnostic command.

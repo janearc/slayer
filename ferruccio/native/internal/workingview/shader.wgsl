@@ -1,6 +1,6 @@
 struct SceneUniform {
     view_projection: mat4x4<f32>,
-    model: mat4x4<f32>,
+    eye_parts: mat4x4<f32>,
     edge: vec4<f32>,
 }
 @group(0) @binding(0) var<uniform> scene: SceneUniform;

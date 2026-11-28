@@ -22,7 +22,14 @@ import (
 )
 
 //go:embed trace.metal
-var traceSource string
+var traceFile string
+
+//go:embed shift.metal
+var shiftSource string
+
+// traceSource is the kernel's source: the march's shift, which the test
+// of its agreement with trace's draws alone, and then the kernel.
+var traceSource = shiftSource + traceFile
 
 //go:embed ring.metal
 var ringSource string
@@ -392,20 +399,8 @@ func sampledLightingGridWithInitialMedia(world *thing.World, trees []grown,
 	defer kernel.Close()
 	kernel.FixBands(bandRows)
 	if mode != softwareTraversal {
-		memoryStage("per-call-native-plan-before")
-		start = time.Now()
-		plan, root, makeError := encoded.accelerationPlan()
-		memoryStage("per-call-native-plan-after")
-		if makeError == nil {
-			encoded.discardBuildHierarchy()
-			memoryStage("per-call-native-build-before")
-			makeError = kernel.Accelerate(plan, root)
-			memoryStage("per-call-native-build-after")
-		}
-		spent.acceleration = time.Since(start)
-		spent.accelerationGPU = kernel.GPUTime()
-		if makeError != nil {
-			return nil, spent, makeError
+		if err := encoded.accelerate(kernel, &spent); err != nil {
+			return nil, spent, err
 		}
 	}
 	spent.device = kernel.Device()
@@ -434,6 +429,23 @@ func sampledLightingGridWithInitialMedia(world *thing.World, trees []grown,
 		return nil, spent, err
 	}
 	return band.picture, spent, nil
+}
+
+// accelerate builds the native mesh hierarchy before tracing a frame.
+func (encoded *scene) accelerate(kernel *metal.Kernel, spent *timing) error {
+	memoryStage("per-call-native-plan-before")
+	start := time.Now()
+	plan, root, makeError := encoded.accelerationPlan()
+	memoryStage("per-call-native-plan-after")
+	if makeError == nil {
+		encoded.discardBuildHierarchy()
+		memoryStage("per-call-native-build-before")
+		makeError = kernel.Accelerate(plan, root)
+		memoryStage("per-call-native-build-after")
+	}
+	spent.acceleration = time.Since(start)
+	spent.accelerationGPU = kernel.GPUTime()
+	return makeError
 }
 
 // prepared is the world encoded for a mode at a size in samples, with

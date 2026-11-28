@@ -31,21 +31,14 @@ type planState struct {
 const requestName = "azazel-request.json"
 const terminalName = "azazel-terminal.json"
 
-// previewTimeoutSeconds limits a preview sent through the queue. The value
-// was chosen: a preview that takes longer is not a preview.
-const previewTimeoutSeconds = 300
-
-// fullTimeoutSeconds is the limit sent with a full render. The request schema
-// requires a limit, so this is the longest it accepts, seven days. It was
-// chosen as the ceiling, not as a time a full render is expected to take.
-const fullTimeoutSeconds = 604800
+// renderTimeoutSeconds is the longest limit the queue schema accepts: seven
+// days. It is a protocol ceiling, not an expected render duration. The editor
+// can cancel either a preview or a full render before then.
+const renderTimeoutSeconds = 604800
 
 // timeoutSeconds is the queue limit for this plan.
 func (plan *Plan) timeoutSeconds() int64 {
-	if plan.Profile.Full {
-		return fullTimeoutSeconds
-	}
-	return previewTimeoutSeconds
+	return renderTimeoutSeconds
 }
 
 // freezeRequest persists exactly one immutable submission per prepared plan.

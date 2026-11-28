@@ -19,8 +19,10 @@ individual placement.
 For terrain stands with an explicit area and a grid,
 lattice or scatter habit, Region edits the four area bounds in metres from
 the terrain southwest. Staging regenerates the stand, so members can move or
-change and outside-terrain regions can yield fewer members. Other generated
-groups and proxies remain read-only.
+change and outside-terrain regions can yield fewer members. In Move mode,
+arrow keys shift both bounds on one axis by 0.25 m, or 1 m with Shift. Each
+key press is one undoable edit. Other generated groups and proxies remain
+read-only.
 
 An explicitly positioned v2 ground thing, including one in a set that leaves
 `setting` unsaid and therefore defaults to ground, uses
@@ -71,6 +73,14 @@ seconds; that prototype omitted its infinite sea.
 The current shared path adds a clearly labeled finite mean-level plane over
 the finite scene bounds; it does not reproduce waves or shoreline. The
 streamed shared path is now connected to the editor.
+
+The working view shows opaque infinite planes as read-only, flat-colour
+patches. Each patch lies on the staged plane around the captured camera's
+projection. Its half-width ranges from 25 metres to 2 kilometres with
+camera height above or below the plane. Moving the inspection camera can
+expose the finite edge. The working view reports omitted transmissive
+planes, planes with a spectral material and planes outside its coordinate
+precision. Full renders use the original analytic surfaces and their materials.
 
 A version 3 run delivered
 Futian through the helper and loader in 5 minutes using a 17 GiB temporary

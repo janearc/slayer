@@ -1,0 +1,45 @@
+"$schema": https://github.com/janearc/slayer/schemas/ecosystem-v2.json
+scene:
+  name: azure giant
+  seed: 7
+  setting: space
+  light: sun
+  sun: {azimuth: 225, altitude: 20}
+  film: {width: 800, height: 800, rays: 2, exposure: 0.003, wide: 50}
+  cameras:
+    disc:
+      location: {at: [-318490735, 0, 115921147]}
+      orientation: {look_at: [0, 0, 0]}
+    close:
+      location: {at: [-159245367, 0, 57960573]}
+      orientation: {look_at: [0, 0, 0]}
+  world:
+    unit: 1
+    sky:
+      stars: {seed: 29, share: 0.01, size: 0.3, bright: 0.6}
+      source: eye
+    bodies:
+      azure:
+        generate:
+          mass: 317.8
+          makeup: {metal: 0.02, rock: 0.03, ice: 0.05, gas: 0.90}
+          day: 9.93
+          tilt: 3.13
+          distance: 5.2
+          sun: {mass: 1, luminosity: 1}
+          age: 4.5e9
+          seed: 29
+          giant_look:
+            made_up: true
+            paints: [[0.03, 0.08, 0.2], [0.12, 0.42, 0.65], [0.58, 0.85, 0.9], [0.08, 0.25, 0.5], [0.25, 0.65, 0.75], [0.04, 0.12, 0.3], [0.45, 0.7, 0.85], [0.1, 0.3, 0.55], [0.03, 0.09, 0.2]]
+            roil: 0.09
+            shear: 5
+            grain: 0.06
+            fine: 0.04
+            mottle: 0.4
+            jets: 14
+            spots:
+              - {lat: 0.22, lon: 2.0, size: 0.14, stretch: 1.6, turn: -3, paint: [0.7, 0.9, 1]}
+              - {lat: -0.38, lon: 2.4, size: 0.10, stretch: 1.8, turn: 2, paint: [0.04, 0.08, 0.2]}
+        middle: [0, 0, 0]
+        detail: 3

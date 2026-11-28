@@ -12,30 +12,147 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/janearc/slayer/ferruccio/internal/draft"
+	"github.com/janearc/slayer/ferruccio/native/internal/settings"
 	"github.com/janearc/slayer/ferruccio/native/internal/stagewire"
 	"github.com/janearc/slayer/manufacture"
 	"github.com/janearc/slayer/maths"
+	"github.com/janearc/slayer/session/placement"
 	"github.com/janearc/slayer/set"
 )
 
-const groundEditFixture = `$schema: https://github.com/janearc/slayer/schemas/ecosystem-v2.json
-scene:
-  name: Ground editing
-  setting: ground
-  light: moon
-  timeofday: 2200
-  terrain: {from: fixture, file: fixture-plain.tif, west: 1001, north: 8999, across: 150, down: 100, step: 2}
-  film: {width: 24, height: 16, rays: 1, exposure: 100000}
-  cameras:
-    view:
-      orientation: {point_to: stone, alpha: -25}
-      location: {loc_relative: {object: stone, standoff_x: 20, standoff_y: 0, standoff_z: 10}}
-  set:
-    things:
-      stone: {kind: yurt, seed: 4, east: 1050, north: 8990, heading: {value: 30, unit: deg}}
-`
+func TestRetrySceneDetailAfterChoosingSourceShelf(t *testing.T) {
+	root := t.TempDir()
+	missingShelf, readyShelf := t.TempDir(), t.TempDir()
+	supersededShelf, latestMissingShelf := t.TempDir(), t.TempDir()
+	t.Setenv("SLAYER_SHELF", "")
+	t.Setenv("SLAYER_CACHE", t.TempDir())
+	raw, err := os.ReadFile("../../../../terrain/testdata/fixture-plain.tif")
+	if err != nil {
+		t.Fatal(err)
+	}
+	manifest := fmt.Sprintf("sources:\n  - key: fixture\n    from: https://x.test/fixture.tif\n    licence: test\n    sha256: %x\n", sha256.Sum256(raw))
+	for path, content := range map[string][]byte{
+		filepath.Join(root, "sources.yaml"):            []byte(manifest),
+		filepath.Join(root, "scene.yaml"):              []byte(groundEditFixture),
+		filepath.Join(readyShelf, "fixture.tif"):       raw,
+		filepath.Join(readyShelf, "fixture-plain.tif"): raw,
+	} {
+		if err := os.WriteFile(path, content, 0600); err != nil {
+			t.Fatal(err)
+		}
+	}
+	path := filepath.Join(root, "scene.yaml")
+	document, err := draft.Open(path, []byte(groundEditFixture))
+	if err != nil {
+		t.Fatal(err)
+	}
+	unsaved := strings.Replace(groundEditFixture, "east: 1050", "east: 1052", 1)
+	document.Replace(unsaved)
+	work := playWorkspace(t)
+	defer work.closeStaged()
+	work.state.document, work.state.path = document, path
+	work.editor.SetText(unsaved)
+	work.settings = SettingsSource{Path: filepath.Join(root, "config"), Flag: nothing, Environment: nothing}
+	if err := settings.Save(work.settings.Path, settings.Shelf, missingShelf); err != nil {
+		t.Fatal(err)
+	}
+	const stone = "scene.set.things/stone"
+	previous := &placement.DisplayScene{Width: 40, Height: 40}
+	work.working.scene, work.working.source, work.working.path = previous, unsaved, path
+	work.working.mode = "solid"
+	superseded := make(chan struct{}, 1)
+	work.working.stageOverride = func(ctx context.Context, path, source, kind string) (*stagedView, error) {
+		if source != unsaved {
+			return nil, fmt.Errorf("staging received the wrong draft")
+		}
+		shelf := work.renderTools().Shelf
+		if shelf == supersededShelf {
+			superseded <- struct{}{}
+			<-ctx.Done()
+			return nil, ctx.Err()
+		}
+		if err := os.Setenv("SLAYER_SHELF", shelf); err != nil {
+			return nil, err
+		}
+		snapshot, err := StageDetailSnapshot(ctx, path, source, kind, stagewire.Camera{}, stone)
+		if err != nil {
+			return nil, err
+		}
+		return &stagedView{scene: &snapshot.Scene}, nil
+	}
+	work.stageSceneDetail(stone, true)
+	waitStaged(t, work)
+	if work.working.scene != previous || !work.canRetryStaging() ||
+		!strings.Contains(work.diagnostic, filepath.Join(missingShelf, "fixture-plain.tif")) {
+		t.Fatalf("missing pinned data lost the map or retry: %q", work.diagnostic)
+	}
+	work.ui.Window().HandleResize(int(smallestWindow.Width), int(smallestWindow.Height))
+	work.showWorkingDetails()
+	_, retry := detailsPage(t, work, "", "Retry")
+	clickLibraryPoint(work, retry)
+	if !work.working.staging {
+		t.Fatal("the Retry button did not start staging")
+	}
+	waitStaged(t, work)
+	if work.working.scene != previous || !work.canRetryStaging() {
+		t.Fatal("retry with the shelf still empty lost the map or Retry action")
+	}
+	work.play.selected = ""
+	var cancelled bool
+	work.cancel = func() { cancelled = true }
+	work.pending.document = document
+	work.saveSetting(settings.Shelf, supersededShelf)
+	select {
+	case <-superseded:
+	case <-time.After(3 * time.Second):
+		t.Fatal("detail retry did not start")
+	}
+	work.saveSetting(settings.Shelf, latestMissingShelf)
+	waitStaged(t, work)
+	if work.working.scene != previous || !work.canRetryStaging() ||
+		!strings.Contains(work.diagnostic, filepath.Join(latestMissingShelf, "fixture-plain.tif")) {
+		t.Fatalf("superseded retry lost the map or latest shelf: %q", work.diagnostic)
+	}
+	work.settingsOpen = true
+	work.rebuild()
+	sheet := work.root
+	work.refreshLayout = false
+	work.wantSettings.Store(false)
+	work.saveSetting(settings.Shelf, readyShelf)
+	if work.root != sheet || !work.wantSettings.Load() {
+		t.Fatal("accepting the source shelf replaced the Settings sheet during the input callback")
+	}
+	if !work.refreshLayout {
+		t.Fatal("the detail retry did not defer the layout refresh")
+	}
+	waitStaged(t, work)
+	if work.working.scene == nil || work.working.scene == previous || work.working.detail != stone ||
+		work.canRetryStaging() || !document.Matches(unsaved) {
+		t.Fatalf("working view did not recover the same unsaved detail: %q", work.diagnostic)
+	}
+	origin, ok := work.working.scene.Origins[stone]
+	const terrainWest = 1001
+	if !ok || origin.X+terrainWest != 1052 {
+		t.Fatalf("recovered stone easting = %g (found: %t), want 1052", origin.X+terrainWest, ok)
+	}
+	if work.state.document != document || work.editor.Text() != unsaved || !document.Dirty() {
+		t.Fatal("retry lost the live document or its unsaved editor text")
+	}
+	if cancelled || work.pending.document != document {
+		t.Fatal("detail retry interrupted rendering or cleared queued navigation")
+	}
+	saved, err := os.ReadFile(path)
+	if err != nil || string(saved) != groundEditFixture {
+		t.Fatalf("retry changed the saved document: %v", err)
+	}
+	work.Tick()
+	if work.root == sheet || !work.settingsOpen {
+		t.Fatal("the next tick did not refresh the existing Settings sheet")
+	}
+}
 
 // TestGroundMoveStagesSavedTerrainHeight exercises source editing and the
 // detached snapshot without drawing an offline render.
@@ -113,6 +230,51 @@ func TestGroundMoveStagesSavedTerrainHeight(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	parsed, err := set.Read(path, []byte(document.Text()))
+	if err != nil {
+		t.Fatal(err)
+	}
+	work.working.parsed = &parsed
+	work.play.poseText = [4]string{"1052", "8988", "0", "30"}
+	if err := work.submitCoordinates(true); err != nil {
+		t.Fatal(err)
+	}
+	preview := work.working.preview
+	if preview == nil {
+		t.Fatal("typed terrain move did not retain a provisional scene")
+	}
+	matched := false
+	for i, batch := range detached.Scene.Batches {
+		if batch.Authored && batch.Author.Collection == "scene.set.things" && batch.Author.Name == "stone" && len(batch.Places) > 0 {
+			moved := preview.scene.Batches[i].Places[0].Origin.Sub(batch.Places[0].Origin)
+			if math.Abs(moved.X-2) > 1e-9 || math.Abs(moved.Z-2) > 1e-9 || math.Abs(moved.Y) > 1e-9 {
+				t.Fatalf("provisional terrain move = %v", moved)
+			}
+			matched = true
+			break
+		}
+	}
+	if !matched {
+		t.Fatal("staged terrain object has no authored geometry")
+	}
+	started := make(chan struct{}, 2)
+	work.working.stageOverride = func(ctx context.Context, _, _, _ string) (*stagedView, error) {
+		started <- struct{}{}
+		<-ctx.Done()
+		return nil, ctx.Err()
+	}
+	defer work.closeStaged()
+	work.updateWorking()
+	<-started
+	work.play.poseText = [4]string{"1054", "8988", "0", "30"}
+	if err := work.submitCoordinates(true); err != nil || work.working.preview == nil {
+		t.Fatalf("second terrain edit while staging failed: %v", err)
+	}
+	work.updateWorking()
+	<-started
+	work.undoCamera(work.ui.Window().Context(), false)
+	work.undoCamera(work.ui.Window().Context(), false)
+	work.working.displayed = true
 	work.beginWorking()
 	if work.working.gesture == nil {
 		t.Fatal("ground move did not begin")
@@ -579,5 +741,131 @@ func TestAddGroundThingSavesAndStagesOnTerrain(t *testing.T) {
 	}
 	if _, err := StageSnapshot(context.Background(), path, string(saved), "set"); err != nil {
 		t.Fatal(err)
+	}
+}
+
+func TestTypedGroundPlacementsSaveAndRestageAbsoluteUp(t *testing.T) {
+	for _, route := range []struct {
+		name, light string
+		origin      maths.Vec
+	}{
+		{"terrain", "  light: moon\n  timeofday: 2200\n  terrain: {from: fixture, file: fixture-plain.tif, west: 1001, north: 8999, across: 150, down: 100, step: 2}", maths.V(49, 0, 9)},
+		{"groundless Earth", "  light: moon\n  moon: {azimuth: 56, altitude: 10}\n  air: earth\n  groundless-air: {coordinate-origin: earth-mean-radius, reference-altitude: {value: 12, unit: m}, boundary: earth-standard-land}", maths.V(1050, 12, -8990)},
+	} {
+		t.Run(route.name, func(t *testing.T) {
+			dir := t.TempDir()
+			t.Setenv("SLAYER_CACHE", t.TempDir())
+			t.Setenv("SLAYER_SHELF", dir)
+			if route.name == "terrain" {
+				raw, err := os.ReadFile("../../../../terrain/testdata/fixture-plain.tif")
+				if err != nil {
+					t.Fatal(err)
+				}
+				manifest := fmt.Sprintf("sources:\n  - key: fixture\n    from: https://x.test/fixture.tif\n    licence: test\n    sha256: %x\n", sha256.Sum256(raw))
+				for name, contents := range map[string][]byte{"sources.yaml": []byte(manifest), "fixture.tif": raw, "fixture-plain.tif": raw} {
+					if err := os.WriteFile(filepath.Join(dir, name), contents, 0600); err != nil {
+						t.Fatal(err)
+					}
+				}
+			}
+			source := strings.Replace(groundEditFixture,
+				"  light: moon\n  timeofday: 2200\n  terrain: {from: fixture, file: fixture-plain.tif, west: 1001, north: 8999, across: 150, down: 100, step: 2}",
+				route.light, 1)
+			source = strings.Replace(source, "east: 1050, north: 8990",
+				"position: {east: {value: 1050, unit: m}, north: {value: 8990, unit: m}, up: {value: 12, unit: m}}", 1)
+			path := filepath.Join(dir, "scene.yaml")
+			if err := os.WriteFile(path, []byte(source), 0600); err != nil {
+				t.Fatal(err)
+			}
+			document, err := draft.Open(path, []byte(source))
+			if err != nil {
+				t.Fatal(err)
+			}
+			before, err := StageSnapshot(context.Background(), path, source, "set")
+			if err != nil {
+				t.Fatal(err)
+			}
+			const id = "scene.set.things/stone"
+			anchor, ok := before.Scene.Origins[id]
+			if !ok || anchor.X != route.origin.X || anchor.Z != route.origin.Z || (route.name != "terrain" && anchor.Y != route.origin.Y) {
+				t.Fatalf("unexpected producer anchor %v", anchor)
+			}
+			work := playWorkspace(t)
+			work.state.document, work.state.path = document, path
+			work.editor.SetText(source)
+			work.working.scene, work.working.source, work.working.path, work.working.displayed = &before.Scene, source, path, true
+			work.selectWorkingObject(id)
+			object, ok := work.selectedObject()
+			if !ok || !object.Grounded() || !object.AbsolutePosition() || object.ScaleEditable() {
+				t.Fatalf("unexpected absolute ground selection %+v", object)
+			}
+			if readout := work.playReadout(); !strings.Contains(readout, "Up 12.00 m") || strings.Contains(readout, "above ground") {
+				t.Fatalf("readout uses the wrong height reference: %q", readout)
+			}
+			if route.name == "terrain" {
+				plan, shown, err := document.AuthoredMap()
+				if err != nil || !shown || len(plan.Marks) != 1 || plan.Marks[0].ID != id || plan.Marks[0].East != 1050 || plan.Marks[0].North != 8990 {
+					t.Fatalf("typed ground placement missing from authored map: %v, %t, %v", plan.Marks, shown, err)
+				}
+			}
+			wantEast, wantNorth, err := before.Scene.DragViewDepth(anchor, .5, .5, .55, .52)
+			if err != nil {
+				t.Fatal(err)
+			}
+			east, north, err := work.dragPlacement(&before.Scene, .5, .5, .55, .52)
+			if err != nil || east != wantEast || north != wantNorth {
+				t.Fatalf("absolute pointer delta %g east, %g north (%v), want %g east, %g north", east, north, err, wantEast, wantNorth)
+			}
+			work.play.poseText = [4]string{"1052", "8988", "-3", "55"}
+			if err := work.submitCoordinates(true); err != nil {
+				t.Fatal(err)
+			}
+			wantShift := maths.V(2, -15, 2)
+			if preview := work.working.preview; preview == nil || preview.scene.Origins[id] != anchor.Add(wantShift) {
+				t.Fatal("preview lost the staged absolute anchor")
+			}
+			if err := document.Save(path); err != nil {
+				t.Fatal(err)
+			}
+			saved, err := os.ReadFile(path)
+			if err != nil {
+				t.Fatal(err)
+			}
+			parsed, err := set.Read(path, saved)
+			if err != nil {
+				t.Fatal(err)
+			}
+			stone := parsed.Things()[0]
+			position, absolute := stone.Position()
+			heading, turned := stone.Heading()
+			if !absolute || position.East() != 1052 || position.North() != 8988 || position.Up() != -3 || !turned || heading != 55 {
+				t.Fatalf("saved position %v, heading %v", position, heading)
+			}
+			after, err := StageSnapshot(context.Background(), path, string(saved), "set")
+			if err != nil {
+				t.Fatal(err)
+			}
+			if got := after.Scene.Origins[id].Sub(anchor); got.Sub(wantShift).Len() > 1e-9 {
+				t.Fatalf("producer staged shift %v, want %v", got, wantShift)
+			}
+			findPlace := func(scene placement.DisplayScene) maths.Subspace {
+				for _, batch := range scene.Batches {
+					if batch.Authored && batch.Author.Collection == "scene.set.things" && batch.Author.Name == "stone" && len(batch.Places) > 0 {
+						return batch.Places[0]
+					}
+				}
+				t.Fatal("absolute ground placement lost its authored geometry")
+				return maths.Subspace{}
+			}
+			original, turnedPlace := findPlace(before.Scene), findPlace(after.Scene)
+			wantTurn := maths.Rotation(maths.YAxis, -25*maths.Degree).Then(original.Orientation)
+			if wantTurn.X.Sub(turnedPlace.Orientation.X).Len() > 1e-9 || wantTurn.Z.Sub(turnedPlace.Orientation.Z).Len() > 1e-9 {
+				t.Fatal("saved heading did not reach producer geometry")
+			}
+			work.undoCamera(work.ui.Window().Context(), false)
+			if document.Text() != source || work.editor.Text() != source {
+				t.Fatal("undo did not restore the exact absolute ground source")
+			}
+		})
 	}
 }

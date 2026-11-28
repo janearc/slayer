@@ -1,0 +1,37 @@
+"$schema": https://github.com/janearc/slayer/schemas/ecosystem-v2.json
+# Same diagnostic translated by [+6862930.645479282, -2228182.686697275, 0]
+# in map units. Amber is 1/10000 of its original center vector so the
+# template's default tail, aimed away from the origin, retains its nominal
+# direction. Decimal coordinates are preserved to their stated precision;
+# renderer floating-point behavior and lighting equivalence are not assumed.
+scene:
+  name: Amber binary local-coordinate diagnostic
+  seed: 271
+  setting: space
+  light: none
+  film: {width: 640, height: 400, rays: 1, exposure: 0.003, wide: 60}
+  cameras:
+    amber:
+      location: {at: [-336.361700718, 97.840552725, 100]}
+      orientation: {look_at: [-686.361700718, 222.840552725, 0]}
+  world:
+    unit: 1000000
+    sky:
+      stars: {seed: 29, share: 0.06, size: 0.5, bright: 0.9}
+      source: eye
+    binaries:
+      pair:
+        generate:
+          primary: {mass: 2.45, age: 1.2e7}
+          companion: {mass: 0.62, temperature: 7400, radius: 0.0122}
+          separation: 9.2
+          eccentricity: 0.16
+          drop: {mass: 0.1, temperature: 3000, age: 1.0e9, distance: 48, phase: 8, made_up: true}
+        drop_at: [6862556.505823282, -2229210.626953275, 0]
+        time: 4
+    bodies:
+      amber:
+        template: hot-jupiter
+        middle: [-686.361700718, 222.840552725, 0]
+        tilt: 17
+        detail: 4

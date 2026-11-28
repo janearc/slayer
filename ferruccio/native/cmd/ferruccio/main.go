@@ -84,9 +84,6 @@ func command() *pzm.Tool {
 			return fmt.Errorf("proof needs --out and no positional arguments")
 		}
 		gesture := call.Value("gesture")
-		if workingGesture(gesture) && call.Value("composition") != "" && call.Value("composition") != "play" {
-			return fmt.Errorf("held working gesture requires Play composition")
-		}
 		if gesture != "" && gesture != "orbit" && gesture != "zoom" && gesture != "undo" && gesture != "move" && gesture != "turn" && !workingGesture(gesture) {
 			return fmt.Errorf("unknown proof gesture %q; choose orbit, zoom, move, turn, undo, working-move, working-look, trackball or travel", gesture)
 		}
@@ -107,6 +104,9 @@ func command() *pzm.Tool {
 		}
 		if gesture == "undo" && call.Value("composition") == "compose" {
 			return fmt.Errorf("undo gesture proof requires --composition observe so the YAML editor can receive Command-Z")
+		}
+		if gesture != "" && gesture != "undo" && call.Value("composition") != "" && call.Value("composition") != "play" {
+			return fmt.Errorf("viewport gesture proof requires Play composition")
 		}
 		if err := validateTheme(call.Value("theme")); err != nil {
 			return err
@@ -239,6 +239,11 @@ func renderRequested(call pzm.Call) bool { return call.On("render") || call.On("
 
 // workingGesture reports whether gesture is one of the proof gestures that
 // move the working view.
+// proofUsesWorkingView keeps placement proof gestures off photographed pixels.
+func proofUsesWorkingView(composition, gesture string) bool {
+	return workingGesture(gesture) || (composition == "play" && gesture != "")
+}
+
 func workingGesture(gesture string) bool {
 	return gesture == "working-move" || gesture == "working-look" || gesture == "trackball" || gesture == "travel"
 }
@@ -412,22 +417,6 @@ func evidenceDirectory(explicit string) string {
 	return filepath.Join(home, "Library", "Application Support", "Ferruccio", "Renders")
 }
 
-// queueDirectory discovers the local shared queue only when it already exists.
-func queueDirectory(explicit string) string {
-	if explicit != "" {
-		return explicit
-	}
-	home, err := os.UserHomeDir()
-	if err != nil {
-		return ""
-	}
-	shared := filepath.Join(home, "mesh", "the-vorrh", "renders", "applications", "azazel", "queue")
-	if info, err := os.Stat(shared); err == nil && info.IsDir() {
-		return shared
-	}
-	return ""
-}
-
 // cacheDirectory reuses the shared cache where it exists; elsewhere it
 // gives this user a private, portable location for reconstructible data.
 func cacheDirectory(explicit string) string {
@@ -446,10 +435,7 @@ func cacheDirectory(explicit string) string {
 }
 
 // sourceShelf detects the shared shelf only when it already exists.
-func sourceShelf(explicit string) string {
-	if explicit != "" {
-		return explicit
-	}
+func sourceShelf() string {
 	home, err := os.UserHomeDir()
 	if err != nil {
 		return ""
@@ -461,13 +447,24 @@ func sourceShelf(explicit string) string {
 	return ""
 }
 
+// isBundleLaunch locates the packaging marker beside the launch executable.
+func isBundleLaunch(executable string) bool {
+	if executable == "" {
+		return false
+	}
+	resources := filepath.Join(filepath.Dir(executable), "..", "Resources")
+	info, err := os.Stat(filepath.Join(resources, "ferruccio-build-owned"))
+	return err == nil && info.Mode().IsRegular()
+}
+
 // isBundledClient distinguishes the launcher's fallback from an explicitly
 // selected operator client, which must remain in force.
 func isBundledClient(client, executable string) bool {
 	if client == "" || executable == "" {
 		return false
 	}
-	return filepath.Clean(client) == filepath.Clean(filepath.Join(filepath.Dir(executable), "..", "Resources", "engine", "azazel"))
+	absolute, err := filepath.Abs(client)
+	return err == nil && absolute == filepath.Join(filepath.Dir(executable), "..", "Resources", "engine", "azazel")
 }
 
 // run shares one real workspace between normal use and the native proof.
@@ -508,10 +505,33 @@ func run(call pzm.Call, file string, proof bool) error {
 	host := gogpu.NewApp(gogpu.DefaultConfig().WithTitle("Ferruccio · Slayer").WithSize(width, height).WithMinSize(minimumWindowWidth, minimumWindowHeight).WithGraphicsAPI(gogpu.GraphicsAPIMetal).WithBackground(proof && call.On("background")))
 	ui := app.New(app.WithWindowProvider(host), app.WithPlatformProvider(host), app.WithEventSource(host.EventSource()), app.WithTheme(appearance.ThemeForSize(16)))
 	executable, _ := os.Executable()
-	work, err := workspace.New(host, ui, workspace.Options{Starter: starter, SuppressAutomaticPreview: proof, PreferQueueClient: isBundledClient(call.Value("azazel"), executable), Evidence: evidence, File: file, Examples: resolved.Value(settings.Examples), Settings: source, Composition: composition, Tools: preview.Tools{Transport: previewTransport(call.Value("preview-transport")), Azazel: call.Value("azazel"), Queue: queueDirectory(resolved.Value(settings.Queue)), Agent: queueAgent(call.Value("agent")), Slayer: resolved.Value(settings.Slayer), Catalogue: call.Value("catalogue"), Game: call.Value("game"), GameHome: call.Value("game-home"), Shelf: sourceShelf(resolved.Value(settings.Shelf)), Cache: cache}})
+	client := call.Value("azazel")
+	transport := previewTransport(call.Value("preview-transport"))
+	bundled := !proof && transport == "azazel" && isBundleLaunch(executable)
+	home, _ := os.UserHomeDir()
+	queue := defaultRenderQueue(home, bundled)
+	tools := preview.Tools{
+		Transport: transport, Azazel: client, Queue: queue.directory,
+		ManageWorker: bundled,
+		Agent:        queueAgent(call.Value("agent")), Slayer: resolved.Value(settings.Slayer),
+		Catalogue: call.Value("catalogue"), Game: call.Value("game"),
+		GameHome: call.Value("game-home"), Shelf: sourceShelf(),
+		Cache: cache,
+	}
+	options := workspace.Options{
+		Starter: starter, SuppressAutomaticPreview: proof,
+		PreferQueueClient: isBundledClient(client, executable),
+		Evidence:          evidence, File: file, Examples: resolved.Value(settings.Examples),
+		Settings: source, Composition: composition, Tools: tools,
+	}
+	if queue.private {
+		options.PrepareQueue = queue.prepare
+	}
+	work, err := workspace.New(host, ui, options)
 	if err != nil {
 		return err
 	}
+	defer work.Close()
 	if !proof {
 		work.InstallMenu()
 	}
@@ -519,7 +539,7 @@ func run(call pzm.Call, file string, proof bool) error {
 	if display == "" {
 		display = "rendered"
 	}
-	if proof && workingGesture(call.Value("gesture")) && display == "rendered" {
+	if proof && display == "rendered" && proofUsesWorkingView(composition, call.Value("gesture")) {
 		display = "edges"
 	}
 	if err := work.SetWorkingMode(display); err != nil {
@@ -561,7 +581,7 @@ func run(call pzm.Call, file string, proof bool) error {
 					_, diagnostic := work.ProofOutput()
 					proofError = fmt.Errorf("Ferruccio proof exceeded four minutes: %s", diagnostic)
 					finished = true
-					host.Quit()
+					work.QuitDesktop()
 				}
 				return
 			}
@@ -581,7 +601,7 @@ func run(call pzm.Call, file string, proof bool) error {
 					if err := startRender(); err != nil {
 						proofError = err
 						finished = true
-						host.Quit()
+						work.QuitDesktop()
 						return
 					}
 				}
@@ -609,7 +629,7 @@ func run(call pzm.Call, file string, proof bool) error {
 			if err := work.ProofSettingsClick(control); err != nil {
 				proofError = err
 				finished = true
-				host.Quit()
+				work.QuitDesktop()
 				return
 			}
 			ready = time.Time{}
@@ -632,7 +652,7 @@ func run(call pzm.Call, file string, proof bool) error {
 			}
 			proofError = fmt.Errorf("working viewport: %s", diagnostic)
 			finished = true
-			host.Quit()
+			work.QuitDesktop()
 			return
 		}
 		if workingGesture(gesture) {
@@ -640,7 +660,7 @@ func run(call pzm.Call, file string, proof bool) error {
 			if err != nil {
 				proofError = err
 				finished = true
-				host.Quit()
+				work.QuitDesktop()
 				return
 			}
 			if !done {
@@ -650,7 +670,7 @@ func run(call pzm.Call, file string, proof bool) error {
 			if renderRequested(call) && output == "" {
 				proofError = fmt.Errorf("post-release refinement missing: %s", diagnostic)
 				finished = true
-				host.Quit()
+				work.QuitDesktop()
 				return
 			}
 			receipt := map[string]any{
@@ -681,7 +701,7 @@ func run(call pzm.Call, file string, proof bool) error {
 				proofError = json.NewEncoder(call.Out()).Encode(receipt)
 			}
 			finished = true
-			host.Quit()
+			work.QuitDesktop()
 			return
 		}
 		if gesture != "" {
@@ -691,27 +711,29 @@ func run(call pzm.Call, file string, proof bool) error {
 				if initialPreview == "" {
 					proofError = fmt.Errorf("gesture proof has no accepted initial preview: %s", initialDiagnostic)
 					finished = true
-					host.Quit()
+					work.QuitDesktop()
 					return
 				}
 				initialText = work.ProofText()
-				action := gesture
-				if action == "undo" {
-					action = "orbit"
-					if composition == "play" {
-						action = "move"
-					}
+				var gestureErr error
+				switch {
+				case gesture == "undo" && composition == "observe":
+					gestureErr = work.ProofSourceCameraEdit()
+				case gesture == "undo":
+					gestureErr = work.ProofGesture("move")
+				default:
+					gestureErr = work.ProofGesture(gesture)
 				}
-				if err := work.ProofGesture(action); err != nil {
-					proofError = err
+				if gestureErr != nil {
+					proofError = gestureErr
 					finished = true
-					host.Quit()
+					work.QuitDesktop()
 					return
 				}
 				if work.ProofText() == initialText {
 					proofError = fmt.Errorf("proof gesture did not change the YAML draft")
 					finished = true
-					host.Quit()
+					work.QuitDesktop()
 					return
 				}
 				gestureText = work.ProofText()
@@ -724,7 +746,7 @@ func run(call pzm.Call, file string, proof bool) error {
 				if err := work.ProofUndo(initialText); err != nil {
 					proofError = err
 					finished = true
-					host.Quit()
+					work.QuitDesktop()
 					return
 				}
 				gestureStage = 2
@@ -736,14 +758,14 @@ func run(call pzm.Call, file string, proof bool) error {
 				if output == "" {
 					proofError = fmt.Errorf("undo proof produced no restored preview: %s", diagnostic)
 					finished = true
-					host.Quit()
+					work.QuitDesktop()
 					return
 				}
 				matches, err := workspace.ProofPreviewsEqual(initialPreview, output)
 				if err != nil || !matches {
 					proofError = fmt.Errorf("undo proof preview does not match the initial render: matches=%t: %v", matches, err)
 					finished = true
-					host.Quit()
+					work.QuitDesktop()
 					return
 				}
 				undoImageMatches = true
@@ -752,7 +774,7 @@ func run(call pzm.Call, file string, proof bool) error {
 				if gesturePreview == "" || work.ProofText() == initialText {
 					proofError = fmt.Errorf("camera gesture proof produced no changed rendered preview")
 					finished = true
-					host.Quit()
+					work.QuitDesktop()
 					return
 				}
 			}
@@ -761,20 +783,20 @@ func run(call pzm.Call, file string, proof bool) error {
 		output, diagnostic := work.ProofOutput()
 		if (renderRequested(call) || call.Value("starter") != "") && output == "" {
 			proofError = fmt.Errorf("render proof produced no current preview: %s", diagnostic)
-			host.Quit()
+			work.QuitDesktop()
 			return
 		}
 		hovered := ""
 		if call.On("hover") {
 			if hovered, proofError = work.ProofHover(); proofError != nil {
-				host.Quit()
+				work.QuitDesktop()
 				return
 			}
 		}
 		picture, err := work.Export()
 		if err != nil || picture == nil {
 			proofError = fmt.Errorf("widget export failed: %v", err)
-			host.Quit()
+			work.QuitDesktop()
 			return
 		}
 		receipt := map[string]any{"build": build, "native_window_opened": !backgroundApplied, "native_window_created": true, "window_hidden_at_capture": backgroundApplied, "requested_backend": "metal", "composition": composition, "theme": appearance.SelectedTheme(), "capture": "GoGPU UI widget-tree export; not an OS window screenshot", "width": picture.Bounds().Dx(), "height": picture.Bounds().Dy(), "source_file": work.DocumentName(), "preview_file": output, "full_render": call.On("full"), "display": display, "working": work.WorkingStats()}
@@ -797,7 +819,7 @@ func run(call pzm.Call, file string, proof bool) error {
 		if proofError == nil {
 			proofError = json.NewEncoder(call.Out()).Encode(receipt)
 		}
-		host.Quit()
+		work.QuitDesktop()
 	})
 	if err := desktop.Run(host, ui); err != nil {
 		return err

@@ -1,7 +1,7 @@
-# Composition and taxonomy: work in progress
+# gate composition implementation record
 
-Base: rc-v0.1.5 at 94748beb. The checked-in design describes intent;
-this note records what has actually been built and what remains.
+Base: rc-v0.1.5 at 94748beb. This records the staged gate fixture and its
+checks. For the current recipe entry point, see [sets](sets.md).
 
 A set can read an inline or external composition, resolve numeric parameters,
 validate it and stage its parts. External composition bytes are included in
@@ -44,29 +44,6 @@ passed through the Game test lane, including space-scene staging. These checks d
 project's coverage, mutation or anti-test gates. No full review or release
 gate has been run.
 
-Superseded numbered squid, Hatz, Purussaurus, pliosaur and walrus studies
-and their tests were removed after checking in-repository callers; the active
-models remain. `NewHumboldtSquid` selects a checked profile and uses the
-shared squid and mollusc construction. Checked squid profiles are usable in
-set recipes and catalogue descriptors, with an explicit phase in radians; the
-catalogue includes a Humboldt squid. Profiles can vary size, mantle radius,
-head width, fin span, arm and tentacle lengths, and coat. They share the
-illustrative pulse and do not validate other species' anatomy.
-
-Checked profile books now supply the migrated seasonal plants, conifers,
-cacti, ferns, ray-finned fish, birds, pinnipeds and the Allosaurus theropod
-study. Their migrated scenes and catalogue cards select profiles; the former
-species kind names are not public factory or set aliases. A private fixed
-candidate list preserves the default scavenged cluster's historical seeded
-draws without making those labels authorable kinds. City and planted-tower
-recipes can also freeze an explicitly supplied tree book. The shared recursive
-branching mechanism is separate from plant taxonomy.
-
-This is still an increment, not completion of the proposed tree. The fish
-builder covers the current bony ray-finned forms; the theropod scaffold is the
-Allosaurus study, not a general dinosaur builder. The orca, pterosaur, crocodylian and other models need further work where
-real shared boundaries can reduce duplication while preserving anatomical
-variation. Profile YAML and
-shared numerical construction policies remain in Slayer, including embedded
-defaults; a separate models repository has not been created or populated.
-The removed study functions were exported; their only user confirmed the removal.
+For the profile migrations that accompanied this work, see the
+[constructor hierarchy](manufacture-constructor-hierarchy.md) and the
+[historical review](constructor-hierarchy-review.md).

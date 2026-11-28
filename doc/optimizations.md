@@ -23,44 +23,12 @@ Turning optional shortcuts off establishes a reference for that model,
 not a complete physical solution. [Modes](modes.md) keeps these choices
 separate.
 
-## So you want to produce content for YouTube
+## Choose a faster film workflow
 
-Most of slayer is built so that a frame can be checked: the exact path,
-its controls and its proofs. Gonzo mode is the other half. It is for a
-film that has to look right, arrive quickly and go on YouTube, and it is
-honest that it is an approximation. It is named for Hunter S. Thompson's
-journalism, where the reporter is part of the story. Here the tracer is
-part of the picture too.
-
-Gonzo mode works differently from the rest of the renderer. The exact
-path answers each pixel by itself. Gonzo mode shares work between pixels
-and frames, and it guesses where light is coming from before it checks.
-That is why it is fast, and why it never runs unless the job asks for it.
-It is not a flag of its own.
-
-A job asks for it by choosing the fast path
-in [modes](modes.md): `renderer: gpu`, `vibes: on` and a short, low-ray
-draft first. With `vibes: off`, nothing below changes a pixel.
-
-### What it uses today
-
-- **Native Metal traversal.** Primary and shadow queries go through the
-  GPU's own ray-tracing hardware and acceleration structures. See
-  [native Metal mesh traversal](#native-metal-mesh-traversal).
-- **`lamp-store` and `sky-looks`.** Lamp light is baked into a per-frame
-  grid for mist and smoke, and sky directions are shared across a pixel's
-  rays. See [store illumination under explicit
-  approximations](#store-illumination-under-explicit-approximations). The
-  lamp store holds at most sixteen lamps.
-- **Section reuse.** A film reuses the sections of the scene that did not
-  change between frames. See [reuse sections whose scene did not
-  change](#reuse-sections-whose-scene-did-not-change).
-
-### Before you publish
-
-Gonzo frames are still slayer's frames. Caption them as rendered, not as
-measured. Review the encoded film with its sound. Slayer does not upload
-anything; you publish it yourself.
+start with the [film preview](modes.md#film-preview) and measure a
+short shot. native traversal accelerates mesh queries. lamp-store,
+shared sky looks and ReSTIR change the lighting estimate. retained
+buffers and section reuse depend on what changes between frames.
 
 ## Construct geometry once and share it
 
@@ -245,7 +213,8 @@ integration effort rather than a pilot ray's guess about its neighbours.
 | incident-sky grid | sky visibility/extinction queries at every weather sample | native per-frame world grid; lamps stay direct; interpolation and boundary blend |
 | `lamp-store` | lamp shadow/volume march at every boxed-medium sample | per-lamp grid baked for the frame; cell-scale mist shadow softening |
 | beam axis table in lamp store | repeated narrow-beam source evaluation | transverse beam profile stays analytic; bounded axial sampling |
-| `sky-looks` | sixteen surface-sky looks for every pixel ray | shares sixteen directions across pixel rays; noisier per-ray estimate |
+| `sky-looks` | sixteen surface-sky looks for every pixel ray | shares sixteen directions across pixel rays, with a noisier per-ray estimate |
+| [ReSTIR](restir.md) | repeated primary-hit direct-light sampling | reuses light candidates across samples and frames, with shadow bias and temporal lag |
 
 These store different quantities and have different domains. The optional
 incident-sky grid is bounded to 262144 RGB nodes, with direct evaluation
@@ -259,8 +228,9 @@ lighting: sampling their neighbouring dark grid cells would create patches.
 
 It conflicts with cached smoke lighting. `sky-looks` requires the lamp-store
 kernel. At one ray per pixel it saves nothing; with four it assigns four
-of the sixteen directions to each ray. Both are selected by `fastlight`
-or `vibes`, with per-shortcut overrides. There is no lamp store on disk.
+of the sixteen directions to each ray. both umbrellas also request ReSTIR, which takes priority. use
+`shortcuts: {restir: off}` for the lamp store and shared sky looks.
+the lamp store stays on the device.
 
 The [fast-light study](fast-light.md) gives its error measurements and
 workload context. No universal whole-film speedup follows from them.
@@ -319,8 +289,7 @@ and titles. Preserve unclipped raw light if later exposure changes matter.
 
 ## Measure the complete job
 
-Record revision, device, CPU allowance, input/seed, dimensions, rays per
-axis, backend, approximation flags and cold/warm state. Separate host
+Record revision, device, CPU allowance, input/seed, dimensions, sampling, backend, approximation flags and cold/warm state. Separate host
 construction/encoding, device bake, trace dispatch/readback, finishing,
 development and encoding. A GPU timestamp is not another wall interval
 to add to wall time; overlapping dispatch timestamps can overlap too.

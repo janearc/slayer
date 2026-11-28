@@ -46,8 +46,10 @@ func (reading reader) profileFile(file string) (string, []byte, error) {
 func (reading reader) animalRecipe(name, block *yaml.Node) error {
 	var family, file, species, pose, representation, study string
 	var count int
+	var clip manufacture.BioformClipSpec
 	var seconds, phase float64
 	if err := reading.keys(block, map[string]step{
+		"pose-clip": reading.poseClip(&clip),
 		"animal": reading.block(map[string]step{
 			"family": reading.word(&family, "fish", "bird", "theropod", "pinniped", "squid", "whale", "reptile", "snake", "sauropod"),
 			"file":   reading.text(&file), "species": reading.text(&species),
@@ -83,6 +85,10 @@ func (reading reader) animalRecipe(name, block *yaml.Node) error {
 		return fmt.Errorf("%s: animal recipe %s needs family, file and species", reading.file, name.Value)
 	}
 	spec := valueNode(block, "animal")
+	hasClip := says(block, "pose-clip")
+	if hasClip && (family != "whale" || says(spec, "pose") || representation == "bones") {
+		return reading.refuse(block, "an animal pose clip needs whale skin and no built-in pose")
+	}
 	var path, builtin string
 	var raw []byte
 	var err error
@@ -122,11 +128,18 @@ func (reading reader) animalRecipe(name, block *yaml.Node) error {
 	if err != nil {
 		return fmt.Errorf("%s: %w", path, err)
 	}
+	if hasClip {
+		row, err = manufacture.WithBioformClip(row, clip)
+		if err != nil {
+			return reading.refuse(block, "%v", err)
+		}
+	}
 	profilePath := path
 	if builtin != "" {
 		profilePath = ""
 	}
 	reading.set.recipes[name.Value] = Recipe{kind: "animal-profile", profileFamily: family, profileSpecies: species,
-		profileKind: &row, profileDigest: sha256.Sum256(raw), profilePath: profilePath, profileBuiltin: builtin}
+		profileKind: &row, profileDigest: sha256.Sum256(raw), profilePath: profilePath, profileBuiltin: builtin,
+		poseClip: hasClip}
 	return nil
 }

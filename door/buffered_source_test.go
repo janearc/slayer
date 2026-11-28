@@ -28,7 +28,7 @@ func TestFrozenJobUsesOriginalDirectoryForRelativeInputs(t *testing.T) {
 }
 
 func TestFrozenSetUsesBufferInsteadOfDisk(t *testing.T) {
-	raw, err := os.ReadFile("../ferruccio/examples/ferruccio-playground.yaml")
+	raw, err := os.ReadFile("../sets/ferruccio-playground.yaml")
 	if err != nil {
 		t.Fatal(err)
 	}

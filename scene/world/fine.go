@@ -65,7 +65,7 @@ func (f *fineness) Within(p maths.Vec, footprint float64) maths.Light {
 	if f.rungs > 0 || footprint <= 0 {
 		return f.At(p)
 	}
-	want := tilePixels * footprint
+	want := tilePixels * angular(p, footprint)
 	rungs := 0
 	for s := f.w.Tiling.Spacing(); s > want && rungs < 40; s /= 2 {
 		rungs++

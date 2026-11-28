@@ -1,4 +1,4 @@
-# Constructor hierarchy for review
+# constructor hierarchy proposal and review record
 
 The proposal and historical inventory were written against Slayer checkout
 `parts-compositions-taxonomy` at `fcaae65f`. The tree below is a
@@ -6,49 +6,9 @@ proposal, not a claim that all of its constructors or directories exist.
 Names beginning with `New` in the proposed tree are working names. A common
 boundary must do real shared work and earn its cost by reducing code.
 
-## Current implementation and remaining work
-
-Checked species books and constructors exist for seasonal plants, conifers,
-cacti, ferns, kelp, ray-finned fish, birds, pinnipeds, whales, theropods,
-reptile studies and squid. Their authored scenes and catalogue cards use
-profile recipes. The former plant, alga and animal factory-kind aliases are
-retired. Catalogue card identifiers and the private scavenged-cluster
-population may retain historical labels; they select profile recipes and
-are not factory kinds.
-
-The squid path is `NewHumboldtSquid` -> the checked squid profile ->
-`squid.NewSquid` -> `molluscs.NewMollusc`. Squid profiles supply mantle size,
-five anatomy proportions, coat and mottle. The mantle, appendages and
-illustrative pulse share one scaffold; the profiles are not validated
-representations of every squid species.
-
-Pinniped profiles select skeleton counts, posing and supported seal or walrus
-outlines. The existing walrus head, limbs, tusks and hide, and the separate
-drawn-seal studies, retain their own anatomy. Orca profiles supply body
-stations, swim-cycle length, skin sheen and marking colours; fins, flukes,
-face, marking placement and skeletal details remain tied to the orca study. `NewFish` currently supports
-ray-finned forms; `NewBird` uses the existing bird rig. The theropod book
-supports the Allosaurus study, and the reptile book selects the distinct
-pliosaur, crocodylian and pterosaur studies. These are not universal bodies
-for their larger clades.
-
-Fern profiles now supply crown, stalk and leaflet proportions; their family
-recipe and the actual depth-first limb growth engine live in `plants/ferns`
-and `branching`. Seasonal plants use the separate bounded breadth-first
-branching expansion, and conifer shoots retain their own indexed depth-first
-planner. Their order and seed rules differ. Kelp is under algae, not plants.
-
-The bird profile reader, skeleton, feathers, poses and geometry now live in
-the birds family package, with a root adapter for factory kinds. The other
-profile books have taxonomic paths, but much animal geometry and several plant
-constructors and readers remain in the root `manufacture` package. The shared
-vertebrate, mammal and other ancestor constructors in the proposal below are not yet implemented; they should be added only where real
-common anatomy can replace code. This migration is not complete. Embedded
-model books and shared construction policies still live in Slayer; checked
-file-based readers and snapshot keys prepare for, but do not create, a
-separate models repository. See [plant recipes](plant-profile-recipes.md),
-[animal recipes](animal-profile-recipes.md), and
-[alga recipes](alga-profile-recipes.md).
+The [constructor hierarchy](manufacture-constructor-hierarchy.md) traces
+implemented paths. This review records the proposal, the inventory at its
+reviewed commit and the decisions that informed the migration.
 
 ## The intended shape
 

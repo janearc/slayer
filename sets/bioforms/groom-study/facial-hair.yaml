@@ -1,0 +1,51 @@
+# The face looks south. Coordinates are east, north and up.
+"$schema": https://github.com/janearc/slayer/schemas/ecosystem-v2.json
+scene:
+  name: Native eyebrow and eyelash study
+  seed: 27
+  setting: space
+  light: none
+  set:
+    things:
+      adult:
+        kind: adult-human-facial-hair
+        seed: 27
+        heading: {value: 0, unit: deg}
+        position:
+          east: {value: 0, unit: m}
+          north: {value: 0, unit: m}
+          up: {value: 0, unit: m}
+  film: {width: 640, height: 360, rays: 4, exposure: 1, wide: 29}
+  cameras:
+    front:
+      title: Both brows and lids from the front
+      location: {at: [0, -0.360, 1.597]}
+      orientation: {look_at: [0, -0.070, 1.597]}
+    three-quarter:
+      title: Left brow and lashes from the front quarter
+      location: {at: [0.210, -0.271, 1.597]}
+      orientation: {look_at: [0.023, -0.070, 1.597]}
+    profile:
+      title: Left lash curl and root clearance from the side
+      location: {at: [0.278, -0.072, 1.597]}
+      orientation: {look_at: [0.028, -0.072, 1.597]}
+  world:
+    unit: 1
+    sky:
+      horizon: {srgb_linear: [0.090, 0.090, 0.090]}
+      zenith: {srgb_linear: [0.060, 0.060, 0.060]}
+      ground: {srgb_linear: [0.040, 0.040, 0.040]}
+      source: eye
+    suns:
+      key:
+        toward: [-0.44, -0.80, 0.48]
+        colour: {srgb_linear: [1.08, 1.04, 1.00]}
+        source: eye
+      fill:
+        toward: [0.82, -0.56, 0.25]
+        colour: {srgb_linear: [0.36, 0.38, 0.42]}
+        source: eye
+      rim:
+        toward: [0.36, 0.64, 0.42]
+        colour: {srgb_linear: [0.51, 0.51, 0.51]}
+        source: eye

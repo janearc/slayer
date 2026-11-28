@@ -10,8 +10,8 @@ only the parameters its registered builder declares.
 
 | Entry | What it constructs | Source and fuller guide |
 |---|---|---|
-| `slayer draw JOB` with a `scene.set` job | Reads a checked set and sends it through the normal scene/session pipeline. | [`door`](../door/README.md), [`job`](../job/README.md), [`set.Read`](../set/read.go), [render pipeline](../OPERATION.md), [`hillside`](../hillside/run.go) |
-| `slayer render SET` | Legacy direct set-rendering verb; it is not the named-scene interface. | [`cmd/slayer`](../cmd/slayer/main.go), [`render`](../cmd/slayer/render.go) |
+| `slayer draw SET` or `slayer draw JOB` with `scene.set` | reads and stages the set, then draws it with the chosen renderer. | [sets](sets.md), [jobs](../job/README.md), [`set.Read`](../set/keys.go) |
+| `slayer assess FILE` | runs the preparation checks and reports what drawing would write. | [`assess`](../door/assess.go) |
 | `slayer draw JOB` with `scene.named` | Looks up a scene registered in the running Slayer process, validates its `with` map, then builds its world or map output. | [`scene/named`](../scene/named/README.md), [`job.Scene`](../job/scene.go), [`door`](../door/README.md) |
 | `slayer list scenes` | Lists the runtime registry; it is the authority for names present in that binary. | [`scene/named.All`](../scene/named/named.go), [`door`](../door/README.md) |
 
@@ -53,8 +53,8 @@ and stage determine whether a validated feature is actually drawable.
 
 | YAML surface | What it can build | Source |
 |---|---|---|
-| `scene.recipes`, `set.things`, `set.stands` | Reusable manufactory recipes and placed catalogue kinds; recipe construction is separate from placement. | [`set/recipes.go`](../set/recipes.go), [`set/world.go`](../set/world.go), [constructor reference](constructor-reference.md) |
-| `set.bounded_box`, `set.assets`, `set.texts` | Bounds, declared assets, and scene text/labels around the placed objects. | [`set/scene.go`](../set/scene.go), [`set/text.go`](../set/text.go) |
+| `scene.recipes`, `scene.set.things`, `scene.set.stands` | reusable manufactory recipes and placed catalogue kinds. | [`set/recipes.go`](../set/recipes.go), [`set/world.go`](../set/world.go), [constructor reference](constructor-reference.md) |
+| `scene.set.bounded_box`, `scene.set.assets`, `scene.set.texts` | bounds, declared assets and scene text. | [`set/scene.go`](../set/scene.go), [`set/text.go`](../set/text.go) |
 | `scene.world.materials`, `boxes`, `spheres` | Named materials plus the built-in box and sphere pieces; references are checked by the reader. These are not arbitrary `thing.Thing` literals. | [`set/pieces.go`](../set/pieces.go), [`set/shapes.go`](../set/shapes.go) |
 | `scene.world.imports` | Checked external geometry placements with explicit material bindings, provenance, and license; mesh faces are not authored inline in YAML. | [`set/imports.go`](../set/imports.go), [`oakland`](../oakland/api.go) |
 | `scene.world.lamps`, `spots`, `floods`, `suns`, `sky` | The set format's light emitters and sky descriptions. | [`set/pieces.go`](../set/pieces.go), [`set/spots.go`](../set/spots.go) |
@@ -74,12 +74,9 @@ Set YAML has no inline constructor for `shape.Tube`, arbitrary triangles,
 registered recipe, the checked import path, or a Go-authored scene as
 appropriate.
 
-The `setting: space` subset has its own reader and stage; a key present in a
-schema is not by itself evidence that a stage draws it.
-
-See the implemented support and refusals in [`set/space.go`](../set/space.go),
-[`set/space_things.go`](../set/space_things.go), and
-[`session/space.go`](../session/space.go).
+see [sets in space](sets.md#a-scene-in-space) for the supported placements
+and [`session/afloat.go`](../session/afloat.go) for the stage. the reader's
+reserved features are checked by [`session/undrawn.go`](../session/undrawn.go).
 
 ## Direct Go surface geometry
 

@@ -8,21 +8,29 @@ The rectangles are in the complete frame's coordinates.
 
 ## Running a set
 
-One command reads the set, validates every rectangle and requested setting,
-then draws the regions and prints a report. Its verb and flags are declared
-through puzzlemouth.
+use `slayer compare-regions SET` with a frozen input snapshot.
+the comparison set names a job relative to the snapshot and each
+rectangle in full-frame pixels. supply:
 
-The command records the effective frame dimensions,
-camera, time, renderer, sampling, threshold and development settings. It
-reports scene staging and each draw separately, including elapsed wall time;
-the total includes staging and sheet creation. A failed draw or missing
-reference is an error, not a partial success presented as a complete set.
+- `--snapshot`, `--inputs` and `--complete-inputs` for the snapshot
+  and its complete list of stable input paths.
+- `--width`, `--height`, `--rays` and `--reference-rays` for the full
+  frame and both per-side sample counts. the reference count must
+  exceed the candidate count and be at most 64.
+- `--references` for an existing absolute directory and `--out`
+  for a new absolute output directory, both outside the snapshot.
 
-The output contains the candidate and reference pictures, their measurements,
-and one labelled sheet made with `interfaces/sheet`. Each region is placed
-beside its reference. The sheet is for visual judgment; the numbers do not
-decide whether the picture is good. Inspect the sheet before placing it and
-its explanatory note on the review page.
+set `SLAYER_SHELF` inside the snapshot and keep `SLAYER_CACHE` stable
+and outside it. the command depends on the supplied input list.
+`--dry-run` checks the request without drawing. use the
+[region limits](frame-regions-plan.md#supported-draws) and
+[shared queue](azazel.md#submit-work) for the render.
+
+the result directory contains `report.json` with raw-light
+comparisons and draw timings, `sheet.png` with candidate and
+reference pairs, and `references.json` with the reference plan.
+use `--reference-plan` to pin a previous plan and `--repeat` to
+compare up to eight candidate draws with the first.
 
 ## What the numbers say
 
@@ -83,9 +91,6 @@ Draw the reference at increasing sampling and repeat it to measure both
 convergence and run-to-run variation. Record the samples, differences and
 identities; a higher count alone does not prove convergence.
 
-Run the set at
-1, 4 and 16 rays and compare the numbers and sheet against the corresponding
-whole-frame appearances. If the figures do not follow the visible change,
-say so and investigate the measure rather than declaring a successful
-prediction. A final visual judgment belongs to the person reviewing the
-sheet.
+see [the street region measurements](region-work-in-progress.md)
+for cases where different measures did and did not follow sampling
+changes.

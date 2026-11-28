@@ -25,6 +25,8 @@ type cameraBall struct {
 	radius                 float64
 	yaw, pitch             float64
 	displacement           maths.Vec
+	mapStart               *authoredPlan
+	mapFrame               authoredPlan
 }
 
 // bounds returns the screen rectangle of the ball control inside view.
@@ -112,12 +114,20 @@ func (ball *cameraBall) Event(ctx widget.Context, e event.Event) bool {
 	if !finitePoint(mouse.GlobalPosition) || !ball.work.workingCurrent() {
 		return true
 	}
-	if ball.translation && ball.work.state.document.Kind() != "set" {
+	kind := ball.work.state.document.Kind()
+	if ball.translation && kind != "set" && kind != "job" {
 		return true
 	}
-	ball.work.beginWorking()
-	if ball.work.working.gesture == nil {
-		return true
+	if plan := ball.work.working.plan; plan != nil && !ball.work.photographVisible() {
+		ball.mapStart, ball.mapFrame = plan, *plan
+	} else {
+		if !ball.work.cameraInspectionOnly() && ball.work.refuseCameraGesture() {
+			return true
+		}
+		ball.work.beginWorkingGesture(true)
+		if ball.work.working.gesture == nil {
+			return true
+		}
 	}
 	c, r := ball.disc(view.Bounds())
 	ball.center = geometry.Pt(c.X+mouse.GlobalPosition.X-mouse.Position.X, c.Y+mouse.GlobalPosition.Y-mouse.Position.Y)
@@ -147,6 +157,10 @@ func spherePoint(p, c geometry.Point, r float64) maths.Vec {
 
 // move maps the sphere rotation into the canonical upright camera coordinates.
 func (ball *cameraBall) move(constrain bool) {
+	if ball.mapStart != nil {
+		ball.moveMap(constrain)
+		return
+	}
 	if ball.translation {
 		ball.moveTravel(constrain)
 		return
@@ -156,6 +170,7 @@ func (ball *cameraBall) move(constrain bool) {
 	if base == nil {
 		return
 	}
+	started := workingClock()
 	end := ball.current
 	if constrain {
 		if math.Abs(float64(end.X-ball.start.X)) >= math.Abs(float64(end.Y-ball.start.Y)) {
@@ -201,14 +216,26 @@ func (ball *cameraBall) move(constrain bool) {
 	scene := copyDisplay(base)
 	scene.Eye = *eye
 	live.scene, live.dirty = scene, true
+	live.timing.moved(started)
 	ball.work.invalidate()
 }
 
 // finish ends the drag. It commits the camera edit when commit is set, and
 // otherwise leaves the document as it was.
 func (ball *cameraBall) finish(ctx widget.Context, commit bool) {
-	before := ball.work.state.document.Text()
-	if commit {
+	if ball.mapStart != nil {
+		ball.finishMap(commit)
+		if capture, ok := ctx.(widget.PointerCapturer); ok {
+			capture.ReleasePointer(ball.work.viewer)
+		}
+		return
+	}
+	inspection := ball.work.cameraInspectionOnly()
+	var before string
+	if !inspection {
+		before = ball.work.state.document.Text()
+	}
+	if !inspection && commit {
 		if ball.translation {
 			delta := ball.displacement
 			ball.work.problem(ball.work.moveCamera(delta.X, -delta.Z, delta.Y))
@@ -220,12 +247,17 @@ func (ball *cameraBall) finish(ctx widget.Context, commit bool) {
 	if capture, ok := ctx.(widget.PointerCapturer); ok {
 		capture.ReleasePointer(ball.work.viewer)
 	}
+	if inspection {
+		ball.work.finishCameraInspection(commit)
+		return
+	}
 	ball.work.endWorking(before != ball.work.state.document.Text())
 	ball.work.invalidate()
 }
 
 // Draw projects latitude/longitude and world axes through the actual camera pose.
 func (ball *cameraBall) Draw(canvas widget.Canvas, view geometry.Rect) {
+	plan := ball.work.working.plan
 	b := ball.bounds(view)
 	// Distinct instrument clips retain image-before-overlay order in gg's
 	// GPU scissor groups, which otherwise bucket images after shape paths.
@@ -243,7 +275,13 @@ func (ball *cameraBall) Draw(canvas widget.Canvas, view geometry.Rect) {
 	scene := ball.work.working.scene
 	if scene != nil {
 		project := func(p maths.Vec) (geometry.Point, bool) {
-			q := scene.Eye.Orientation.In(p)
+			var q maths.Vec
+			if plan != nil {
+				x, y := plan.rotate(p.X, p.Z)
+				q = maths.V(x, -y, p.Y)
+			} else {
+				q = scene.Eye.Orientation.In(p)
+			}
 			return geometry.Pt(c.X+float32(q.X)*r, c.Y-float32(q.Y)*r), q.Z >= -.001
 		}
 		curve := func(point func(float64) maths.Vec, ink widget.Color) {
@@ -305,6 +343,12 @@ func (ball *cameraBall) Draw(canvas widget.Canvas, view geometry.Rect) {
 		text = fmt.Sprintf("%+.0f°  %+.0f°", ball.yaw, ball.pitch)
 		if ball.translation {
 			text = fmt.Sprintf("%.2f m", ball.displacement.Len())
+		}
+	}
+	if plan != nil && scene != nil {
+		text = "Rotate map"
+		if ball.translation {
+			text = "Pan / Shift zoom"
 		}
 	}
 	canvas.DrawText(text, label, ball.work.size, appearance.Ink, false, widget.TextAlignCenter)

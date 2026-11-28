@@ -6,10 +6,12 @@ import (
 	"github.com/janearc/slayer/maths"
 )
 
-// displayNear is how close to the eye, in metres, a thing still counts as in
-// front of it when its bounds are projected. It is the near plane the working
-// view draws with.
-const displayNear = .05
+// DisplayNear and DisplayFar are the working view's clip depths in metres
+// along the camera's forward axis.
+const (
+	DisplayNear = .05
+	DisplayFar  = 100000
+)
 
 // defaultWide is the field of view, in radians, a lens with none says.
 const defaultWide = 60 * maths.Degree
@@ -63,7 +65,17 @@ func (scene *DisplayScene) PickAt(x, y float64) (DisplayHit, bool) {
 			found = DisplayHit{ID: object.ID, Name: object.Name, Point: point, Distance: worldDistance, Part: object.Mesh.partAt(local)}
 		}
 	}
-	if hit, ok := scene.batchHit(ray, nearest); ok {
+	// Convert the camera's depth limits to distances along this pixel's ray.
+	// An off-axis ray travels further than a centre ray to reach either clip.
+	eyeScale := scene.Eye.Scale
+	if eyeScale == 0 {
+		eyeScale = 1
+	}
+	depthPerMetre := ray.Dir.Dot(scene.Eye.Forward()) / eyeScale
+	if depthPerMetre <= 0 || !displayFinite(depthPerMetre) {
+		return found, found.ID != ""
+	}
+	if hit, ok := scene.batchHit(ray, DisplayNear/depthPerMetre, min(nearest, DisplayFar/depthPerMetre)); ok {
 		found = hit
 	}
 	return found, found.ID != ""
@@ -210,7 +222,7 @@ func (scene *DisplayScene) eyeCorners(at maths.Subspace, low, high maths.Vec) [8
 // front of the near plane, where the eye looks along minus z. It reports
 // false when none of it is.
 func clipNear(a, b maths.Vec) (maths.Vec, maths.Vec, bool) {
-	depthA, depthB := -a.Z-displayNear, -b.Z-displayNear
+	depthA, depthB := -a.Z-DisplayNear, -b.Z-DisplayNear
 	switch {
 	case depthA < 0 && depthB < 0:
 		return a, b, false
@@ -226,6 +238,12 @@ func clipNear(a, b maths.Vec) (maths.Vec, maths.Vec, bool) {
 // on the picture: x from the left and y from the top, as fractions. It is
 // the inverse of the eye ray for a pixel.
 func (scene *DisplayScene) project(point maths.Vec) (float64, float64) {
+	half, aspect := scene.projectionShape()
+	across, above := point.X/-point.Z, point.Y/-point.Z
+	return (across/half + 1) / 2, (1 - above*aspect/half) / 2
+}
+
+func (scene *DisplayScene) projectionShape() (half, aspect float64) {
 	wide := scene.Lens.Wide
 	if !(wide > 0 && wide < math.Pi) {
 		wide = defaultWide
@@ -234,8 +252,5 @@ func (scene *DisplayScene) project(point maths.Vec) (float64, float64) {
 	if !(pixel > 0) {
 		pixel = 1
 	}
-	half := math.Tan(wide / 2)
-	aspect := float64(scene.Width) * pixel / float64(scene.Height)
-	across, above := point.X/-point.Z, point.Y/-point.Z
-	return (across/half + 1) / 2, (1 - above*aspect/half) / 2
+	return math.Tan(wide / 2), float64(scene.Width) * pixel / float64(scene.Height)
 }

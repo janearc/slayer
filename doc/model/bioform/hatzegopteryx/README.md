@@ -1,5 +1,36 @@
 # Hatzegopteryx
 
+The optional `detailed-plain` variant uses the same geometry and pose as
+`detailed` but omits the authored streaked membrane paint while retaining
+the mottled hide.
+This is an artistic compromise using the GPU's existing support for unpainted
+posed meshes; it does not implement rest-space texture lookup. Its renderer
+compatibility and appearance have not yet been established.
+
+The opt-in `detailed` reptile study restores the detailed pterosaur study at
+ ebdc4f98fb8c01e76946436030256dad4d155297, with its wing rig from
+4266c3c7d. The profile phase selects a fixed wingbeat phase in
+radians. The 2026-11-20 report and pictures document a more detailed head,
+jointed limbs, two membrane panels per wing and geometric body fibres;
+membrane stripes and separate-shell seams remain visible. Pose, proportions,
+colours, crest and soft tissue are hypotheses; this is not an approved
+anatomical reconstruction. The rig lengths and inferred membrane attachments
+are not direct measurements of Hatzegopteryx. See
+[SOURCES.md](SOURCES.md) for anatomical references.
+The adapted study's current renderer compatibility and appearance remain to
+be established by new images.
+
+An additional opt-in `soaring` study is under construction. It uses a
+gliding outline with a separate tapered rostrum, a stout differentiated
+neck, open wing controls and thin membrane, and trailing jointed legs.
+These exact shapes, colours, attachments and pose are invented. The
+comparisons in [SOURCES.md](SOURCES.md) motivate the long toothless
+rostrum, long hindlimbs and stout neck; they do not supply a complete
+Hatzegopteryx outline. The separate shells can leave seams, the old wing
+surface has known defects, and no visual result or anatomical approval is
+claimed for this study. Its inspection scene is
+`doc/examples/hatz-soaring/scene.yaml`.
+
 An authored giant azhdarchid pterosaur of about 11 m wingspan, after
 Hatzegopteryx thambema. It is an invented individual, not a scan and not a
 reconstruction of a known animal: the holotype is a piece of rear skull and

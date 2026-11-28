@@ -103,31 +103,50 @@ func (lit Lit) along(out maths.Vec) float64 {
 	return 1 - maths.Smooth(lit.Width, lit.Width+lit.Soft, off)
 }
 
+// EdgeShare is how thick the soft edge of Beyond is, as a share of
+// Beyond: the light fades to nothing over the last EdgeShare of it
+// inside, and is whole from Beyond out. The edge was a step, and a point
+// within a float32's rounding of a step is lit or not by which side the
+// float32 puts it; a march that samples where it likes, as the draw's
+// does since 2026-11-26, lands one there once in some tens of thousands
+// of rays, and the Metal draw and the CPU's then differ by a whole
+// sample's light. Over this thickness a rounding is a hundredth of one.
+const EdgeShare = 1e-4
+
+// edge is how much of the light reaches a point a distance from the
+// emitter: none within Beyond less its edge, all from Beyond out, and a
+// smoothstep between.
+func (lit Lit) edge(distance float64) float64 {
+	return maths.Smooth(lit.Beyond*(1-EdgeShare), lit.Beyond, distance)
+}
+
 // Light is what reaches a point from the emitter: the way toward it,
 // how far the light travels past Beyond, and the light, by the inverse
-// square. Inside Beyond nothing arrives.
+// square. Inside Beyond, less its edge, nothing arrives.
 func (lit Lit) Light(at, _ maths.Vec) (maths.Vec, float64, maths.Light) {
 	toward := lit.At.Sub(at)
 	distance := toward.Len()
-	if distance <= lit.Beyond {
+	share := lit.edge(distance)
+	if share == 0 {
 		return maths.Vec{}, 0, maths.Light{}
 	}
 	in := toward.Scale(1 / distance)
-	return in, distance - lit.Beyond, lit.Strength.Scale(lit.falling(in,
-		distance))
+	return in, math.Max(distance-lit.Beyond, 0),
+		lit.Strength.Scale(lit.falling(in, distance) * share)
 }
 
 // Lands is how much of the band reaches a point from the emitter: its
 // power in the band, by the inverse square and the cone as its light
-// falls. Inside Beyond none of it arrives.
+// falls. Inside Beyond, less its edge, none of it arrives.
 func (lit Lit) Lands(at maths.Vec, band maths.Band) float64 {
 	toward := lit.At.Sub(at)
 	distance := toward.Len()
-	if distance <= lit.Beyond {
+	share := lit.edge(distance)
+	if share == 0 {
 		return 0
 	}
 	in := toward.Scale(1 / distance)
-	return lit.In(band) * lit.falling(in, distance)
+	return lit.In(band) * lit.falling(in, distance) * share
 }
 
 // falling is the share of the emitter's light at one unit of distance

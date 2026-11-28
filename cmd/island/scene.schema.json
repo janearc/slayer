@@ -86,7 +86,7 @@
       "type": "number", "minimum": 0, "maximum": 1000
     },
     "height-model": {
-      "const": "authored-radial-offsets"
+      "enum": ["authored-radial-offsets", "authored-procedural"]
     },
     "radius-metres": {
       "type": "number",
@@ -98,7 +98,7 @@
     },
     "sources": {
       "type": "array",
-      "minItems": 1,
+      "minItems": 0,
       "maxItems": 8,
       "items": {
         "type": "object",
@@ -134,6 +134,19 @@
             "maximum": 10000
           }
         }
+      }
+    },
+    "procedural-ground": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["seed", "base-metres", "height-metres", "wavelength-metres", "fine-metres", "made-up"],
+      "properties": {
+        "seed": {"type": "integer", "minimum": 0},
+        "base-metres": {"type": "number"},
+        "height-metres": {"type": "number", "minimum": 0},
+        "wavelength-metres": {"type": "number", "exclusiveMinimum": 0},
+        "fine-metres": {"type": "number", "minimum": 0},
+        "made-up": {"const": true}
       }
     },
     "raster-budget": {
@@ -226,6 +239,7 @@
         "maximum-height-metres"
       ],
       "properties": {
+        "normal-footprint": {"const": "mesh"},
         "normal-step": {
           "type": "object", "additionalProperties": false,
           "required": ["longitude-deg", "latitude-deg"],

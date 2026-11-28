@@ -15,10 +15,13 @@ Calling the sphere “partly submerged” describes only the intended visual
 analogy: this recipe does not simulate immersion. The plate's finite thickness
 also means it is not an infinitely thin air-water boundary.
 
+Set `SLAYER_CACHE` to an absolute cache directory.
 Run `slayer assess validation/clear-interface/job.yaml` to validate and stage
 the scene without drawing. The job requests a 160 × 90, one-ray CPU still.
 
-## Recorded validation
+Submit any new draw through [Azazel](../../doc/azazel.md).
+
+## Recorded validation, 16 November 2026
 
 - Source checkout: `clear-interface-validation` in the agent's tree, based on
   `76e331e367bdc9f7d30ef579ff70ca1a3a0526cb`.

@@ -1,0 +1,9 @@
+"$schema": https://github.com/janearc/slayer/schemas/job-v1.json
+scene: {set: 11-drop-to-caprica-reverse-quarter.yaml}
+renderer: gpu-native
+shortcuts: {restir: off}
+film: {width: 500, height: 500, rays: 1, wide: 40, exposure: 0.0013}
+camera: {name: 11-drop-to-caprica}
+outputs:
+  picture: ../../../out/2026-11-27-caprica-11-drop-to-caprica-reverse-quarter-dim-preview/proof.png
+  raw: ../../../out/2026-11-27-caprica-11-drop-to-caprica-reverse-quarter-dim-preview/light.pfm

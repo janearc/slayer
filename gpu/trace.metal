@@ -54,6 +54,11 @@ struct World {
     float4 momentum;
     float energy;
     int cuts;
+	// fine is the fine pixel this sample is, and streamed whether it
+	// says: a sample that does not takes the middle of each step of a
+	// march, as every one did before
+	uint2 fine;
+	int streamed;
 #ifdef SLAYER_WORK_COUNTS
 	// work is the diagnostic counts of what one sample did (work_counts.go)
 	thread uint *work;
@@ -1638,6 +1643,9 @@ static bool selected_lamp(Lamp lamp, SourcePart sources) {
 // is its strength weighed by how that way faces its dome; a seen of
 // nought is a way facing it neither toward nor away, as film.Flood's is.
 struct Reached { float3 toward; float far; float3 light; };
+// lamp_edge is emit's EdgeShare: how thick, as a share of Beyond, the soft
+// edge of a point lamp's Beyond is
+constexpr constant float lamp_edge = 1e-4f;
 static Reached lamp_light(Lamp lamp, float3 point, float3 seen) {
  if (is_flood(lamp)) {
   float3 facing = any(seen != beam_zero) ? normalize(seen) : seen;
@@ -1681,12 +1689,19 @@ static Reached lamp_light(Lamp lamp, float3 point, float3 seen) {
   float falling = lamp_along(lamp, -in) * volume_falloff(distance, lamp.extent.x);
   return {in, distance, lamp.strength.xyz * falling};
  }
- if (distance <= lamp.at.w) {
+ // the light fades to nothing over the last lamp_edge of Beyond inside it
+ // and is whole from Beyond out, as emit's EdgeShare says: a step there
+ // was a coin a float32's rounding tossed against the cpu's float64
+ // (2026-11-26)
+ float edge = lamp.at.w > 0 ?
+  smoothstep(lamp.at.w * (1 - lamp_edge), lamp.at.w, distance) :
+  (distance > 0 ? 1.0f : 0.0f);
+ if (edge == 0) {
   return {float3(0), 0, float3(0)};
  }
  float3 in = toward / distance;
- float falling = lamp_along(lamp, -in) / (distance * distance);
- return {in, distance - lamp.at.w, lamp.strength.xyz * falling};
+ float falling = lamp_along(lamp, -in) / (distance * distance) * edge;
+ return {in, max(distance - lamp.at.w, 0.0f), lamp.strength.xyz * falling};
 }
 
 // the lists of lamps (gpu/lamp_lists.go): the floods, then the cones, then
@@ -2281,6 +2296,194 @@ static float shell_density(Volume volume, float3 local) {
 	return volume.puff.y * weight;
 }
 
+// air_density is medium.Air's Density: puff.z at the ground, puff.x out,
+// falling by e every puff.y above it, and nothing past its top at puff.w.
+static float air_density(Volume volume, float3 local) {
+	float radius = volume.puff.x, height = volume.puff.y;
+	float from = length(local);
+	if (height <= 0 || from < radius || from > volume.puff.w) {
+		return 0;
+	}
+	return volume.puff.z * exp(-(from - radius) / height);
+}
+
+// clouds_belts is CloudWeather's Beaded: the cover a latitude's belt adds,
+// from the weather table's equator, dry and track gains, belt width, and
+// the dry belt's and track's latitudes, the equator's belt broken into
+// clusters by noise round the axis (cluster in 13, beads in 14).
+static float clouds_belts(device const float *weather, float reach,
+                          float3 sky, ulong seed) {
+	float width = weather[3];
+	float equator = reach / width, dry = (reach - weather[4]) / width;
+	float track = (reach - weather[5]) / width;
+	float round = fractal(seed + 4, sky.x * weather[14], 0, sky.z * weather[14], 2);
+	float strung = max(0.0f, 1 + 2 * weather[13] * round);
+	float belt = weather[0] * exp(-equator * equator);
+	return belt - weather[1] * exp(-dry * dry) +
+	       weather[2] * exp(-track * track) + belt * (strung - 1);
+}
+
+// clouds_locking is CloudWeather's Locking: the cover a locked sky adds at a
+// sky direction, from the table's flag (43), its way to its sun (44 to 46),
+// deck and its width (47, 48), terminator belt and its width (49, 50) and
+// night's clearing, from where and over how far (51 to 53). belt is put the
+// share of the way into the terminator's belt.
+static float clouds_locking(device const float *weather, float3 sky,
+                            thread float &belt) {
+	float3 toward = float3(weather[44], weather[45], weather[46]);
+	float away = acos(clamp(dot(sky, toward), -1.0f, 1.0f));
+	float over = away / weather[48];
+	float across = (away - 1.57079632679f) / weather[50];
+	belt = exp(-across * across);
+	float night = weather[51] * smoothstep(weather[52],
+	                                       weather[52] + weather[53], away);
+	float far = weather[59] * smoothstep(weather[60], weather[60] + weather[61],
+	                                     away);
+	return weather[47] * exp(-over * over) + weather[49] * belt - night - far;
+}
+
+// clouds_heart is CloudWeather's heart: the cover a storm adds at a sky
+// direction away radii from its centre, its pull there, the eye cleared
+// (15, 16) and the arms (17, 18) banded as the turn winds them.
+static float clouds_heart(device const float *weather, float3 centre,
+                          float sign, float3 sky, float away, float pull) {
+	float3 first = normalize(cross(float3(0, 1, 0), centre));
+	float3 second = cross(centre, first);
+	float azimuth = (sign < 0 ? -1.0f : 1.0f) * atan2(dot(sky, second), dot(sky, first));
+	float phase = weather[17] * (azimuth - weather[9] * pull);
+	float reach = away / 1.5f, eye = away / weather[15];
+	float fade = weather[43] > 0.5f ? smoothstep(0.0f, weather[15], away) : 1.0f;
+	return weather[10] * pull - weather[16] * exp(-eye * eye) +
+	       weather[18] * exp(-reach * reach) * cos(phase) * fade;
+}
+
+// clouds_swirl is CloudWeather's Swirl: the sky's direction turned about
+// each storm of the table, six of them after its nineteen numbers, by the
+// storm's turn unwinding with distance, and the cover their hearts add,
+// which is put in hearts, and the part of it that is the arms and the eyes,
+// without the hearts' own core, in bare.
+static float3 clouds_swirl(device const float *weather, float3 sky,
+                           thread float &hearts, thread float &bare) {
+	for (int index = 0; index < 6; index++) {
+		device const float *storm = weather + 19 + index * 4;
+		float3 centre = float3(storm[0], storm[1], storm[2]);
+		float away = acos(clamp(dot(centre, sky), -1.0f, 1.0f)) /
+		             (weather[8] * fabs(storm[3]));
+		if (away > 3.0f) { continue; }
+		float pull = exp(-away * away);
+		float added = clouds_heart(weather, centre, storm[3], sky, away, pull);
+		hearts += added;
+		bare += added - weather[10] * pull;
+		float angle = -storm[3] * weather[9] * pull;
+		sky = sky * cos(angle) + cross(centre, sky) * sin(angle) +
+		      centre * (dot(centre, sky) * (1 - cos(angle)));
+	}
+	return sky;
+}
+
+// clouds_top is CloudWeather's Top: how much of the layer's height a cloud
+// at a sky direction reaches, one in a sky that turns; in a locked sky the
+// towers' fall from the substellar point toward the base (55) over the width
+// (56), and the lowest tower's share lower than the tallest (57), by noise
+// of the frequency in 58, billowed by 62 of finer noise.
+static float clouds_top(device const float *weather, float3 sky, ulong seed) {
+	float3 toward = float3(weather[44], weather[45], weather[46]);
+	float away = acos(clamp(dot(sky, toward), -1.0f, 1.0f)) / weather[56];
+	float tall = weather[55] + (1 - weather[55]) * exp(-away * away);
+	float3 fine = sky * weather[58];
+	float rise = smoothstep(-0.2f, 0.3f,
+	                        fractal(seed + 6, fine.x, fine.y, fine.z, 3));
+	float3 finer = fine * 5.0f;
+	float billow = 0.5f + fractal(seed + 7, finer.x, finer.y, finer.z, 3);
+	return min(1.0f, tall * (1 - weather[57] * (1 - rise)) *
+	                 (1 - weather[62] * (0.5f - billow)));
+}
+
+// clouds_density is medium.Clouds's Density: between puff.y and puff.z
+// above puff.x, patches laid by the noise over the sphere's directions
+// where it rises past the cover in thin.x, each puff.w at its heart,
+// whole low in the layer and thinning to its top. The seed is in
+// thermal's z and w, the octaves in info.y, and the patches' frequency,
+// edge, whole and top in phase, as volumes.go writes them.
+static float clouds_density(Volume volume, float3 local,
+                            device const float *weather) {
+	float radius = volume.puff.x, low = volume.puff.y, high = volume.puff.z;
+	float cover = volume.thin.x;
+	float above = length(local) - radius;
+	if (high <= low || cover <= 0 || above < low || above > high) {
+		return 0;
+	}
+	float3 sky = normalize(local);
+	float3 home = sky;
+	float latitude = asin(clamp(sky.y, -1.0f, 1.0f));
+	// the weather, as medium.CloudWeather's Table lays it out: the belts
+	// add to the cover by latitude, each storm turns the sky about its
+	// heart and clouds it, then the winds slide and stretch it
+	float parallel = fabs(latitude);
+	float hearts = 0;
+	ulong seed = ulong(uint(volume.thermal.z)) |
+	             (ulong(uint(volume.thermal.w)) << 32);
+	float belt = 0;
+	if (weather[43] > 0.5f) {
+		cover += clouds_locking(weather, sky, belt);
+	} else {
+		cover += clouds_belts(weather, parallel, sky, seed);
+	}
+	float bare = 0;
+	sky = clouds_swirl(weather, sky, hearts, bare);
+	cover += hearts;
+	float slide = -weather[7] * sin(6.0f * parallel);
+	float3 wind = float3((sky.x * cos(slide) - sky.z * sin(slide)) / weather[6],
+	                     sky.y,
+	                     (sky.x * sin(slide) + sky.z * cos(slide)) / weather[6]);
+	float3 direction = wind * volume.phase.x;
+	float grain = 0.5f + fractal(seed, direction.x, direction.y, direction.z,
+	                             volume.info.y);
+	// the filaments: weather[11] of finer noise across the wind, weather[12]
+	// times as fine across as along
+	grain += weather[11] * fractal(seed + 3, direction.x,
+	                               direction.y * weather[12], direction.z, 3);
+	// the billow: finer noise, thin.y of it at thin.z times the frequency
+	// with thermal.x octaves, read unstretched, breaks the patches up
+	// In a locked sky or the authored soft-bands variant, read it before
+	// storms turn the sky, as medium.Clouds does.
+	float3 fine = (weather[43] > 0.5f || volume.thermal.y > 0.5f ? home : sky) *
+	              volume.phase.x * volume.thin.z;
+	grain += volume.thin.y * fractal(seed + 1, fine.x, fine.y, fine.z,
+	                                 volume.thermal.x);
+	// a locked sky's terminator is broken by noise finer still: weather[54]
+	// of it, by how far into the belt the place is
+	if (belt > 0) {
+		grain += weather[54] * belt * fractal(seed + 5, fine.x, fine.y, fine.z, 3);
+	}
+	float threshold = 1 - cover, edge = volume.phase.y;
+	float patch = smoothstep(threshold - edge, threshold + edge, grain);
+	if (patch <= 0) {
+		return 0;
+	}
+	// a thicker patch reaches higher, from thin.w of the layer to its top
+	float height = (above - low) / (high - low);
+	float reach = volume.thin.w + (1 - volume.thin.w) * patch;
+	if (weather[43] > 0.5f) {
+		// a locked sky's towers are tallest at its substellar point
+		reach *= clouds_top(weather, home, seed);
+		// and a whorl's arms are ridges and its lanes lower cloud, as
+		// medium.CloudWeather's Relief has it
+		reach *= clamp(1.0f + weather[63] * bare, 0.5f, 2.0f);
+		// a ridge reaches no higher than the layer, so its top thins and is
+		// not cut
+		reach = min(reach, 1.0f);
+	}
+	if (height > reach) {
+		return 0;
+	}
+	float puff = 1 - smoothstep(volume.phase.z * reach, reach, height);
+	// a locked sky's towers thin to nothing at their tops, as medium.Clouds's
+	// Density has it
+	float floor_density = weather[43] > 0.5f ? 0.0f : volume.phase.w;
+	return volume.puff.w * patch * max(puff, floor_density);
+}
+
 // density reads a shell directly, a boxed medium from its grid, and a puff
 // from its baked cells when available or from its original field otherwise.
 // Bounds and occupied shell intervals keep the march outside empty regions.
@@ -2318,6 +2521,13 @@ static float density(World world, Volume volume, float3 local) {
 			float below = radius - length(local);
 			float along = clamp(below / depth, 0.0f, 1.0f);
 			return volume.puff.z * along * along * (3 - 2 * along);
+		}
+		if (volume.info.x == boxed_air) {
+			return air_density(volume, local);
+		}
+		if (volume.info.x == boxed_clouds) {
+			return clouds_density(volume, local,
+				                      world.boxes + volume.grid.w);
 		}
 		int3 low;
 		float3 part;
@@ -2383,18 +2593,23 @@ static float2 span(Volume volume, float3 at, float3 way, float near,
 	return float2(max(closest - root, near), min(closest + root, far));
 }
 
-// shell_ball uses a factored distance term and paired quadratic roots. Keeping
-// the near root as c/q avoids subtracting two planetary distances at entry.
+// shell_ball is where a ray crosses a sphere of a radius about the origin:
+// the way to its closest approach, and the half chord either side of it,
+// the root of the radius squared less the impact parameter squared, taken
+// as (radius - b)(radius + b). The impact parameter b is the length of at
+// crossed with way, the ray's miss distance, which stays near the radius
+// for any ray that hits. The factored form this replaced, from the
+// distance squared less the radius squared, took the difference of two
+// numbers of 1e18 for a body a million kilometres off, where a float holds
+// a part in sixteen million: its chord was out by ten kilometres, and a
+// shell seven kilometres thick drew as bands (2026-11-26).
 static float2 shell_ball(float radius, float3 at, float3 way, float near, float far) {
-	float distance = length(at);
-	float c = (distance - radius) * (distance + radius);
 	float closest = -dot(at, way);
-	float disc = fma(closest, closest, -c);
+	float missed = length(cross(at, way));
+	float disc = (radius - missed) * (radius + missed);
 	if (disc < 0) { return float2(1, 0); }
 	float root = sqrt(disc);
-	float q = closest + copysign(root, closest);
-	float other = q == 0 ? closest : c / q;
-	return float2(max(min(q, other), near), min(max(q, other), far));
+	return float2(max(closest - root, near), min(closest + root, far));
 }
 
 // spans keeps the two occupied legs of a hollow shell separate. Ordinary
@@ -2404,6 +2619,33 @@ static int spans(Volume volume, float3 at, float3 way, float near, float far,
 	parts[0] = volume.info.z == shell_kind ?
 		shell_ball(volume.puff.x, at, way, near, far) : span(volume, at, way, near, far);
 	if (parts[0].y <= parts[0].x) { return 0; }
+	if (volume.info.z == boxed_kind && volume.info.x == 1 &&
+	    volume.puff.y < volume.puff.x) {
+		// a giant's body is opaque below its ramp: the span ends where
+		// the ray meets the ball under it, as medium.Giant's Span does,
+		// so its steps all fall in the ramp
+		float2 core = shell_ball(volume.puff.x - volume.puff.y, at, way,
+		                         parts[0].x, parts[0].y);
+		if (core.y > core.x && core.x > parts[0].x) { parts[0].y = core.x; }
+	}
+	if (volume.info.z == boxed_kind &&
+	    (volume.info.x == boxed_air || volume.info.x == boxed_clouds)) {
+		// a body's air or clouds: a shell tens of kilometres thick in a
+		// box thousands across, so the march keeps to the legs of the
+		// shell, as a shell's does, and not the box's whole chord
+		bool air = volume.info.x == boxed_air;
+		float radius = volume.puff.x;
+		float top = air ? volume.puff.w : radius + volume.puff.z;
+		float bottom = air ? radius : radius + volume.puff.y;
+		float2 outer = shell_ball(top, at, way, parts[0].x, parts[0].y);
+		if (outer.y <= outer.x) { return 0; }
+		float2 inner = shell_ball(bottom, at, way, outer.x, outer.y);
+		if (inner.y <= inner.x) { parts[0] = outer; return 1; }
+		int count = 0;
+		if (inner.x > outer.x) { parts[count++] = float2(outer.x, inner.x); }
+		if (outer.y > inner.y) { parts[count++] = float2(inner.y, outer.y); }
+		return count;
+	}
 	if (volume.info.z != shell_kind) { return 1; }
 	float2 outer = parts[0];
 	float2 inner = shell_ball(volume.low.x + volume.low.y, at, way, outer.x, outer.y);
@@ -2996,6 +3238,9 @@ static float crossing_density(World world, Volume volume, Crossing crossing,
 	return known == flat_yes ? kept : density(world, volume, local);
 }
 
+// through is the volumes a ray crosses, front to back: how much of what
+// lies behind is kept, and what light they add. It takes a fixed number of
+// strides across each volume, at the middle of each.
 static Through through(World world, float3 at, float3 way, float far,
                        SourcePart sources = all_sources) {
 	Through gathered = {float3(1), float3(0)};
@@ -3008,6 +3253,11 @@ static Through through(World world, float3 at, float3 way, float far,
 	BeamMarch refine = beam_march(world, at, way, far);
 	int strides = world.cuts > 0 ? world.cuts : world.header->more.y;
 	float faint = world.header->tuning.y;
+	// shift is where in each step a sample is taken, a share of the step
+	// the sample's fine pixel decides, as trace's MarchShift, bit for
+	// bit: every pixel's steps lie at depths of their own, so a coarse
+	// march is fine noise and not arcs where the steps line up
+	float shift = world.streamed != 0 ? march_shift(world.fine) : beam_half;
 	while (shows(gathered.keep, faint)) {
 		SLAYER_WORK(0, 1)
 		int taken = -1;
@@ -3022,8 +3272,13 @@ static Through through(World world, float3 at, float3 way, float far,
 			float size = crossed / strides;
 			float begin = crossing.enter + next[index] * size;
 			int split = beam_splits(refine, begin, begin+size);
+			// a step a beam has cut finer takes the middle of each part,
+			// and so does a ring's, as trace's atTheMiddle says
+			bool at_middle = split > 1 ||
+			    world.volumes[crossing.volume].info.z == ring_kind;
 			float middle_of = next[index] +
-			                  (parts[index] + beam_half) / split;
+			                  (parts[index] +
+			                   (at_middle ? beam_half : shift)) / split;
 			float along = crossing.enter + middle_of * size;
 			if (taken < 0 || along < middle) {
 				taken = index, middle = along, stride = size / split;
@@ -3065,6 +3320,11 @@ static Through through(World world, float3 at, float3 way, float far,
             field_gain(world, volume, world.gravity == nullptr ? point : gainPoint, way);
 		gathered.added += light * gathered.keep * absorb;
 		gathered.keep *= 1 - absorb;
+	}
+	// trace's settled: a march that stopped for want of light keeps none
+	// of what is behind, so an opaque body hides a sun
+	if (!shows(gathered.keep, faint)) {
+		gathered.keep = float3(0);
 	}
 	return gathered;
 }
@@ -3150,14 +3410,18 @@ static float3 skylit(World world, float3 point, float3 normal,
 // disc of angular width size about middle, on a spiral turning by the
 // golden angle, each at the root of its place along the eight times the
 // disc's radius out.
-static float3 sun_spread(float3 middle, float size, int i) {
+static float3 sun_spread_count(float3 middle, float size, int i, int count) {
 	float3 up = abs(middle.y) >= 0.9f ? float3(1, 0, 0) : float3(0, 1, 0);
 	float3 across = normalize(cross(middle, up));
 	float3 other = cross(middle, across);
-	float out = size / 2 * sqrt((float(i) + 0.5f) / 8);
+	float out = size / 2 * sqrt((float(i) + 0.5f) / float(count));
 	float turn = 2.399963229728653f * float(i);
 	float3 aside = across * cos(turn) + other * sin(turn);
 	return normalize(middle * cos(out) + aside * sin(out));
+}
+
+static float3 sun_spread(float3 middle, float size, int i) {
+	return sun_spread_count(middle, size, i, 8);
 }
 
 // unhidden is trace's unhidden: how much of a lamp's light gets from a
@@ -4001,9 +4265,36 @@ static Seen clear_attenuate(World world, Seen seen, Held active,
 // mirror: its glow and its colour times the light falling on it, or,
 // where the material is painted or shining, the place for the cpu to
 // paint and the light to paint it by.
-static Seen surfaced(World world, Hit hit, float3 point, float3 normal) {
+//
+// way is the look's way, or nought where there is none to darken by: a
+// glowing ball whose glint.y is a limb-darkening coefficient gives its
+// glow times one minus the coefficient times one minus the cosine of the
+// angle between its normal and the way back to the eye, as thing.LimbShare.
+static Seen surfaced(World world, Hit hit, float3 point, float3 normal,
+                     float3 way = float3(0)) {
 	Material made = world.materials[hit.material];
+	float limb = 1.0f;
+	if (made.glint.y > 0 && any(way != 0) && any(normal != 0)) {
+		float cosine = max(0.0f, dot(normalize(normal), -normalize(way)));
+		limb = 1.0f - min(made.glint.y, 1.0f) * (1.0f - cosine);
+		made.glow.xyz *= limb;
+	}
 	bool painted = made.info.x != 0, shining = made.info.y != 0;
+	float visibility = 1.0f;
+	if (made.direct_sun.w > 0) {
+		float unblocked = 0.0f;
+		if (made.direct_sun_disc.x > 0) {
+			int count = int(made.direct_sun_disc.y);
+			for (int i = 0; i < count; i++) {
+				float3 sunway = sun_spread_count(made.direct_sun.xyz, made.direct_sun_disc.x, i, count);
+				if (!blocked(world, point + hit.lift, sunway, nowhere, hit.sphere_index)) { unblocked += 1.0f / float(count); }
+			}
+		} else if (!blocked(world, point + hit.lift, made.direct_sun.xyz, nowhere, hit.sphere_index)) {
+			unblocked = 1.0f;
+		}
+		float fill = made.direct_sun.w - 1.0f;
+		visibility = fill + (1.0f - fill) * unblocked;
+	}
 	// Pure emission has no diffuse response. In particular, the Moon
 	// does not need terrestrial shadow queries at astronomical coordinates.
 	float3 fell = float3(0);
@@ -4011,12 +4302,12 @@ static Seen surfaced(World world, Hit hit, float3 point, float3 normal) {
 		fell = falling(world, point + hit.lift, normal, hit.sphere_index);
 	}
 	float3 light = (painted ? float3(0) : made.colour.xyz * fell) +
-	               (shining ? float3(0) : made.glow.xyz);
+	               (shining ? float3(0) : made.glow.xyz * visibility);
 	Painted place = unpainted;
 	if (painted || shining) {
 		place = {hit.material, hit.local, hit.distance / hit.scale,
 		         painted ? fell : float3(0),
-		         shining ? float3(1) : float3(0)};
+		         shining ? float3(limb * visibility) : float3(0)};
 	}
 	return {light, 1, hit.distance, float3(0), float3(0), place, unpainted,
 	        unpainted};
@@ -4171,7 +4462,7 @@ static Seen shade_plain(World world, float3 at, float3 way,
 		float3 normal = crinkled(made, point, shading_normal(world, hit,
 			made, at, way, width, side, lost), -way, width);
 		made.glint.x += lost;
-		seen = surfaced(world, hit, point, normal);
+		seen = surfaced(world, hit, point, normal, way);
 		seen.light += glinted(world, point + hit.lift, normal, -way, made,
 		                      hit.sphere_index);
 		seen.light += last_mirror(world, hit, made, normal, way,
@@ -4202,7 +4493,7 @@ static Seen shade_plain(World world, float3 at, float3 way,
 	float3 normal = crinkled(made, point, shading_normal(world, hit, made,
 		at, way, width, side, lost), -way, width);
 	made.glint.x += lost;
-	Seen seen = surfaced(world, hit, point, normal);
+	Seen seen = surfaced(world, hit, point, normal, way);
 	seen.light += glinted(world, point + hit.lift, normal, -way, made,
 	                      hit.sphere_index);
 	// every plain look starts in the air, inside nothing, as shade's does
@@ -4269,7 +4560,7 @@ static Seen shade(World world, float3 at, float3 way) {
 		at, way, pixel_at(world, come), side, lost), -way,
 		pixel_at(world, come));
 	made.glint.x += lost;
-	Seen seen = surfaced(world, hit, point, normal);
+	Seen seen = surfaced(world, hit, point, normal, way);
 	float clearness = clamp(made.mirror.z, 0.0f, 1.0f);
 	float foam_coverage = 0;
 	// Optics follow the final shading normal, as trace's do: for a sea
@@ -4866,6 +5157,7 @@ kernel void trace(SLAYER_TRACE_ARGUMENTS) {
 	world.native_counts = &native_counts;
 	uint2 pixel = uint2(at.x + origin.x, at.y + origin.y);
 	world.shared = sky_share(header, pixel);
+	world.fine = pixel, world.streamed = 1;
 	// where in its pixel the sample starts: its own middle, or spread
 	float2 off = placed(header, pixel);
 	float3 from = header->origin.xyz, way = look_through(header, pixel, off);

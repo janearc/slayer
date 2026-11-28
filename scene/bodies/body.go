@@ -32,6 +32,10 @@ type Body struct {
 	// own, the disc, the jets and the coma, so two bodies do not share
 	// one noise. Clouds, Cities, Aurora and a Tail carry their own.
 	seed uint64
+	// locked is a body that keeps one face to its star, which stands in
+	// the direction toward from its middle, in the body's own space.
+	locked bool
+	toward maths.Vec
 	// complaint is the first bad argument a verb that cannot return an
 	// error was given, without the package prefix; Place refuses it.
 	complaint error
@@ -155,6 +159,21 @@ func (body Body) Turning(day time.Duration, tilt measure.Angle) Body {
 		body.complaint = fmt.Errorf("the tilt given to Turning is %v radians: a "+
 			"finite number is expected", body.tilt)
 	}
+	return body
+}
+
+// Locking is the body held with one face to its star, which stands in the
+// direction toward from the body's middle, in the body's own space: its
+// clouds gather about that face and not about its poles. The body's own
+// turning is the caller's to leave out, as PlaceOn does. A direction that
+// is not finite, or has no length, is held, and Place refuses it.
+func (body Body) Locking(toward maths.Vec) Body {
+	hold(&body.complaint, vecComplaint("Locking's direction", toward))
+	if body.complaint == nil && !(toward.Len() > nought) {
+		body.complaint = fmt.Errorf("the direction given to Locking has " +
+			"no length: a face cannot be turned toward nowhere")
+	}
+	body.locked, body.toward = true, toward.Unit()
 	return body
 }
 
@@ -315,6 +334,10 @@ func (body Body) Clouds() (Clouds, bool) {
 	}
 	return *body.clouds, true
 }
+
+// Facing is the direction of the star a locked body keeps one face to,
+// in the body's own space, and whether the body is locked.
+func (body Body) Facing() (maths.Vec, bool) { return body.toward, body.locked }
 
 // Cities is the body's lights at night, when it has them.
 func (body Body) Cities() (Cities, bool) {

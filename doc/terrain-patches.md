@@ -1,7 +1,8 @@
 # Source patches selected by a view
 
-This does not replace the existing session terrain stage or establish
-whole-world rendering.
+the raster patch helpers expose bounded source reads and selection.
+the island renderer selects source patches for the view, while ordinary
+set sessions stage their authored terrain crop.
 
 ## Identity and bounded reads
 
@@ -45,10 +46,8 @@ remain valid and consume memory until that consumer releases them.
 Closing the source does not automatically clear a separately held cache; the
 world manager must clear it or release it too.
 
-Sample payloads, decoded tiles, meshes, GPU inputs and consumer-held grids
-are separate allocations. This cache does not establish an aggregate RSS
-cap. It is not yet wired into moving-view staging, nor does it cache a
-transformed mesh under an unspecified projection or height datum.
+the cache budgets retained source grids. decoded tiles, meshes, GPU
+inputs and grids held by callers have separate allocations.
 
 ## Selection and budgets
 
@@ -92,8 +91,6 @@ viewer, with progressively coarser levels farther away. The primary
 [GPU Gems chapter by Asirvatham and Hoppe](https://developer.nvidia.com/gpugems/gpugems2/part-i-geometric-complexity/chapter-2-terrain-rendering-using-gpu-based-geometry)
 describes that approach. This selector uses a quadtree rather than clipmap
 rings. Neither organization manufactures terrain beyond source coverage.
-
-The current session continues to stage its authored terrain crop.
 
 ## World mesh boundary
 

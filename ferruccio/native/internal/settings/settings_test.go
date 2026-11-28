@@ -334,3 +334,21 @@ func TestUpdateTouchesNoOtherFileInTheFolder(t *testing.T) {
 		t.Fatal("another file was changed")
 	}
 }
+
+func TestRenderQueueUsesTheExplicitFlagBeforeTheLauncherEnvironment(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "config")
+	if err := Save(path, Queue, "/saved queue"); err != nil {
+		t.Fatal(err)
+	}
+	if got := Resolve(path, none, none).Get(Queue); got.Value != "/saved queue" || got.Source != FromFile {
+		t.Fatalf("saved queue: %+v", got)
+	}
+	env := only("FERRUCCIO_AZAZEL_QUEUE", "/environment queue")
+	if got := Resolve(path, none, env).Get(Queue); got.Value != "/environment queue" || got.Source != FromEnvironment {
+		t.Fatalf("environment queue: %+v", got)
+	}
+	flag := only("azazel-queue", "/flag queue")
+	if got := Resolve(path, flag, env).Get(Queue); got.Value != "/flag queue" || got.Source != FromFlag {
+		t.Fatalf("explicit queue: %+v", got)
+	}
+}

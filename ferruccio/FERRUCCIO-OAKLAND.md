@@ -1,4 +1,6 @@
-# Ferruccio and Oakland
+# Earlier Ferruccio and Oakland integration
+
+For the bundled study, see the [installation guide](../doc/applications/ferruccio/howto-run-dis.md).
 
 Ferruccio is the separate GoGPU/Metal editor application. Slayer remains
 the renderer; Grissom remains a separate viewer. The Fyne prototype is

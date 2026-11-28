@@ -36,6 +36,25 @@ const (
 	fizzKind
 )
 
+// the shapes a boxed medium's density is asked in by the kernel itself,
+// in its info's x, in place of its grid: a giant's clouds are 1 and a
+// plain disc 2, written where they are made; a body's air and its clouds
+// are these
+const (
+	boxedAir    = 3
+	boxedClouds = 4
+)
+
+// shelled is whether a medium is a shell round a body: a giant's clouds,
+// a body's air or its clouds, each far thinner than its box.
+func shelled(med medium.Medium) bool {
+	switch med.(type) {
+	case medium.Giant, medium.Air, medium.Clouds:
+		return true
+	}
+	return false
+}
+
 // tinted is a medium thicker to some light than to other, as soot is to
 // blue: trace's Tinted, how many times its density each channel meets.
 type tinted interface {
@@ -203,6 +222,13 @@ func (encoded *scene) plainVolume(space maths.Subspace, med medium.Medium,
 		encoded.smokes = encoded.smokes[:smoking]
 		encoded.reached = encoded.reached[:reached]
 	}
+	if shelled(med) {
+		// a giant's lit clouds, a body's air and its clouds are shells
+		// far thinner than a cell of a grid over their whole box, so the
+		// store's cells would show as fine ripples; each is lit at every
+		// step, as a gas is
+		encoded.reached = encoded.reached[:reached]
+	}
 	encoded.airIf(gassy, optics)
 	return nil
 }
@@ -307,12 +333,54 @@ func (encoded *scene) boxedVolume(space maths.Subspace, grid boxed,
 		given["puff"] = []float64{disc.Inner, disc.Outer, disc.Thick, disc.Dense}
 		given["info"] = wholes(2, 0, boxedKind, material)
 	}
+	// A body's air and clouds are shells tens of kilometres thick in a box
+	// thousands across: a grid's cells showed in them as rings and cubes,
+	// so the kernel asks their density as the medium does.
+	if air, ok := grid.med.(medium.Air); ok {
+		given["puff"] = []float64{air.Radius, air.Height, air.Thick,
+			air.Bounds().Max.X}
+		given["info"] = wholes(boxedAir, 0, boxedKind, material)
+	}
+	clouds, clouded := grid.med.(medium.Clouds)
+	if clouded {
+		given["puff"] = []float64{clouds.Radius, clouds.Low, clouds.High,
+			clouds.Thick}
+		given["info"] = wholes(boxedClouds, clouds.Patches().Octaves,
+			boxedKind, material)
+		// the weather's table, its belts, winds and storms, is read from
+		// the boxes where a grid's cells would be
+		table := clouds.Weather().Table()
+		narrow := make([]float32, len(table))
+		for index, number := range table {
+			narrow[index] = float32(number)
+		}
+		first = encoded.boxes.floats(narrow)
+	}
 	given["low"], given["high"] = point(grid.low), point(grid.high)
 	given["grid"] = append(wholes(grid.cells[:]...), float64(first))
 	given["shone"] = wholes(shone, painted)
 	given["lighting"] = wholes(0, 0, 0, -1)
 	given["tint"] = []float64{tint.R, tint.G, tint.B}
 	noAir(given)
+	if clouded {
+		// clouds have no thermal table and no thin texture: their seed
+		// is where a table's seed would be, behind a count of none, their
+		// cover where thin's inner would be, and their patches' numbers
+		// in phase
+		patches := clouds.Patches()
+		// the billow's octaves and soft-pattern flag are in thermal;
+		// its amount, frequency and the patches' reach are in thin
+		soft := 0
+		if clouds.Soft {
+			soft = 1
+		}
+		given["thermal"] = wholes(patches.DetailOctaves, soft,
+			int(uint32(clouds.Seed)), int(uint32(clouds.Seed>>32)))
+		given["thin"] = []float64{clouds.Cover, patches.Billow,
+			patches.Detail, patches.Reach}
+		given["phase"] = []float64{patches.Frequency, patches.Edge,
+			patches.Whole, patches.Top}
+	}
 	if radial {
 		const samples = 1024
 		base := thin

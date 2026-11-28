@@ -1,5 +1,303 @@
 # Azazel
 
+Azazel queues Slayer renders on a shared machine. submit a request
+to the operator's queue, check its status, and collect the finished
+files. the worker admits CPU and GPU work separately. Slayer still
+reads the scene and job and writes the picture or film.
+
+if you already have a queue path and an Azazel executable, start
+with [submit work](#submit-work). to run your own queue, see
+[build and discover](#build-and-discover) and
+[create a validation queue](#create-a-validation-queue).
+
+## Submit work
+
+this CPU still writes `out/first-picture.png` and
+`out/first-picture.pfm` in the checkout. save this request as
+`request.yaml` and replace each `/ABS/SLAYER` with the checkout
+path. use the versioned binary named by the operator for a shared queue.
+request `lane: tests` for this CPU render or `lane: gpu` for a Metal render.
+
+```yaml
+agent: studio
+key: first-picture-v1
+command: /ABS/SLAYER/bin/slayer
+args:
+  - draw
+  - doc/examples/jobs/first-picture.yaml
+directory: /ABS/SLAYER
+inputs:
+  - /ABS/SLAYER/doc/examples/jobs/first-picture.yaml
+lane: tests
+timeout_seconds: 300
+```
+
+```sh
+bin/azazel submit --queue /ABS/QUEUE request.yaml
+bin/azazel status --queue /ABS/QUEUE
+```
+
+save the sequence number from the acknowledgement. find it in the
+JSON returned by `status`. wait for `succeeded` before opening the
+outputs. inspect the picture and raw file separately.
+
+Use the same agent, key and request when retrying an uncertain submission.
+Azazel returns the original acknowledgement. Reusing a key with different
+content fails. A new key means another job, so do not change keys merely
+because the response was lost.
+
+The command and declared inputs are hashed at submission and checked before
+execution. Keep those files unchanged until
+execution. Include referenced sets and assets in `inputs` when their
+identity matters; Azazel does not discover every transitive input.
+
+Pin a submitted command to its versioned binary path. A shared launcher can
+change while the job waits, causing its identity check to refuse execution.
+For comparisons between branches or revisions, give each build a distinct
+executable path and each picture a distinct output path. Preserve both
+binaries and all declared inputs until their jobs finish. Submit one request
+per foreground invocation, with a different key for each intended job.
+
+Only `SLAYER_*` environment overrides are accepted.
+
+Jobs use Slayer's caches with the worker's environment and request overrides.
+Operators should set shared `SLAYER_CACHE`, `SLAYER_RENDERS` and source-shelf
+paths explicitly. Persistent GPU trees live in the cache home, `SLAYER_CACHE`, in
+`trees.bolt`; `SLAYER_TREE_STORE=files` keeps a file a tree instead and avoids
+the one shared database lock.
+
+Keep authored `--fresh` flags: comparisons may deliberately require a new
+picture. That flag does not disable every lower-level cache. Process-local
+caches remain local to each submitted foreground command.
+
+Any foreground Slayer tool can be scheduled this way, including `slayer`,
+`catalogue` and `searching`. Do not detach children or daemonize. Interactive
+applications are not batch jobs. A tool refusal remains a failed result;
+Azazel cannot add a rendering capability absent from the selected tool.
+
+## Build and discover
+
+The queue record format is version 3. Older Azazel clients reject new ledgers;
+new clients reject version 1 and 2 ledgers until an operator migrates them. Preserve
+the old database and its logs before migration. Status uses a read-only
+transaction and does not rewrite the ledger. `work --serve` stays alive while
+paused, so `resume` alone releases the latch. Renderer executables submitted
+as jobs remain pinned separately from the deployed Azazel client.
+
+Build through Game with the source shelf configured. Before starting a
+worker that runs Slayer render jobs, export `SLAYER_CACHE` with the absolute
+path to the shared cache, or set it in Game config if Game starts the worker.
+
+```sh
+game build azazel-binary
+bin/azazel --help
+bin/azazel --agent-help
+bin/azazel schema
+```
+
+`--agent-help` includes the submission workflow, a complete request,
+state meanings, retry rules, resource policy and recovery instructions.
+`schema` prints the checked YAML/JSON contract. Arguments remain an array;
+they are never passed through a shell.
+
+Pzm's `--dry-run` prints the requested action without invoking the handler.
+It is an intent preview: it does not validate input files or queue state,
+submit work, create a queue or acquire a worker lock. Its JSON includes
+`dry_run: true`; it is never a submission acknowledgement.
+
+The custom build target does not establish release provenance. Check the
+build workflow before distributing a binary.
+
+## Create a validation queue
+
+choose an absolute queue path whose parent exists.
+
+```sh
+bin/azazel init --queue /ABS/QUEUE
+```
+
+in the worker terminal, export the absolute cache path so the
+renderer processes inherit it.
+
+```sh
+export SLAYER_CACHE=/ABS/CACHE
+bin/azazel work --queue /ABS/QUEUE --serve
+```
+
+run the worker in that terminal. It stays in the foreground and starts
+independent render supervisors. Azazel owns its CPU and GPU render admission;
+it does not launch Game to execute a render. A second main worker cannot
+dispatch from the same queue. Direct Slayer jobs and Game GPU tests do not
+yet share this admission.
+Without `--serve`, the worker exits when no pending jobs remain.
+
+`status.scheduling` names the sampled counter (`Device Utilization %`), its
+sample time, target, active counts and admission hold. Unknown GPU readings
+hold GPU starts. Host pressure and disk checks still govern both resources.
+
+## Worker scheduling
+
+The scheduling target is 100% GPU utilization with a runnable backlog,
+with CPU jobs eligible alongside GPU work and admission governed by system
+pressure. The worker samples device utilization and independently admits CPU
+work. By default, GPU starts are spaced five seconds apart, with up to four
+GPU attempts and two CPU attempts. These bounds include claimed attempts.
+
+Use `work --gpu-jobs 1` to begin with one additional GPU job when large
+scenes need a measured ramp. Values from one through 64 are accepted;
+the default is four. `status.scheduling.gpu_limit` records the limit.
+
+Stored live tuning takes precedence over the startup setting. Clear all
+overrides with `tune --reset`; existing attempts continue. Reset restores
+default pressure stops and five-second admission spacing.
+See [the utilization policy](../azazel/DESIGN.md#utilization-under-backlog).
+
+change a running queue without restarting it.
+
+```sh
+bin/azazel tune --queue /ABS/QUEUE --gpu-jobs 4 --gpu-start-seconds 1 --pressure-policy observe
+```
+
+Controls persist in the ledger. Coordinators reread them every second;
+supervisors apply pressure policy while running. Concurrency accepts 1..64.
+
+Reducing it leaves active jobs running and holds later starts. `observe`
+records memory pressure without automatically pausing or killing work;
+`stop` restores automatic pressure stops. Disk stops and unknown observations
+still apply. Tuning does not clear an existing pause; use `resume` explicitly.
+An unresolved fenced attempt retains its slot until recovery resolves it.
+
+## Results, logs and stops
+
+| state | meaning |
+|---|---|
+| queued | accepted and waiting |
+| running | claimed by the worker; it may still be waiting for admission |
+| succeeded | the foreground process returned success |
+| failed | the failure and exit status are retained |
+| cancelled | cancellation was recorded |
+| interrupted | the operator resolved an uncertain attempt |
+
+Read `held` to explain an admission wait. Read `result` for the terminal
+reason and exit code. Logs are named `SEQUENCE.ATTEMPT.log`, with 20-digit
+sequences and four-digit attempts, inside the queue directory. Existing
+logs are never replaced. A successful worker exit means it drained the
+queue; individual jobs can still have failed.
+
+`executing` is retained execution-claim history, not a current liveness flag.
+It may remain true after success or failure; use `state` and `result` for
+completion. `process_group` is also historical. Clients must not signal that
+identifier or treat its continued presence in JSON as proof of a live process.
+
+Memory policy follows system pressure. The worker records sampled peak
+process-group residency and the most recent pressure category. It removes
+an inherited `GOMEMLIMIT`, does not impose a small Go heap, and does not
+stop solely because RSS crosses an estimate. An optional `memory_bytes`
+field in an older request is retained as metadata, not an enforced ceiling.
+
+Load average and accumulated swap alone do not hold work. Render processes
+default to eight Go workers. Set `SLAYER_CPU_WORKERS` in a request's
+environment to choose 1 through 1024 for that job without restarting the
+worker. A running process keeps the setting it started with; build and test
+limits are separate.
+
+With the default `stop` policy, elevated memory pressure latches a stop.
+The `observe` policy records it and continues. Free disk below 30 GiB always
+latches a stop.
+Unknown observations hold new work
+and stop active work. The monitor samples process groups; it is not a
+kernel memory cap or complete accounting of GPU allocations.
+
+```sh
+bin/azazel cancel --queue /ABS/QUEUE --agent studio 1
+bin/azazel pause --queue /ABS/QUEUE --reason "inspect host pressure"
+bin/azazel resume --queue /ABS/QUEUE
+```
+
+Pause stops active work and retains waiting jobs. Resume explicitly clears
+the latch; admission checks still apply. Failed jobs are not retried until
+they pass. Inspect the cause and deliberately submit a corrected request.
+
+## Recovery and retained data
+
+The queue commits submissions before acknowledging them. It does not prune
+history; at 10,000 retained jobs it refuses new submissions. Preserve the
+queue directory and logs. Do not delete the database or lock file to clear
+a stuck worker, and do not initialize over an existing queue.
+
+A restarted worker adopts surviving supervisors without starting their jobs
+again. Each claim has a renewable deadline in the queue; its supervisor
+renews it while running. Expiry alone does not authorize replay. A command
+inherits an attempt lock, and its process group is retained in the ledger.
+Recovery refuses a held attempt lock or a process group still present. A
+claimed attempt that never executed returns to the queue after those checks.
+
+If a supervisor died and its recorded group has stopped, the attempt becomes
+interrupted, with outputs retained and no automatic replay. An unknown launch
+remains fenced for inspection. After confirming quiescence, the operator uses:
+
+```sh
+bin/azazel recover --queue /ABS/QUEUE --worker RECORDED_TOKEN --stopped 1
+```
+
+Recovery requeues never-started work; executed work records interruption.
+It never signals an old PID. `execute` and `work-gpu` are internal handoffs;
+agents must not call them. Commands must keep their inherited attempt lock
+open and must not daemonize or escape their process group.
+
+Stopping the dispatcher leaves active supervisors running. Use `cancel` for
+a job stop, or `pause` to stop active work and hold the queue. Restart the
+dispatcher with the same queue; do not delete its database or lock files.
+
+## Pictures and the gallery
+
+set `pictures: N` to the expected final PNG count for Barkeep,
+excluding `icon-*.png`. without that count Barkeep omits the render.
+the folder page counts the PNGs it finds independently.
+
+[`azazel/pages`](../azazel/pages/README.md) keeps a job's folder page, its
+film so far, `latest.html` and the two indexes. The main worker
+starts one publisher automatically when `--renders ROOT` or `SLAYER_RENDERS`
+names the render root. It reads the ledger without changing job records:
+
+```sh
+bin/azazel work --serve --queue /ABS/QUEUE --renders /ABS/RENDERS
+```
+
+The operator can also run the publisher alone for recovery:
+
+```sh
+bin/azazel pages --serve --queue /ABS/QUEUE --renders /ABS/RENDERS
+```
+
+A second one for the same queue is refused. Its log is `QUEUE/pages.log`.
+
+partial films use `ffmpeg` for encoding and `ffprobe` for verification.
+they require a readable recorded soundtrack and verified audio in the
+encoded movie. a digest, when recorded, must match before encoding.
+if a check fails, the page explains why the partial stayed unpublished.
+
+Jobs that finish between ten-second polls are published too. Failed final
+publication retries on the next poll without rerunning the render. Clean
+shutdown makes a final ledger refresh with a five-second deadline. After
+a restart, automatic catch-up includes jobs finished in the last ten minutes;
+older missed outputs require the operator's one-folder `publish` command.
+
+For a render begun before, the operator can publish one folder once:
+
+```sh
+bin/azazel publish --renders /ABS/RENDERS --folder animations/X --pictures N
+```
+
+Use new output paths. The scheduler does not yet stop a tool from replacing
+an existing output or verify a complete film before marking process success.
+The job ledger does not guarantee either.
+
+See [the design](../azazel/DESIGN.md) for the component boundaries.
+`azazel render` remains the older direct session adapter and bypasses the
+queue. `azazel composite` still refuses direct admission. Submit the actual
+supported Slayer command through `submit` for queue evaluation.
+
 ## Frame diagnostics
 
 Set `SLAYER_OBSERVE_FRAMES: "on"` in a queue request's `environment` to opt into frame observations
@@ -112,298 +410,3 @@ The `azazel_retained_jobs_*_seconds_sum` and matching count gauges summarize
 queue waiting and execution time over the retained history; divide sum by count
 for an average. They are ledger-derived gauges, not permanent counters, and
 are not a distribution or a count of discarded attempts.
-
-Azazel lives inside Slayer and schedules existing foreground commands.
-Agents submit YAML or JSON requests to one queue directory. One worker
-admits eligible jobs directly, preserving order within available resources.
-CPU work can proceed while GPU work runs. Slayer keeps responsibility
-for scenes, films, catalogue operations and output formats.
-
-Automatic pages and music-backed partial films are implemented.
-
-The scheduling target is 100% GPU utilization with a runnable backlog,
-with CPU jobs eligible alongside GPU work and admission governed by system
-pressure. The worker samples device utilization and independently admits CPU
-work. By default, GPU starts are spaced five seconds apart, with up to four
-GPU attempts and two CPU attempts. These bounds include claimed attempts.
-
-Use `work --gpu-jobs 1` to begin with one additional GPU job when large
-scenes need a measured ramp. Values from one through 64 are accepted;
-the default is four. `status.scheduling.gpu_limit` records the limit.
-
-Stored live tuning takes precedence over the startup setting. Clear all
-overrides with `tune --reset`; existing attempts continue. Reset restores
-default pressure stops and five-second admission spacing.
-See [the utilization policy](../azazel/DESIGN.md#utilization-under-backlog).
-
-## Build and discover
-
-The queue record format is version 3. Older Azazel clients reject new ledgers;
-new clients reject version 1 and 2 ledgers until an operator migrates them. Preserve
-the old database and its logs before migration. Status uses a read-only
-transaction and does not rewrite the ledger. `work --serve` stays alive while
-paused, so `resume` alone releases the latch. Renderer executables submitted
-as jobs remain pinned separately from the deployed Azazel client.
-
-Change a running queue without restarting it:
-
-```sh
-bin/azazel tune --queue /ABS/QUEUE --gpu-jobs 4 --gpu-start-seconds 1 --pressure-policy observe
-```
-
-Controls persist in the ledger. Coordinators reread them every second;
-supervisors apply pressure policy while running. Concurrency accepts 1..64.
-
-Reducing it leaves active jobs running and holds later starts. `observe`
-records memory pressure without automatically pausing or killing work;
-`stop` restores automatic pressure stops. Disk stops and unknown observations
-still apply. Tuning does not clear an existing pause; use `resume` explicitly.
-An unresolved fenced attempt retains its slot until recovery resolves it.
-
-Use the repository Game configuration, canonical cache and source shelf.
-The builder's Slayer project block must set `SLAYER_CACHE` to the shared
-cache folder before building:
-
-```sh
-game build azazel-binary
-bin/azazel --help
-bin/azazel --agent-help
-bin/azazel schema
-```
-
-`--agent-help` includes the submission workflow, a complete request,
-state meanings, retry rules, resource policy and recovery instructions.
-`schema` prints the checked YAML/JSON contract. Arguments remain an array;
-they are never passed through a shell.
-
-Pzm's `--dry-run` prints the requested action without invoking the handler.
-It is an intent preview: it does not validate input files or queue state,
-submit work, create a queue or acquire a worker lock. Its JSON includes
-`dry_run: true`; it is never a submission acknowledgement.
-
-The custom build target does not establish release provenance. Check the
-build workflow before distributing a binary.
-
-## Create a validation queue
-
-Choose an absolute path whose parent already exists. Initialization creates
-a private directory and refuses to replace an existing one:
-
-```sh
-bin/azazel init --queue /ABS/QUEUE
-bin/azazel work --queue /ABS/QUEUE --serve
-```
-
-Run the worker in a separate terminal. It stays in the foreground and starts
-independent render supervisors. Azazel owns its CPU and GPU render admission;
-it does not launch Game to execute a render. A second main worker cannot
-dispatch from the same queue. Direct Slayer jobs and Game GPU tests do not
-yet share this admission.
-Without `--serve`, the worker exits when no pending jobs remain.
-
-`status.scheduling` names the sampled counter (`Device Utilization %`), its
-sample time, target, active counts and admission hold. Unknown GPU readings
-hold GPU starts. Host pressure and disk checks still govern both resources.
-
-## Submit work
-
-For example, save this as `request.yaml`, replacing every `/ABS` path:
-
-```yaml
-agent: studio
-key: first-picture-preview-v1
-command: /ABS/SLAYER/bin/slayer
-args:
-  - draw
-  - doc/examples/jobs/first-picture.yaml
-  - --width
-  - "320"
-  - --height
-  - "180"
-  - --rays
-  - "1"
-  - --out
-  - /ABS/RENDERS/frames/DATE-studio-heard/frame.png
-directory: /ABS/SLAYER
-inputs:
-  - /ABS/SLAYER/jobs/heard-v7/individual-41.yaml
-lane: gpu
-timeout_seconds: 300
-```
-
-```sh
-bin/azazel submit --queue /ABS/QUEUE request.yaml
-bin/azazel status --queue /ABS/QUEUE
-```
-
-The acknowledgement contains the sequence number and submitted identities.
-It means the request was recorded, not that work started or a picture passed
-inspection. `status` returns a JSON snapshot of the retained job ledger.
-
-Use the same agent, key and request when retrying an uncertain submission.
-Azazel returns the original acknowledgement. Reusing a key with different
-content fails. A new key means another job, so do not change keys merely
-because the response was lost.
-
-The command and declared inputs are hashed at submission and checked before
-execution. Keep those files unchanged until
-execution. Include referenced sets and assets in `inputs` when their
-identity matters; Azazel does not discover every transitive input.
-
-Pin a submitted command to its versioned binary path. A shared launcher can
-change while the job waits, causing its identity check to refuse execution.
-For comparisons between branches or revisions, give each build a distinct
-executable path and each picture a distinct output path. Preserve both
-binaries and all declared inputs until their jobs finish. Submit one request
-per foreground invocation, with a different key for each intended job.
-
-Only `SLAYER_*` environment overrides are accepted.
-
-Jobs use Slayer's caches with the worker's environment and request overrides.
-Operators should set shared `SLAYER_CACHE`, `SLAYER_RENDERS` and source-shelf
-paths explicitly. Persistent GPU trees live in the cache home, `SLAYER_CACHE`, in
-`trees.bolt`; `SLAYER_TREE_STORE=files` keeps a file a tree instead and avoids
-the one shared database lock.
-
-Keep authored `--fresh` flags: comparisons may deliberately require a new
-picture. That flag does not disable every lower-level cache. Process-local
-caches remain local to each submitted foreground command.
-
-Any foreground Slayer tool can be scheduled this way, including `slayer`,
-`catalogue` and `searching`. Do not detach children or daemonize. Interactive
-applications are not batch jobs. A tool refusal remains a failed result;
-Azazel cannot add a rendering capability absent from the selected tool.
-The current heard studies use standard `slayer draw` jobs. Listening
-and continuous-field scenes still have limitations in that adapter.
-
-## Results, logs and stops
-
-| state | meaning |
-|---|---|
-| queued | accepted and waiting |
-| running | claimed by the worker; it may still be waiting for admission |
-| succeeded | the foreground process returned success |
-| failed | the failure and exit status are retained |
-| cancelled | cancellation was recorded |
-| interrupted | the operator resolved an uncertain attempt |
-
-Read `held` to explain an admission wait. Read `result` for the terminal
-reason and exit code. Logs are named `SEQUENCE.ATTEMPT.log`, with 20-digit
-sequences and four-digit attempts, inside the queue directory. Existing
-logs are never replaced. A successful worker exit means it drained the
-queue; individual jobs can still have failed.
-
-`executing` is retained execution-claim history, not a current liveness flag.
-It may remain true after success or failure; use `state` and `result` for
-completion. `process_group` is also historical. Clients must not signal that
-identifier or treat its continued presence in JSON as proof of a live process.
-
-Memory policy follows system pressure. The worker records sampled peak
-process-group residency and the most recent pressure category. It removes
-an inherited `GOMEMLIMIT`, does not impose a small Go heap, and does not
-stop solely because RSS crosses an estimate. An optional `memory_bytes`
-field in an older request is retained as metadata, not an enforced ceiling.
-
-Load average and accumulated swap alone do not hold work. Render processes
-default to eight Go workers. Set `SLAYER_CPU_WORKERS` in a request's
-environment to choose 1 through 1024 for that job without restarting the
-worker. A running process keeps the setting it started with; build and test
-limits are separate.
-
-With the default `stop` policy, elevated memory pressure latches a stop.
-The `observe` policy records it and continues. Free disk below 30 GiB always
-latches a stop.
-Unknown observations hold new work
-and stop active work. The monitor samples process groups; it is not a
-kernel memory cap or complete accounting of GPU allocations.
-
-```sh
-bin/azazel cancel --queue /ABS/QUEUE --agent studio 1
-bin/azazel pause --queue /ABS/QUEUE --reason "inspect host pressure"
-bin/azazel resume --queue /ABS/QUEUE
-```
-
-Pause stops active work and retains waiting jobs. Resume explicitly clears
-the latch; admission checks still apply. Failed jobs are not retried until
-they pass. Inspect the cause and deliberately submit a corrected request.
-
-## Recovery and retained data
-
-The queue commits submissions before acknowledging them. It does not prune
-history; at 10,000 retained jobs it refuses new submissions. Preserve the
-queue directory and logs. Do not delete the database or lock file to clear
-a stuck worker, and do not initialize over an existing queue.
-
-A restarted worker adopts surviving supervisors without starting their jobs
-again. Each claim has a renewable deadline in the queue; its supervisor
-renews it while running. Expiry alone does not authorize replay. A command
-inherits an attempt lock, and its process group is retained in the ledger.
-Recovery refuses a held attempt lock or a process group still present. A
-claimed attempt that never executed returns to the queue after those checks.
-
-If a supervisor died and its recorded group has stopped, the attempt becomes
-interrupted, with outputs retained and no automatic replay. An unknown launch
-remains fenced for inspection. After confirming quiescence, the operator uses:
-
-```sh
-bin/azazel recover --queue /ABS/QUEUE --worker RECORDED_TOKEN --stopped 1
-```
-
-Recovery requeues never-started work; executed work records interruption.
-It never signals an old PID. `execute` and `work-gpu` are internal handoffs;
-agents must not call them. Commands must keep their inherited attempt lock
-open and must not daemonize or escape their process group.
-
-Stopping the dispatcher leaves active supervisors running. Use `cancel` for
-a job stop, or `pause` to stop active work and hold the queue. Restart the
-dispatcher with the same queue; do not delete its database or lock files.
-
-## Pictures and the gallery
-
-Give the request `pictures: N`: how many pictures the render folder holds
-when the whole render is done, counted as its page counts them (every
-`.png` at any depth except `icon-*.png`). The page's total is that number;
-without it no total is shown, and Azazel never infers one.
-
-[`azazel/pages`](../azazel/pages/README.md) keeps a job's folder page, its
-film so far, `latest.html` and the two indexes. The main worker
-starts one publisher automatically when `--renders ROOT` or `SLAYER_RENDERS`
-names the render root. It reads the ledger without changing job records:
-
-```sh
-bin/azazel work --serve --queue /ABS/QUEUE --renders /ABS/RENDERS
-```
-
-The operator can also run the publisher alone for recovery:
-
-```sh
-bin/azazel pages --serve --queue /ABS/QUEUE --renders /ABS/RENDERS
-```
-
-A second one for the same queue is refused. Its log is `QUEUE/pages.log`.
-
-Every partial carries the recorded music, with its digest checked before
-encoding and its audio checked afterward. Missing or conflicting music
-prevents publication and leaves an explanation on the page. There is no
-silent preview fallback. Hidden working movies are ignored until published.
-
-Jobs that finish between ten-second polls are published too. Failed final
-publication retries on the next poll without rerunning the render. Clean
-shutdown makes a final ledger refresh with a five-second deadline. After
-a restart, automatic catch-up includes jobs finished in the last ten minutes;
-older missed outputs require the operator's one-folder `publish` command.
-
-For a render begun before, the operator can publish one folder once:
-
-```sh
-bin/azazel publish --renders /ABS/RENDERS --folder animations/X --pictures N
-```
-
-Use new output paths. The scheduler does not yet stop a tool from replacing
-an existing output or verify a complete film before marking process success.
-The job ledger does not guarantee either.
-
-See [the design](../azazel/DESIGN.md) for the component boundaries.
-`azazel render` remains the older direct session adapter and bypasses the
-queue. `azazel composite` still refuses direct admission. Submit the actual
-supported Slayer command through `submit` for queue evaluation.

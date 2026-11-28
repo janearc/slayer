@@ -66,10 +66,9 @@ Keeping manufacture free of an `emit` import preserves the dependency direction.
    Metal rendering, bounds, materials and representation costs.
 
 `maker`, `good`, `instrumentAssembly`, `newTube` and `turnedProfile` are
-package implementation names, not exported client APIs. Adding a factory
-kind means working inside `manufacture`; a client composes existing public
-recipes instead. Historical capitalized constructors in
-[the original design](manufactory.md) are not a current extension API.
+package implementation names. Add a factory kind inside `manufacture`.
+Clients can compose the public recipes in the
+[constructor reference](constructor-reference.md).
 
 ## Build from geometry rather than a stored surface
 

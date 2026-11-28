@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"fmt"
 	"math"
-	"strconv"
 	"strings"
 
 	"gopkg.in/yaml.v3"
@@ -18,19 +17,24 @@ func (document *Document) GroupArea(id string) ([4]float64, bool) {
 	if err != nil {
 		return values, false
 	}
-	area := groupAreaNode(tree, id)
+	return readGroupArea(groupAreaNode(tree, id))
+}
+
+func readGroupArea(area *yaml.Node) ([4]float64, bool) {
+	var values [4]float64
 	if area == nil {
 		return values, false
 	}
 	for i, key := range []string{"west", "south", "east", "north"} {
 		node := member(area, key)
-		if node == nil {
+		if node == nil || (node.ShortTag() != "!!int" && node.ShortTag() != "!!float") {
 			return values, false
 		}
-		values[i], err = strconv.ParseFloat(node.Value, 64)
-		if err != nil || math.IsNaN(values[i]) || math.IsInf(values[i], 0) {
+		var value float64
+		if err := node.Decode(&value); err != nil || math.IsNaN(value) || math.IsInf(value, 0) {
 			return values, false
 		}
+		values[i] = value
 	}
 	return values, true
 }
@@ -60,6 +64,29 @@ func groupAreaNode(tree *yaml.Node, id string) *yaml.Node {
 
 // SetGroupArea atomically changes the stand's authored region.
 func (document *Document) SetGroupArea(id string, values [4]float64) error {
+	tree, err := document.Tree()
+	if err != nil {
+		return err
+	}
+	return document.setGroupArea(tree, groupAreaNode(tree, id), values)
+}
+
+// ShiftGroupArea translates the stand's region in metres without resizing it.
+func (document *Document) ShiftGroupArea(id string, east, north float64) error {
+	tree, err := document.Tree()
+	if err != nil {
+		return err
+	}
+	area := groupAreaNode(tree, id)
+	current, ok := readGroupArea(area)
+	if !ok {
+		return fmt.Errorf("this group has no editable terrain region")
+	}
+	values := [4]float64{current[0] + east, current[1] + north, current[2] + east, current[3] + north}
+	return document.setGroupArea(tree, area, values)
+}
+
+func (document *Document) setGroupArea(tree, area *yaml.Node, values [4]float64) error {
 	for _, value := range values {
 		if math.IsNaN(value) || math.IsInf(value, 0) || value < -1e7 || value > 1e7 {
 			return fmt.Errorf("region coordinates must be finite and between -10000000 and 10000000 metres")
@@ -68,17 +95,16 @@ func (document *Document) SetGroupArea(id string, values [4]float64) error {
 	if values[2] <= values[0] || values[3] <= values[1] {
 		return fmt.Errorf("east must exceed west, and north must exceed south")
 	}
-	if current, ok := document.GroupArea(id); ok && current == values {
+	if current, ok := readGroupArea(area); ok && current == values {
 		return nil
 	}
-	tree, err := document.Tree()
-	if err != nil {
-		return err
-	}
-	area := groupAreaNode(tree, id)
 	if area == nil {
 		return fmt.Errorf("this group has no editable terrain region")
 	}
+	return document.updateGroupArea(tree, area, values)
+}
+
+func (document *Document) updateGroupArea(tree, area *yaml.Node, values [4]float64) error {
 	for i, key := range []string{"west", "south", "east", "north"} {
 		node := member(area, key)
 		if node == nil {

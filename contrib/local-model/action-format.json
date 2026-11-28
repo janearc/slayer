@@ -1,0 +1,155 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "width",
+    "height",
+    "rays",
+    "camera",
+    "aim"
+  ],
+  "properties": {
+    "width": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 512
+    },
+    "height": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 512
+    },
+    "rays": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 8
+    },
+    "camera": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "mode"
+      ],
+      "properties": {
+        "mode": {
+          "type": "string",
+          "enum": [
+            "keep",
+            "set",
+            "move"
+          ]
+        },
+        "xyz": {
+          "type": "array",
+          "minItems": 3,
+          "maxItems": 3,
+          "items": {
+            "type": "number",
+            "minimum": -50,
+            "maximum": 50
+          }
+        },
+        "by": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "east": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 50
+            },
+            "west": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 50
+            },
+            "north": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 50
+            },
+            "south": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 50
+            },
+            "up": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 50
+            },
+            "down": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 50
+            }
+          }
+        }
+      }
+    },
+    "aim": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "mode"
+      ],
+      "properties": {
+        "mode": {
+          "type": "string",
+          "enum": [
+            "keep",
+            "set",
+            "move",
+            "ball"
+          ]
+        },
+        "xyz": {
+          "type": "array",
+          "minItems": 3,
+          "maxItems": 3,
+          "items": {
+            "type": "number",
+            "minimum": -50,
+            "maximum": 50
+          }
+        },
+        "by": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "east": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 50
+            },
+            "west": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 50
+            },
+            "north": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 50
+            },
+            "south": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 50
+            },
+            "up": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 50
+            },
+            "down": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 50
+            }
+          }
+        }
+      }
+    }
+  }
+}

@@ -29,3 +29,10 @@ the plan at 640 by 360 and one ray per side, retaining lighting and camera value
 
 The original settings and previous images remain untouched. Output goes into a
 fresh catalogue book, and the selected specimen's actual PNG is displayed.
+
+## Play toolbar
+
+Keep the scene picker, Open, Save, preview or queue setup, full render
+and Source reachable at 1280 × 800 across the Type size cycle. Keep
+queue instructions in the installation guide and the Settings row
+short enough to identify the correct folder without crowding other controls.

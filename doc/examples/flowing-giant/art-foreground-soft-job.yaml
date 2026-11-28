@@ -1,0 +1,7 @@
+"$schema": https://github.com/janearc/slayer/schemas/job-v1.json
+scene: {set: art-foreground-soft.yaml}
+renderer: gpu
+camera: {name: disc}
+outputs:
+  picture: ../../../out/2026-11-27-flowing-art-foreground-soft/proof.png
+  raw: ../../../out/2026-11-27-flowing-art-foreground-soft/light.pfm

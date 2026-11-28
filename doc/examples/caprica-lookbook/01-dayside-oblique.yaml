@@ -1,0 +1,126 @@
+"$schema": https://github.com/janearc/slayer/schemas/ecosystem-v2.json
+# caprica round a lava drop, inside the binary of the first slice, round
+# two, 2026-11-27. round one's set (caprica.yaml) shrank the drop by 15 per
+# cent, by eye, to reach a number; it no longer reads, the generator has no
+# such share. this one keeps what the generator makes.
+#
+# the binary: a 12 Myr, 2.45 solar mass A star and a 0.62 solar mass white
+# dwarf at 25000 K, 9.2 AU apart, e 0.16 (set as the first slice's).
+#
+# the lava drop: 0.1 solar masses, circular, 48 AU from the binary's centre
+# of mass, in its plane. its mass, distance and age are picked. its radius
+# is the cold degenerate relation's at two nucleons an electron (Nauenberg
+# 1972, from memory, to shelve), 0.0271 solar radii, 2.95 Earth radii, as
+# it stands, with no correction. its 3000 K is made up (the iron-60 that
+# melted it is gone after ten half-lives, and the drop is a billion years
+# old), and the draw says so ("made up:").
+#
+# caprica: like the earth (mass, makeup and seed 1 of the like-earth sets),
+# locked, one face to the drop, which is its sun. its distance is not
+# chosen: it says flux: 1, the Earth's sunlight, and the generator puts it
+# where the drop's light comes to that, 1,093,911 km out (1.094 million),
+# a year of 17.3 hours (its day). the drop is 1.97 degrees across in its
+# sky. it stands at the origin; the pair is worked back from where the
+# drop stands (drop_at), so that every number near caprica is small.
+# caprica is at 70 degrees on its circle, which puts the A star 88 degrees
+# from the drop in its sky: quarter phase from the A star's side.
+#
+# the drop's place, drop_at, is that distance from the origin at 70
+# degrees: east -374139656, north -1027940256 (1,093,911,172 m times cos
+# and sin of 70). if the generator's distance changes, these change, and
+# the camera "drop" with them (it stands 70000 km off, as it did).
+#
+# weather: caprica's clouds are laid about the substellar point by the
+# locked-sky weather: a dense convective deck about 40 degrees across with
+# towers tallest at the substellar point and lower toward the terminator,
+# cloud carried over the rest of the day side, a churning belt and whorls
+# at the terminator, and cloud carried on to the night side, thinning deep
+# in it. the numbers are picked by eye in scene/medium/choices.yaml.
+#
+# a copy of this set, without its comments, is in the slayer repository at
+# set/testdata/caprica-lava-drop.yaml, where a test holds drop_at and the
+# camera "drop" to the distance the flux gives.
+scene:
+  name: caprica round the lava drop
+  seed: 7
+  setting: space
+  light: none
+  vibes: on
+  film: {width: 400, height: 400, rays: 2, exposure: 0.003, wide: 40}
+  cameras:
+    01-dayside:
+      title: Day-side disc
+      location: {at: [-21800000, -4850000, 3000000]}
+      orientation: {look_at: [0, 0, 0]}
+    02-quarter:
+      title: Quarter phase
+      location: {at: [-22826400, 7411200, 500000]}
+      orientation: {look_at: [0, 0, 0]}
+    03-night:
+      title: A-star night side
+      location: {at: [8210000, 22550000, 1500000]}
+      orientation: {look_at: [0, 0, 0]}
+    04-terminator:
+      title: Terminator limb
+      location: {at: [-12500000, 6100000, 6000000]}
+      orientation: {look_at: [0, 0, 0]}
+    05-deck:
+      title: Convective deck
+      location: {at: [9500000, -2430000, 3500000]}
+      orientation: {look_at: [5261000, -3684000, 3000000]}
+    06-grazing:
+      title: Grazing cloud tops
+      location: {at: [9080000, -2430000, 3500000]}
+      orientation: {look_at: [5400000, -3700000, 4200000]}
+    07-oblique:
+      title: Above-deck oblique
+      location: {at: [11000000, -3300000, 4000000]}
+      orientation: {look_at: [5261000, -3684000, 3000000]}
+    08-polar-horizon:
+      title: Polar horizon
+      location: {at: [-306185, -842985, 6381541]}
+      orientation: {look_at: [-1196630, -1269929, 6311220]}
+    09-drop-close:
+      title: Lava drop close
+      location: {at: [-324699060, -989305916, 21945000]}
+      orientation: {look_at: [-374139656, -1027940256, 0]}
+    10-drop-oblique:
+      title: Lava drop oblique
+      location: {at: [-344139656, -977940256, -30000000]}
+      orientation: {look_at: [-374139656, -1027940256, 0]}
+    11-drop-to-caprica:
+      title: Caprica from near the drop
+      location: {at: [-354139656, -972940256, 5000000]}
+      orientation: {look_at: [0, 0, 0]}
+    12-system:
+      title: Wide system portrait
+      location: {at: [0, -500000000, 350000000]}
+      orientation: {look_at: [-187069828, -513970128, 0]}
+  world:
+    unit: 1
+    sky:
+      stars: {seed: 29, share: 0.01, size: 0.3, bright: 1.5}
+      source: eye
+    binaries:
+      pair:
+        generate:
+          primary: {mass: 2.45, age: 1.2e7}
+          companion: {mass: 0.62, temperature: 25000, radius: 0.0122}
+          separation: 9.2
+          eccentricity: 0.16
+          drop: {mass: 0.1, temperature: 3000, age: 1.0e9, distance: 48, phase: 8, made_up: true}
+        drop_at: [-374139656, -1027940256, 0]
+        time: 4
+    bodies:
+      caprica:
+        generate:
+          mass: 1
+          makeup: {metal: 0.32, rock: 0.6798, ice: 0.0002, gas: 0}
+          tilt: 0
+          flux: 1
+          age: 4.5e9
+          seed: 1
+          locked: true
+        circles: pair
+        phase: 70
+        detail: 5

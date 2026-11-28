@@ -18,35 +18,35 @@ var embedded []byte
 // Profile holds the authored defaults for one explicitly named scaffold.
 // Its pose controls are not anatomical measurements.
 type Profile struct {
-	Kind, Scaffold                     string
-	Phase, Yaw, Posture, Fold, Seconds float64
-	Scale                              float64
-	Axial                              [8][6]float64
-	Sections                           [16][4]float64
-	Masses                             [3][6]float64
-	Body                               [8][5]float64
-	Cage                               [11][4]float64
-	Density                            [8][7]float64
-	ContinuousHead                     [7]float64
-	ContinuousFins                     [6]float64
-	FinRoots, FinOrigin                [2]float64
-	FinSections                        [6][4]float64
-	Eye                                [4]float64
-	LimbRoots                          [2]float64
-	LimbPoints                         [3][3]float64
-	LimbRadii                          [3]float64
-	Wing                               [3][3]float64
-	WingLengths                        [3]float64
-	CageWing                           [5][3]float64
-	CageWingLengths                    [4]float64
-	CageLeg                            [3][3]float64
-	CageLegLengths                     [2]float64
-	CageBends                          [3][3]float64
+	Kind, Scaffold                           string
+	Phase, Yaw, Posture, Fold, Seconds, Bank float64
+	Scale                                    float64
+	Axial                                    [8][6]float64
+	Sections                                 [16][4]float64
+	Masses                                   [3][6]float64
+	Body                                     [8][5]float64
+	Cage                                     [11][4]float64
+	Density                                  [8][7]float64
+	ContinuousHead                           [7]float64
+	ContinuousFins                           [6]float64
+	FinRoots, FinOrigin                      [2]float64
+	FinSections                              [6][4]float64
+	Eye                                      [4]float64
+	LimbRoots                                [2]float64
+	LimbPoints                               [3][3]float64
+	LimbRadii                                [3]float64
+	Wing                                     [3][3]float64
+	WingLengths                              [3]float64
+	CageWing                                 [5][3]float64
+	CageWingLengths                          [4]float64
+	CageLeg                                  [3][3]float64
+	CageLegLengths                           [2]float64
+	CageBends                                [3][3]float64
 }
 
 type authored struct {
 	Kind, Scaffold, Status, By, Date, Source string
-	Phase, Yaw, Posture, Fold, Seconds       *float64
+	Phase, Yaw, Posture, Fold, Seconds, Bank *float64
 	Scale                                    *float64
 	Axial                                    *[8][6]float64
 	Sections                                 *[16][4]float64
@@ -100,6 +100,12 @@ func Read(file string, raw []byte) (*Book, error) {
 			return nil, fmt.Errorf("%s: invalid phase for %q", file, row.Kind)
 		}
 		p := Profile{Kind: row.Kind, Scaffold: row.Scaffold, Phase: *row.Phase}
+		if row.Bank != nil {
+			if row.Scaffold != "pterosaur" || !valid(row.Bank, math.Pi/2) {
+				return nil, fmt.Errorf("%s: invalid pterosaur bank for %q", file, row.Kind)
+			}
+			p.Bank = *row.Bank
+		}
 		cageRig := row.CageWing != nil || row.CageWingLengths != nil || row.CageLeg != nil || row.CageLegLengths != nil || row.CageBends != nil
 		switch row.Scaffold {
 		case "pliosaur":

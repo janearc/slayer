@@ -35,6 +35,7 @@ type Recipe struct {
 	carries                                        []string
 	diameter, aperture, opening, azimuth, altitude float64
 	segmented                                      bool
+	poseClip                                       bool
 	tower                                          manufacture.TowerSpec
 	bridge                                         manufacture.BridgeSpec
 	street                                         manufacture.StreetSpec
@@ -48,6 +49,9 @@ func (recipe Recipe) Kind() string { return recipe.kind }
 
 // HasTreeProfiles reports a city or tower recipe with a checked tree book.
 func (recipe Recipe) HasTreeProfiles() bool { return recipe.treeProfiles != nil }
+
+// HasPoseClip reports a recipe with a checked authored bioform clip.
+func (recipe Recipe) HasPoseClip() bool { return recipe.poseClip }
 
 // IsPlant reports a checked plant profile recipe.
 func (recipe Recipe) IsPlant() bool {
@@ -257,6 +261,9 @@ func (reading reader) recipes(_, node *yaml.Node) error {
 		if says(block, "animal") {
 			return reading.animalRecipe(name, block)
 		}
+		if says(block, "pose-clip") {
+			return reading.poseRecipe(name, block)
+		}
 		if says(block, "plant") {
 			return reading.plantRecipe(name, block)
 		}
@@ -443,6 +450,9 @@ func (reading reader) resolvedRecipes() error {
 		kind, detail, err := resolve(t.name, t.kind, t.recipe, t.complexity)
 		if err != nil {
 			return err
+		}
+		if kind == "fire" && t.position != nil && t.scale != nil && reading.set.InSpace() {
+			return fmt.Errorf("%s: scale is not supported for fire recipe placement %q", reading.file, t.name)
 		}
 		if kind == "fire" && t.alight {
 			return fmt.Errorf("%s: fire %s is already alight", reading.file, t.name)

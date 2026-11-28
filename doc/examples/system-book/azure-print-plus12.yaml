@@ -1,0 +1,6 @@
+"$schema": https://github.com/janearc/slayer/schemas/job-v1.json
+scene: {set: system.yaml}
+renderer: gpu-native
+camera: {name: azure-orbit}
+film: {width: 640, height: 400, rays: 1}
+print: {knee: 0.8, top: 4, stops: 12}

@@ -82,6 +82,17 @@ func (made *Weather) Reach(dir string, moment, every float64,
 		0o644)
 }
 
+// LoadReached reads the already-kept answer for a requested moment. It never
+// creates a cache or advances the weather; a missing checkpoint is an error.
+func (made *Weather) LoadReached(dir string, moment float64, onGPU bool) error {
+	shelf := filepath.Join(dir, made.key(onGPU))
+	reached, err := os.ReadFile(note(shelf, moment))
+	if err != nil {
+		return err
+	}
+	return made.load(filepath.Join(shelf, string(reached)))
+}
+
 // note is where a shelf says which checkpoint answers a moment: the
 // first step past it, which a checkpoint's own name, its clock, does
 // not say.

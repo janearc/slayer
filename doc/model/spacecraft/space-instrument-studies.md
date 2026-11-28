@@ -10,10 +10,10 @@ booms, raised equipment-bay doors, housing bands and secondary supports.
 The scene retains the existing simplified tube and solar wings. It does
 not model servicing-era changes, actuators or optical performance.
 
-Spitzer receives equipment-bay relief, thermal collars and secondary
-supports. Its existing single rectangular solar shield is still a proxy:
-the actual panel assembly is wedge-shaped and tilted. That silhouette
-needs a separate correction, not a claim that extra trim has fixed it.
+Spitzer has equipment-bay relief, thermal collars and secondary
+supports. its solar assembly uses two folded leaves with separately
+modelled cells. the body and instruments remain simplified. see
+[Spitzer’s build and sources](spitzer-maturity.md) for the assembly.
 
 Webb retains the existing five-layer shield, segmented gold primary and
 secondary assembly. A braced rear frame surrounds the instrument module,

@@ -884,9 +884,11 @@ func (reading reader) things(_, value *yaml.Node) error {
 			err = reading.refuse(valueNode(block, "part-spin"), "part-spin is supported only with setting: space")
 		}
 		if err == nil && made.scale != nil {
-			if !reading.second || !says(block, "east") || !says(block, "north") ||
+			legacy := says(block, "east") && says(block, "north")
+			absolute := reading.spaceCoordinates && made.position != nil
+			if !reading.second || !(legacy || absolute) ||
 				says(block, "place") || says(block, "orbit") || says(block, "around") || says(block, "attitude") || made.partSpin != nil {
-				return reading.refuse(valueNode(block, "scale"), "scale requires an explicit east/north placement without part-spin or attitude")
+				return reading.refuse(valueNode(block, "scale"), "scale requires east/north or a space position without part-spin or attitude")
 			}
 		}
 		if err == nil && reading.second {

@@ -241,12 +241,8 @@ func TestEveryKindHasAFamily(t *testing.T) {
 	}
 }
 
-// TestEachKindIsInTheFamilyItBelongsTo checks the word a family is, for one
-// kind of every maker that was left without one: a living thing is an
-// animal, a gargoyle is an ornament of a building,
-// a frontage or a shop block is a city building, a street and its signs are
-// the city, and a stream of bubbles is water. Each kind named must exist,
-// so that a kind renamed fails here and is not skipped.
+// TestEachKindIsInTheFamilyItBelongsTo checks the expected families of
+// representative registered kinds and individual profiled makers.
 func TestEachKindIsInTheFamilyItBelongsTo(t *testing.T) {
 	want := [][2]string{
 		{"gargoyle-orca-granite", "architectural ornament"},
@@ -257,6 +253,12 @@ func TestEachKindIsInTheFamilyItBelongsTo(t *testing.T) {
 		{"lashed-street", "city"},
 		{"sign-awning", "city"},
 		{"bubble-stream", "water"},
+		{"adult-human-neutral", "animal"},
+		{"adult-human-reach-clip", "animal"},
+		{"adult-human-iris-hazel", "animal"},
+		{"adult-chest-dark-high-chroma", "animal"},
+		{"adult-chest-study-asymmetric", "animal"},
+		{"tissue-study-4mm", "material study"},
 	}
 	rows := table()
 	if got := familyOf(kelpRow{}); got != "alga" {

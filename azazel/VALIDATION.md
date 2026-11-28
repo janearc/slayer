@@ -1,4 +1,7 @@
-# queue validation, 2026-11-15
+# Queue validation, 2026-11-15
+
+This record describes the 15 November test runs and their limits. See
+[the operator guide](../doc/azazel.md) for current commands and policy.
 
 ## heavy film admission
 
@@ -108,8 +111,9 @@ are refused. The shipped `--agent-help` explains these boundaries.
 
 Last measured statement coverage was 94.8% for the queue, 96.7% for the
 budget package, and 82.2% for the command package. These do not meet the 100% gate.
-Focused vet passed. Full-project acceptance, the complete mutation gate
-and independent reviews remain outstanding.
+Focused vet passed. A focused compiler-overlay mutation restoring the old
+cancellation bug failed its dedicated regression. This run did not measure
+full-project mutation coverage or complete independent review.
 
 Full-tree Game lint also reports inherited prose and comment findings in
 the merged scene and Ferruccio work. Queue-guide findings were repaired;
@@ -160,7 +164,7 @@ validation run; automatic queue integration remains unfinished.
 Recipes and measured limitations accompany the images. Reusable smoke
 inputs are in [examples/validation](examples/validation/README.md).
 
-## remaining migration blockers
+## Open issues at this checkpoint
 
 The queue does not yet prevent a tool from overwriting prior outputs,
 verify arbitrary expected outputs before publication, or provide complete
@@ -168,5 +172,3 @@ automatic descendant recovery. Backup/restore acceptance, gallery/progress
 integration and resource coordination with unrelated Game jobs remain.
 The remaining current workloads also need a maintained compatibility
 matrix. A generic executable interface does not prove every workload.
-
-Do not announce the render pause or migrate agents on this evidence alone.

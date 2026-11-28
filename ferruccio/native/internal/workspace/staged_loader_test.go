@@ -2,6 +2,7 @@ package workspace
 
 import (
 	"context"
+	"sync"
 	"sync/atomic"
 	"testing"
 	"time"
@@ -213,4 +214,41 @@ func (owner blockingStageOwner) Close() error {
 	close(owner.started)
 	<-owner.finish
 	return nil
+}
+
+func TestPreparationWakeCompletesBeforeLoaderClose(t *testing.T) {
+	loader := newStageLoader(nil)
+	waking, release, woke := make(chan struct{}), make(chan struct{}), make(chan struct{})
+	var once sync.Once
+	unblock := func() { once.Do(func() { close(release) }) }
+	defer unblock()
+	loader.notify = func() {
+		close(waking)
+		<-release
+	}
+	go func() {
+		loader.wakePreparing(context.Background())
+		close(woke)
+	}()
+	<-waking
+	closing, closed := make(chan struct{}), make(chan struct{})
+	go func() {
+		close(closing)
+		loader.close()
+		close(closed)
+	}()
+	<-closing
+	select {
+	case <-closed:
+		t.Fatal("loader closed during a window wake")
+	case <-time.After(30 * time.Millisecond):
+	}
+	unblock()
+	select {
+	case <-closed:
+	case <-time.After(3 * time.Second):
+		t.Fatal("loader close did not finish after the wake")
+	}
+	<-woke
+	loader.wakePreparing(context.Background())
 }

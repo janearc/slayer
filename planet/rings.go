@@ -236,6 +236,12 @@ func NewRingSlab(ring Ring, thickness float64) (RingSlab, error) {
 	return RingSlab{ring: ring, half: thickness / double, light: light}, nil
 }
 
+// MarchesAtTheMiddle says a ring's march takes the middle of each step: a
+// ring is a thin flat leg whose grains are hashed by radius, and a sample
+// at a hashed step falls either side of it by the last bit of a float,
+// which a float32 and a float64 do not share (2026-11-26).
+func (slab RingSlab) MarchesAtTheMiddle() bool { return true }
+
 // Density is the ring's share of its mean depth there, its ringlets', inside
 // the slab, and zero outside it.
 func (slab RingSlab) Density(point maths.Vec) float64 {

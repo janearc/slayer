@@ -16,15 +16,12 @@ holds no picture-making of its own.
 - `--age` and `--who` are pzm's, from the stamp.
 - The flags every job-taking verb shares are declared once, by
   `jobFlags`, and read once, by `overridesOf`, into `job.Override`s:
-  `--out`, `--width`, `--height`, `--rays`, `--at`, `--camera`,
-  `--renderer`, `--quality`, and a flag for each of the job's flags
-  and shortcuts, `on` or `off`, made from the schema (`job.Switches`):
-  `--vibes`, `--fastlight`, `--lamp-store`, `--sky-looks`.
-
-  Unset is
-  the job's. A bad
-  number or time is refused in one wording:
-  `--width takes a whole number, not "x"`.
+  `--out`, `--width`, `--height`, `--rays`, `--spp`, `--at`,
+  `--camera`, `--renderer`, `--quality`, and the schema’s switches:
+  `--vibes`, `--fastlight`, `--lamp-store`, `--sky-looks`, `--restir`.
+  `--rays` sets the per-side count and `--spp` the total. both
+  override the job’s sampling setting. give one or leave the job’s
+  setting in place.
 - Verbs return errors. Nothing here exits the process.
 - Each verb other than draw is in a file of its own, `NAME.go`, which
   declares it with `declareNAME`; `tool.go` calls each once.
@@ -250,9 +247,8 @@ is drawn or encoded; a changed tune keeps every frame and makes the movie
 again.
 
 A frame written and not yet recorded, as a kill between the two leaves
-it, is drawn again. A manifest that does not read is refused: empty the
-folder or draw to a new one. Rewriting the manifest costs 3.6 ms at
-6,000 frames, against seconds a frame, so it is written every frame.
+it, is drawn again. an unreadable manifest stops the job. change the
+frames output to a new directory to start a fresh draw.
 
 Under a renders home, a bare-named film looks for a folder of its name
 from an earlier day whose manifest has its frames' key, or whose movie
@@ -270,6 +266,9 @@ offers it. A final line for each file written, and a line of totals. No
 escape bytes and no carriage returns.
 
 ### Movie sizes
+
+MP4 encoding uses AVFoundation on macOS with cgo. a frames-only
+film can still write its numbered PNGs without the movie writer.
 
 The movie's settings are checked before any frame is drawn: its rate,
 count and, where the job says its width and height or draws plates, its
@@ -292,9 +291,9 @@ draws even then, and keeps what it drew.
 
 ### Long stills
 
-A still drawn on the processor is drawn a row at a time
-(`trace.SampledKept`), and each row is kept under the cache home, kind
-`rows`, as it is finished (`door/rows.go`). Its key is the job's light
+CPU draws use `trace.SampledKept` for per-side sampling and
+`trace.ExactKept` for exact totals. a set still keeps each finished
+row under the cache home, in the `rows` cache. Its key is the job's light
 key, the build, the scrooge setting, the sources list and the row's number, so rows of
 another job, size, camera, rays or build are never taken up, and an
 entry that does not check is a miss.
@@ -314,10 +313,8 @@ the first row, and the time left at the pace of the rows drawn in this
 run, once the meter's least time and rows have passed. A last line is
 said when the draw ends. Standard output is unchanged.
 
-A still through a lens rig, of several shutter glimpses, or told ray by
-ray keeps no rows and says no progress line: its rows are not one
-picture's (a row's key would need the instant or glimpse in it), and a
-walked ray must be told every time.
+draws through a lens rig, across several shutter glimpses or with
+ray narration bypass row reuse.
 
 Before the rows, staging the set says where it is on standard error at
 the same interval, the step and, where it places things, the thing of
@@ -430,54 +427,8 @@ its copy in the cache home (`schema/job-v1.schema.json` under
 where it is not set), written first when absent or not this build's.
 `slayer.lua` is kept beside it for the editor.
 
-## Tests with no anti-test, and why
+## checks
 
-None. Every positive is named by a marker (`// anti-test of TestX`);
-`go run ./tools/antitests ./door/` counts them. Two things to know when
-reading the markers:
-
-- A pair that are mirrors of each other (inside tmux and outside it;
-  no renders home and a renders home) name each other, since each is the
-  other's near miss.
-- `TestDrawFilmMovieNeedsMacOS` is compiled only away from macOS, and
-  its marker names `TestDrawFilmWritesAMovieWithSound`, which is compiled
-  only on macOS. On one machine only one of the two exists.
-
-The anti-tests added in `anti_test.go` each answer one positive the
-suite had left alone: a failure to write, overwrite or remove is told
-from a success there.
-
-- A copy whose source is gone leaves its target.
-- A replace that cannot write leaves the old file.
-- A stale frame that cannot be removed is named and the others still go.
-- A working folder with a stranger's file keeps it and says so.
-- A clear of one cache kind leaves another.
-- A dry run of a clear of every kind removes nothing.
-
-## Tests that draw
-
-None needs a GPU, the shelf or a staged scene, and none is moved. These
-draw on the CPU, at the tests' own tiny size, through the real runner
-(the `drew` helper, `assess --judge`, the weather, the tune films);
-their times, from `go test -count=1 -v ./door/` with `GOMAXPROCS=3`:
-
-- `TestWatchUnderAPty` (1.77 s): runs `watch` under a pty, the one test
-  that does; it also draws.
-- `TestTunesStopsCleanlyWithARequestOpen` (2.00 s): waits out the
-  server's shutdown with a request open; it draws nothing.
-- `TestTunedLoopsAndCuts` (1.07 s), `TestTunedLeavesAOneShotAlone`
-  (0.80 s): play a tune through the synth.
-- `TestWhatCannotBeJudgedIsRefused` (0.98 s), `TestAssessJudgesASet`
-  (0.77 s), `TestAssessJudgesASmokeAndServesItAgain` (0.71 s),
-  `TestAssessRefusesWhatAFilmRefusesBeforeItsFirstFrame` (0.37 s).
-- `TestDrawFramesAndMovieTwice` (0.75 s), `TestSoundFromAFile` (0.53 s),
-  `TestDrawFilmWritesAMovieWithSound` (0.38 s): write mp4s, on macOS only.
-- `TestTunesWritesStillsThePageAndFilms` (0.45 s),
-  `TestTunesWritesStillsAndSoundsWhereOutSays` (0.23 s).
-- `TestRunnerFilmBookkeeping` (0.35 s): over mocks; the time is the
-  synth making its sound.
-- Every other test that draws takes under 0.2 s (the `Draw`, `AStill`
-  and `DrawWeather` tests); the rest do not draw.
-
-The whole suite is about 13.6 s (`go test -count=1 ./door/`,
-`GOMAXPROCS=3`).
+`game test -- ./door` checks command parsing, job overrides and
+output bookkeeping. see [testing](../doc/testing.md) for draw-tagged
+tests and the movie checks on macOS.

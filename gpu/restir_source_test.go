@@ -15,12 +15,19 @@ func TestRestirEditsAreFoundOnceEach(t *testing.T) {
 		t.Fatal(err)
 	}
 	for _, want := range []string{"int restir_on;", "falling_restir(world",
-		"world.restir_on = 0;", "world.restir_on = 1;",
+		"world.restir_on = 1;",
 		"kernel void restir_gbuffer", "kernel void restir_resample",
 		"kernel void restir_spatial"} {
 		if strings.Count(text, want) < 1 {
 			t.Errorf("the restir kernel lacks %q", want)
 		}
+	}
+	_, primary, _ := strings.Cut(text, "static Seen shade(World")
+	surface := strings.Index(primary, "Seen seen = surfaced(")
+	cutoff := strings.Index(primary, "world.restir_on = 0;")
+	foam := strings.Index(primary, "float foam_coverage = 0;")
+	if surface < 0 || cutoff <= surface || foam <= cutoff {
+		t.Error("the reservoir must be disabled after primary surface shading and before foam or secondary rays")
 	}
 }
 

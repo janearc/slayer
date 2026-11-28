@@ -1,0 +1,5 @@
+"$schema": https://github.com/janearc/slayer/schemas/job-v1.json
+scene: {set: exposure-high.yaml}
+renderer: cpu
+camera: {name: disc}
+outputs: {picture: ../../../out/2026-11-27-flowing-exposure-high/proof.png}

@@ -1,35 +1,22 @@
 # Render admission and Azazel
 
-Game lanes coordinate work on the shared development machine. Azazel has
-a foreground command queue, plus the older direct rendering adapter. The
-queue enters Game for each selected job. See [the human guide](azazel.md).
+on a shared machine, submit foreground render commands through
+[Azazel](azazel.md#submit-work). `azazel work` dispatches CPU and GPU
+work directly. Game’s build and test lanes have separate coordination.
 
-## What you can run
+the worker uses observed host pressure and disk space for admission.
+unknown observations hold new work. pressure can latch a pause, and
+low disk always does. the [worker scheduling guide](azazel.md#worker-scheduling)
+explains tuning and recovery.
 
-`azazel submit` records a request, and `azazel work` dispatches requests in
-order through their Game lanes. The worker checks host conditions before
-entering Game and again before execution. Unknown measurements hold work.
-Waiting for host conditions does not retain a Game lane.
-
-The current memory policy measures system pressure and records sampled peak
-group RSS. It does not stop solely for an RSS estimate or accumulated swap,
-and removes inherited `GOMEMLIMIT`. Elevated pressure and low disk latch a
-stop. Group sampling does not account for every GPU allocation or contain
-descendants that deliberately leave the group.
-
-`azazel render` wraps the set-rendering engine also used by the older
-`slayer render` path. It does not connect that render to the private
-admission machinery. Ordinary jobs use `slayer draw JOB`; coordinate
-expensive work with Game and the machine's queue policy.
-
-The Azazel composite admission entry point deliberately refuses direct
-starts while shared admission, reservations, locking and publication are
-unavailable as a complete work-lifetime boundary. This is separate from
-the explicitly run Omnipositor experiment. Having lower-level helpers or
-a successful internal transaction must not be treated as a bypass.
+`azazel render` is the older direct set-rendering adapter. the
+`azazel composite` admission entry currently refuses direct starts.
+for the supported foreground commands use the queue’s `submit` path.
 
 ## Memory limits
 
-For large films, `GOMEMLIMIT` controls the Go heap softly, payload
-counters cover selected buffers, and neither caps all Metal memory. See [building](building.md) for the current Game workflow
-and [optimizations](optimizations.md) for renderer memory accounting.
+group RSS, process footprint, Go heap and Metal counters measure
+different things. `GOMEMLIMIT` is a soft Go heap target and Azazel
+removes inherited values when it starts a render. see
+[profiling](observability.md) and [workload profiles](../render/workload/README.md)
+for measuring a job’s memory needs.

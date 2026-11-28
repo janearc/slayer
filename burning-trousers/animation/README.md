@@ -4,15 +4,10 @@ This benchmark uses one clean, committed Slayer executable for both
 5000-redwood scenes. Terrain, mist, camera, time, exposure and all sixteen
 samples per pixel stay fixed. Only the renderer changes.
 
-From the Slayer root, with the source shelf and dependencies configured:
-
-    game build
-    game build review-4k-binary
-    game run review-4k
-
-Follow the machine's render policy and run serially: this draws two 4K frames.
-`game check` only compiles the benchmark. The named build uses its expected
-path; the producer checks that executable against the harness's clean commit.
+The benchmark in `measurement_test.go` expects a prepared executable at
+`out/review-4k/hillside` and checks it against the clean source commit.
+The benchmark draws two 4K frames. Coordinate any run with the render
+queue operator. The normal test suite does not execute the benchmark.
 
 Artifacts stay in out/review-4k: matched scene YAML, complete command logs,
 raw RGB, PNGs, and measurement.json. The producer records the clean Git

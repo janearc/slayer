@@ -118,6 +118,294 @@ entries:
     details: [hull, clumps, quick, demo]
     view-yaw-deg: 0
     view-elevation-deg: 12
+  - kind: adult-human-neutral
+    group: Human studies
+    about: A neutral standing adult human with a short scalp groom.
+    notes: >-
+      A procedural 1.70 m adult reference with posed eye globes and an authored
+      skin diffusion profile.
+      The full scalp groom can exceed the catalogue face limit. Draw
+      sets/bioforms/adult-human-neutral.yaml with the CPU renderer.
+    details: [quick]
+  - kind: adult-human-reaching
+    group: Human studies
+    about: The standing reference reaching with its left arm.
+    notes: >-
+      Authored thorax, head, shoulder and arm turns change the upper body while
+      the legs retain their neutral pose.
+      The full scalp groom can exceed the catalogue face limit. Draw
+      sets/bioforms/adult-human-reaching.yaml with the CPU renderer.
+    details: [quick]
+  - kind: adult-human-reach-clip
+    group: Human studies
+    about: The opening pose of a timed left-arm reach.
+    notes: >-
+      The catalogue samples the neutral start. In a set, the authored clip
+      reaches, holds and returns over 3.2 seconds.
+      The full scalp groom can exceed the catalogue face limit. Draw
+      sets/bioforms/adult-human-reach-clip.yaml with the CPU renderer.
+    details: [quick]
+  - kind: adult-human-male-study
+    group: Human studies
+    about: A standing adult reference with male external forms and cropped scalp fibres.
+    notes: >-
+      Uses the same 1.70 m stature, with authored pectoral and pelvic forms and a
+      separate skin tone.
+      The full scalp groom can exceed the catalogue face limit. Draw
+      sets/bioforms/adult-human-male.yaml with the CPU renderer.
+    details: [quick]
+  - kind: adult-human-details
+    group: Human studies
+    about: The neutral adult with an ungroomed scalp and procedural skin marks.
+    notes: >-
+      Rest-space skin marks and authored surface relief are intended for the close
+      views in the detail set. Use --renderer cpu.
+    details: [quick]
+  - kind: adult-human-cheek-scar
+    group: Human studies
+    about: The bare-scalp adult with healed scratches on the left cheek.
+    notes: >-
+      A rest-space mark adds local pigment and relief. Compare the matched views
+      in sets/bioforms/adult-human-cheek-scar.yaml with the CPU renderer.
+    details: [quick]
+  - kind: adult-human-thin-skin
+    group: Human studies
+    about: The ungroomed adult with a layered thin-tissue material.
+    notes: >-
+      Illustrative transmission varies with mesh thickness. The hand backlight set
+      isolates the effect at the digits. Use --renderer cpu.
+    details: [quick]
+  - kind: adult-human-auricle
+    group: Human studies
+    about: The bare-scalp adult with folded outer ears.
+    notes: >-
+      The head mesh includes the pinna folds and slight authored asymmetry.
+      Use --renderer cpu.
+    details: [quick]
+  - kind: adult-human-auricle-thin-skin
+    group: Human studies
+    about: The folded-ear study with layered thin-tissue transmission.
+    notes: >-
+      The illustrative tissue profile uses a shorter cutoff for the pinna.
+      Draw sets/bioforms/adult-human-ear-backlight.yaml with the CPU renderer
+      to inspect the effect under a local backlight.
+    details: [quick]
+  - kind: adult-human-wider-stance
+    group: Human studies
+    about: The ungroomed adult with both thighs turned outward.
+    notes: >-
+      Each thigh turns five degrees about its hip. The authored pose carries the
+      lower legs along with the turn. Use --renderer cpu.
+    details: [quick]
+  - kind: adult-human-groom-fibre
+    group: Human studies
+    about: The adult reference with short individual scalp fibres.
+    notes: >-
+      Authored coverage, a swept part and a rear whorl guide static strands with
+      single-fibre scattering.
+      The full scalp groom can exceed the catalogue face limit. Draw
+      sets/bioforms/groom-study/scalp-fibre.yaml with the CPU renderer.
+    details: [quick]
+  - kind: adult-human-groom-medium
+    group: Human studies
+    about: The adult reference with a medium-length parted fibre groom.
+    notes: >-
+      Authored roots and shaft guides shape the part and hanging locks. Fibres are
+      static.
+      The full scalp groom can exceed the catalogue face limit. Draw
+      sets/bioforms/groom-study/medium-fibre.yaml with the CPU renderer.
+    details: [quick]
+  - kind: adult-human-groom-medium-layered
+    group: Human studies
+    about: The medium fibre groom with extra lift at the crown.
+    notes: >-
+      The authored crown lift changes the shaft guidance while the same adult body
+      and skin are retained.
+      The full scalp groom can exceed the catalogue face limit. Draw
+      sets/bioforms/groom-study/medium-layered-fibre.yaml with the CPU renderer.
+    details: [quick]
+  - kind: adult-human-groom-medium-field
+    group: Human studies
+    about: The medium fibre groom guided by the scalp-surface direction field.
+    notes: >-
+      The authored field guides the static shafts along the scalp before they
+      hang.
+      The full scalp groom can exceed the catalogue face limit. Draw
+      sets/bioforms/groom-study/medium-field-fibre.yaml with the CPU renderer.
+    details: [quick]
+  - kind: adult-human-groom-medium-field-wisps
+    group: Human studies
+    about: The medium scalp-field groom with shared wisp shapes.
+    notes: >-
+      Nearby, similarly directed guides share bend and tip offsets while shafts
+      retain individual roots and paths. The full scalp groom can exceed the
+      catalogue face limit. Draw sets/bioforms/groom-study/medium-field-wisps.yaml
+      with the CPU renderer.
+    details: [quick]
+  - kind: adult-human-body-hair
+    group: Human studies
+    about: The bare-scalp adult with added arm and leg fibres.
+    notes: >-
+      Procedural coverage and authored regional masks place static limb fibres
+      with single-fibre scattering. Use --renderer cpu.
+    details: [quick]
+  - kind: adult-human-facial-hair
+    group: Human studies
+    about: The bare-scalp adult with individual eyebrow and eyelash fibres.
+    notes: >-
+      The static fibres follow authored brow and lash paths. Draw
+      sets/bioforms/groom-study/facial-hair.yaml with the CPU renderer.
+    details: [quick]
+  - kind: adult-human-vellus-study
+    group: Human studies
+    about: The bare-scalp adult with fine cheek, finger and toe hair.
+    notes: >-
+      Regional masks place short static fibres. Draw
+      sets/bioforms/groom-study/vellus.yaml with the CPU renderer to see them
+      under raking light.
+    details: [quick]
+  - kind: adult-human-iris-brown
+    group: Human studies
+    about: The bare-scalp adult with procedurally patterned brown irises.
+    notes: >-
+      The two eyes share a palette and use separate seeds for their iris patterns.
+      Use --renderer cpu.
+    details: [quick]
+  - kind: adult-human-iris-hazel
+    group: Human studies
+    about: The bare-scalp adult with procedurally patterned hazel irises.
+    notes: >-
+      The two eyes share a palette and use separate seeds for their iris patterns.
+      Use --renderer cpu.
+    details: [quick]
+  - kind: adult-human-iris-blue
+    group: Human studies
+    about: The bare-scalp adult with procedurally patterned blue irises.
+    notes: >-
+      The two eyes share a palette and use separate seeds for their iris patterns.
+      Use --renderer cpu.
+    details: [quick]
+  - kind: adult-chest-study-broad
+    group: Human studies
+    about: A neutral adult skin mesh with broader, shallower chest forms.
+    notes: >-
+      Authoring varies each side independently, with more upper fullness and
+      shorter lower poles. Use --renderer cpu.
+    details: [quick]
+  - kind: adult-chest-study-long
+    group: Human studies
+    about: A neutral adult skin mesh with longer lower chest contours.
+    notes: >-
+      Authored compliance, projection and lower fullness change the contours on
+      both sides. Use --renderer cpu.
+    details: [quick]
+  - kind: adult-chest-study-asymmetric
+    group: Human studies
+    about: A neutral adult skin mesh with strongly asymmetric chest forms.
+    notes: >-
+      One side keeps its authored projection while the other is flat and has no
+      areolar feature. Use --renderer cpu.
+    details: [quick]
+  - kind: adult-chest-light-low-contrast
+    group: Human studies
+    about: Low local chest pigmentation contrast on the light skin tone.
+    notes: >-
+      Authored base melanin 0.15 on the shared neutral skin mesh. The local
+      melanin adjustments reduce contrast at the areolar regions.
+      Use --renderer cpu.
+    details: [quick]
+  - kind: adult-chest-light-high-contrast
+    group: Human studies
+    about: High local chest pigmentation contrast on the light skin tone.
+    notes: >-
+      Authored base melanin 0.15 on the shared neutral skin mesh. The local
+      melanin adjustments increase contrast at the areolar regions.
+      Use --renderer cpu.
+    details: [quick]
+  - kind: adult-chest-light-high-chroma
+    group: Human studies
+    about: High local chest pigmentation contrast with altered chroma on the light skin tone.
+    notes: >-
+      Authored base melanin 0.15 on the shared neutral skin mesh. The high-contrast
+      case shifts red and gold chroma locally at the areolar regions.
+      Use --renderer cpu.
+    details: [quick]
+  - kind: adult-chest-medium-low-contrast
+    group: Human studies
+    about: Low local chest pigmentation contrast on the medium skin tone.
+    notes: >-
+      Authored base melanin 0.47 on the shared neutral skin mesh. The local
+      melanin adjustments reduce contrast at the areolar regions.
+      Use --renderer cpu.
+    details: [quick]
+  - kind: adult-chest-medium-high-contrast
+    group: Human studies
+    about: High local chest pigmentation contrast on the medium skin tone.
+    notes: >-
+      Authored base melanin 0.47 on the shared neutral skin mesh. The local
+      melanin adjustments increase contrast at the areolar regions.
+      Use --renderer cpu.
+    details: [quick]
+  - kind: adult-chest-medium-high-chroma
+    group: Human studies
+    about: High local chest pigmentation contrast with altered chroma on the medium skin tone.
+    notes: >-
+      Authored base melanin 0.47 on the shared neutral skin mesh. The high-contrast
+      case shifts red and gold chroma locally at the areolar regions.
+      Use --renderer cpu.
+    details: [quick]
+  - kind: adult-chest-dark-low-contrast
+    group: Human studies
+    about: Low local chest pigmentation contrast on the dark skin tone.
+    notes: >-
+      Authored base melanin 0.85 on the shared neutral skin mesh. The local
+      melanin adjustments reduce contrast at the areolar regions.
+      Use --renderer cpu.
+    details: [quick]
+  - kind: adult-chest-dark-high-contrast
+    group: Human studies
+    about: High local chest pigmentation contrast on the dark skin tone.
+    notes: >-
+      Authored base melanin 0.85 on the shared neutral skin mesh. The local
+      melanin adjustments increase contrast at the areolar regions.
+      Use --renderer cpu.
+    details: [quick]
+  - kind: adult-chest-dark-high-chroma
+    group: Human studies
+    about: High local chest pigmentation contrast with altered chroma on the dark skin tone.
+    notes: >-
+      Authored base melanin 0.85 on the shared neutral skin mesh. The high-contrast
+      case shifts red and gold chroma locally at the areolar regions.
+      Use --renderer cpu.
+    details: [quick]
+  - kind: tissue-study-opaque
+    group: Material studies
+    about: The opaque 2 mm control slab for thin-tissue transmission.
+    notes: >-
+      A 50 × 66 mm grey slab with the same dimensions as the thinnest transmitting
+      specimen.
+    details: [quick]
+  - kind: tissue-study-2mm
+    group: Material studies
+    about: A 2 mm transmitting slab for the thin-tissue comparison.
+    notes: >-
+      The 50 × 66 mm slab uses two layers with authored optical coefficients. Use
+      --renderer cpu.
+    details: [quick]
+  - kind: tissue-study-4mm
+    group: Material studies
+    about: A 4 mm transmitting slab for the thin-tissue comparison.
+    notes: >-
+      The 50 × 66 mm slab uses two layers with authored optical coefficients. Use
+      --renderer cpu.
+    details: [quick]
+  - kind: tissue-study-8mm
+    group: Material studies
+    about: A 8 mm transmitting slab for the thin-tissue comparison.
+    notes: >-
+      The 50 × 66 mm slab uses two layers with authored optical coefficients. Use
+      --renderer cpu.
+    details: [quick]
   - kind: dobsonian-36
     group: Personal telescopes
     about: A 36-inch Newtonian on a timber rocker and large altitude bearings.

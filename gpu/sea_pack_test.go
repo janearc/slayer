@@ -132,7 +132,7 @@ func TestASlopeVariancePacksForBeckmannsLobe(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	glint := materialStruct.size() - 16
+	glint := fieldOffset(materialStruct, "glint")
 	got := rowFloat(encoded.materials.bytes, glint)
 	if math.Abs(got-variance) > variance*float32Step {
 		t.Errorf("packed a slope variance of %g, want %g", got, variance)

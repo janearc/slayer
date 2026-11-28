@@ -17,9 +17,5 @@ directory; the publisher gives it only its own temporary-file name.
 There is no disk flush here. Jobs, results and shared admission need
 their own recovery and durability policies.
 
-The [design](DESIGN.md) and [adapter plan](LOCAL-DESIGN.md) record the
-thirty-six passing tests and 100% production statement coverage.
-Mutation and broader gates remain open.
-
-The [named cleanup](CLEANUP.md) passed all thirty-six publication tests.
-Replacement uses it and passes the same witnesses at eb026cb.
+The [design](DESIGN.md) describes replacement, and
+[cleanup](CLEANUP.md) describes how temporary files are removed.

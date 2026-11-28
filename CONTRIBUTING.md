@@ -9,13 +9,12 @@ to improve one well-defined part.
 ## Get oriented
 
 Start with [building](doc/building.md) and [testing](doc/testing.md).
-The [beginner guide](doc/getting-started.md) makes a small picture and film.
+The [beginner guide](doc/getting-started.md) makes two pictures.
 Read [package responsibilities](PACKAGES.md) before choosing where code goes,
 and repository [agent guidance](AGENTS.md) if you use a coding agent.
 
 Use Go from `go.mod`, compatible Game and your own source shelf/config.
-Run `./bootstrap.sh --check` for a setup diagnosis before downloading or
-building.
+The building guide covers the tools and source shelf needed before building.
 
 Work on a branch and keep the change small enough to review. State the
 behavior you want to change before touching shared geometry or transport.

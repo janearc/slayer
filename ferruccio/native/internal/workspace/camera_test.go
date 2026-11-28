@@ -146,6 +146,7 @@ func cameraWorkspace(t *testing.T) *Workspace {
 		t.Fatal(err)
 	}
 	work.specimen = "subaru"
+	work.working.photograph = nil
 	work.viewer.set(image.NewRGBA(image.Rect(0, 0, 640, 360)))
 	work.viewer.SetNavigable(true)
 	t.Cleanup(func() {

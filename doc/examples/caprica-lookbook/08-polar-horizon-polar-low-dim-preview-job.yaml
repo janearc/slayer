@@ -1,0 +1,10 @@
+"$schema": https://github.com/janearc/slayer/schemas/job-v1.json
+scene: {set: 08-polar-horizon-polar-low.yaml}
+renderer: gpu-native
+shortcuts: {restir: off}
+film: {width: 500, height: 500, rays: 1, wide: 70}
+print: {knee: 0.7, top: 8, bloom: 1.5, stops: -11}
+camera: {name: 08-polar-horizon}
+outputs:
+  picture: ../../../out/2026-11-27-caprica-08-polar-horizon-polar-low-dim-preview/proof.png
+  raw: ../../../out/2026-11-27-caprica-08-polar-horizon-polar-low-dim-preview/light.pfm

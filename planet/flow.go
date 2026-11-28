@@ -8,7 +8,8 @@ import (
 
 // A Flow is weather a face reads its air from, as a fluid made it.
 //
-// at a latitude and longitude in radians, longitude zero toward the eye, it
+// at a latitude and longitude in radians, longitude zero at the face's
+// prime meridian (toward the eye for NewFace), it
 // gives the latitude its air came from, in radians; its vorticity over twice
 // the planet's spin; and how many seconds the air has cooked at the top.
 type Flow interface {

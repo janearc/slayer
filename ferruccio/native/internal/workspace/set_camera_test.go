@@ -5,6 +5,7 @@ import (
 	"image/png"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/gogpu/gogpu"
@@ -12,8 +13,8 @@ import (
 	"github.com/janearc/slayer/ferruccio/internal/preview"
 )
 
-// TestAcceptedSetPreviewEnablesItsAuthoredCamera checks the viewport join.
-func TestAcceptedSetPreviewEnablesItsAuthoredCamera(t *testing.T) {
+// TestAcceptedSetPreviewProtectsItsCamera checks the viewport join.
+func TestAcceptedSetPreviewProtectsItsCamera(t *testing.T) {
 	path, err := filepath.Abs("../../../examples/oakland-larson/set.yaml")
 	if err != nil {
 		t.Fatal(err)
@@ -22,6 +23,8 @@ func TestAcceptedSetPreviewEnablesItsAuthoredCamera(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	before := work.state.document.Text()
+	work.editor.ApplyText(before + "# unsaved camera edit\n")
 	plan, err := preview.Prepare(preview.Request{Path: path, Text: work.state.document.Text()})
 	if err != nil {
 		t.Fatal(err)
@@ -38,15 +41,15 @@ func TestAcceptedSetPreviewEnablesItsAuthoredCamera(t *testing.T) {
 		t.Fatal(err)
 	}
 	work.finishPreview(renderResult{generation: work.generation, plan: plan})
-	if !work.viewer.navigable {
-		t.Fatal("accepted set render left its camera controls disabled")
+	accepted := work.state.document.Text()
+	if err := work.Navigate(10, 0, 0); err == nil || !strings.Contains(err.Error(), "working camera") {
+		t.Fatalf("accepted photograph did not protect its camera: %v", err)
 	}
-	before := work.state.document.Text()
-	if err := work.Navigate(10, 0, 0); err != nil {
-		t.Fatal(err)
+	if work.editor.Text() != accepted || work.state.document.Text() != accepted {
+		t.Fatal("navigating a photograph edited the source")
 	}
-	work.clearNavigation()
-	if work.editor.Text() == before || work.editor.Text() != work.state.document.Text() {
-		t.Fatal("set camera drag did not reach the editable source")
+	work.undoCamera(work.ui.Window().Context(), false)
+	if work.state.document.Text() != before {
+		t.Fatal("photograph disabled source undo")
 	}
 }

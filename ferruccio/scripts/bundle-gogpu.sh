@@ -54,8 +54,12 @@ cp bin/ferruccio-stage "$bundle/MacOS/ferruccio-stage"
 cp "$game" "$bundle/Resources/engine/game5"
 printf 'author ferruccio\ngomaxprocs 2\n' > "$bundle/Resources/engine/gamehome/.config/game/config"
 cp ferruccio/examples/*.yaml "$bundle/Resources/examples/"
+for file in larson-camp-visitor.glb larson-camp-visitor-LICENSE.txt; do
+    cp "ferruccio/examples/$file" "$bundle/Resources/examples/"
+done
 mkdir -p "$bundle/Resources/examples/library"
 cp sets/*.yaml "$bundle/Resources/examples/library/"
+rm -f "$bundle/Resources/examples/library/ferruccio-playground.yaml"
 cp sources.yaml "$bundle/Resources/examples/sources.yaml"
 cp "$starter/source.yaml" "$starter/preview.png" "$starter/receipt.json" "$bundle/Resources/starter/"
 # shell_word prints its argument quoted for sh, one backslash before every
@@ -72,6 +76,7 @@ shell_word() {
 # repeated slashes and any trailing slash removed. A leading tilde slash is
 # the home directory.
 absolute_path() {
+    # shellcheck disable=SC2088 # "~/" matches a literal tilde the caller passed
     case $1 in
         "~") path=${HOME:-} ;;
         "~/"*) path="${HOME:-}/${1#"~/"}" ;;

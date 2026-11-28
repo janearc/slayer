@@ -1,0 +1,78 @@
+# Close views of the female reference at rest and with modest thigh abduction.
+# Set axes are east, north, up in metres. Both figures face south.
+"$schema": https://github.com/janearc/slayer/schemas/ecosystem-v2.json
+scene:
+  name: Adult female pelvic surface, neutral and wider stance
+  seed: 27
+  setting: space
+  light: none
+  set:
+    things:
+      neutral:
+        kind: adult-human-details
+        seed: 27
+        position:
+          east: {value: 0, unit: m}
+          north: {value: 0, unit: m}
+          up: {value: 0, unit: m}
+      wider-stance:
+        kind: adult-human-wider-stance
+        seed: 27
+        position:
+          east: {value: 5, unit: m}
+          north: {value: 0, unit: m}
+          up: {value: 0, unit: m}
+  film:
+    width: 640
+    height: 600
+    rays: 8
+    exposure: 1
+    wide: 31
+  cameras:
+    neutral-front:
+      title: Neutral pelvis from the front
+      location: {at: [0, -0.92, 0.74]}
+      orientation: {look_at: [0, 0, 0.80]}
+    neutral-oblique:
+      title: Neutral pelvis from 30 degrees left of front
+      location: {at: [0.46, -0.796743, 0.74]}
+      orientation: {look_at: [0, 0, 0.80]}
+    wider-front:
+      title: Wider stance pelvis from the front
+      location: {at: [5, -0.92, 0.74]}
+      orientation: {look_at: [5, 0, 0.80]}
+    wider-oblique:
+      title: Wider stance pelvis from 30 degrees left of front
+      location: {at: [5.46, -0.796743, 0.74]}
+      orientation: {look_at: [5, 0, 0.80]}
+  world:
+    unit: 1
+    materials:
+      floor:
+        colour: {srgb_linear: [0.13, 0.13, 0.13]}
+        source: eye
+    boxes:
+      studio:
+        material: floor
+        middle: [0, 0, -0.15]
+        size: [160, 160, 0.30]
+        source: eye
+    sky:
+      horizon: {srgb_linear: [0.13, 0.13, 0.13]}
+      zenith: {srgb_linear: [0.11, 0.11, 0.11]}
+      ground: {srgb_linear: [0.12, 0.12, 0.12]}
+      source: eye
+    suns:
+      key:
+        toward: [-0.57, -0.78, 0.44]
+        colour: {srgb_linear: [1.25, 1.25, 1.25]}
+        source: eye
+      fill:
+        toward: [0.71, -0.69, 0.25]
+        colour: {srgb_linear: [0.44, 0.44, 0.44]}
+        source: eye
+    floods:
+      room:
+        colour: {srgb_linear: [0.14, 0.14, 0.14]}
+        strength: 1
+        source: eye

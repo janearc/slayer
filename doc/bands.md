@@ -2,7 +2,7 @@
 
 A band render represents what a sensor restricted to a wavelength would
 record: an X-ray camera, radio receiver, or narrow visible-light filter.
-The implemented CPU entry point is `trace.RenderIn`.
+use `trace.RenderIn` with a `maths.Band` wavelength in nanometres.
 
 ## Current CPU path
 
@@ -22,14 +22,12 @@ landing there, times the cosine of incidence.
 
 The power landing is `Lands`: the inverse square and the lamp's cone. A
 surface in the way shadows it, and the volumes between take their share in
-the same band. A lamp without a spectrum, such as `thing.Sun`, lights
-nothing in a band.
+the same band. only lamps carrying a band spectrum contribute here.
 
 This is direct light only. Nothing bounces, and lamps do not light volumes
 in a band.
 
-Gas media without that emission path only
-attenuate the band; their stored lines are not connected to emission.
+gas media without the supported emission path only attenuate the band.
 
 Gravitational fields are omitted and the sky is dark. Output repeats the
 band's strength across RGB. The zero band selects ordinary visible-light
@@ -38,5 +36,5 @@ nonfinite wavelengths.
 
 ## GPU
 
-Band rendering is CPU-only. The `gpu.Sampled` path renders visible RGB, not
-arbitrary bands. Celestial's `bands.Light` owns spectra and band boundaries.
+band rendering uses the CPU. Metal’s `gpu.Sampled` path renders visible
+RGB. Celestial’s `bands.Light` owns spectra and band boundaries.

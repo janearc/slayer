@@ -167,6 +167,14 @@ sampling and refusal to infer descendant closure. The existing usage witnesses
 are also exposed under `TestUsageNativeWitnesses` so the requested selection
 actually runs them. Existing fixture deadlines and cleanup remain unchanged.
 
+## Native verification record
+
+The reader's nine native checks passed, including both generated properties
+at 100 cases each. Deliberate faults in the birth field, native cause,
+PID narrowing and return-status checks failed their respective assertions.
+Game's automated mutation selection omitted the Cgo file, so these are
+explicit fault checks.
+
 ## Sources read
 
 - Installed MacOSX.sdk: libproc.h declarations and return contract;

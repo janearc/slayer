@@ -94,8 +94,11 @@ func readObservation(raw []byte, request queueRequest, sequence uint64) (observe
 	if err := decodeReply(raw, &snapshot); err != nil {
 		return observedJob{}, err
 	}
-	if snapshot.Version != 1 {
-		return observedJob{}, fmt.Errorf("unsupported Azazel ledger version")
+	switch snapshot.Version {
+	case 1, 2, 3:
+		// All three versions keep the identity, state and result fields used here.
+	default:
+		return observedJob{}, fmt.Errorf("unsupported Azazel ledger version %d", snapshot.Version)
 	}
 	var found *observedJob
 	for _, rawJob := range snapshot.Jobs {

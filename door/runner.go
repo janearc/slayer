@@ -311,9 +311,17 @@ func (run runner) frame(tools kit, index int, at time.Duration) (made,
 		return made{}, err
 	}
 	if measured, ok := light.(interface{ Profile() gpu.Profile }); ok {
-		if count := measured.Profile().PrimarySamples; count > 0 {
+		profile := measured.Profile()
+		if count := profile.PrimarySamples; count > 0 {
 			if _, err := fmt.Fprintf(run.out, "gpu: completed %d primary samples\n", count); err != nil {
 				return made{}, err
+			}
+			if native := profile.Native; native.Queries > 0 {
+				_, err := fmt.Fprintf(run.out, "gpu: native closest: %d queries, %d candidates, %d refined, %d software fallbacks\n",
+					native.Queries, native.Candidates, native.Refined, native.Fallbacks)
+				if err != nil {
+					return made{}, err
+				}
 			}
 		}
 	}

@@ -21,6 +21,30 @@ type shapeChoices struct {
 
 	cloudFrequency, cloudEdge, cloudWhole, cloudTop float64
 	cloudOctaves                                    int
+	cloudBillow, cloudDetail, cloudReach            float64
+	cloudDetailOctaves                              int
+
+	cloudEquator, cloudDry, cloudTrack, cloudWidth float64
+	cloudDryAt, cloudTrackAt, cloudStretch         float64
+	cloudJet, cloudWhorlSize, cloudWhorlTurn       float64
+	cloudWhorlCore                                 float64
+
+	cloudFilament, cloudAcross, cloudCluster, cloudBeads float64
+	cloudEye, cloudEyeClear, cloudArms, cloudArmCover    float64
+
+	cloudDeck, cloudDeckWidth, cloudTerminator float64
+	cloudTerminatorWidth, cloudNight           float64
+	cloudNightFrom, cloudNightWidth            float64
+	cloudBroken, cloudLockedStorm              float64
+	cloudLockedStretch, cloudLockedFilament    float64
+	cloudLockedJet, cloudLockedStrength        float64
+	cloudTowerBase, cloudTowerWidth            float64
+	cloudTowers, cloudTowerFrequency           float64
+	cloudFar, cloudFarFrom, cloudFarWidth      float64
+	cloudTowerBillow, cloudLockedEyeClear      float64
+	cloudLockedArmCover, cloudLockedTurn       float64
+	cloudLockedWhorlThin, cloudLockedCore      float64
+	cloudLockedSize                            float64
 
 	auroraFloor, auroraFall, auroraSoft, auroraRays float64
 	auroraFolds, auroraStretch, auroraRayWeight     float64
@@ -87,7 +111,50 @@ func readShapeChoices() shapeChoices {
 		cloudFrequency: pick("cloud-frequency"), cloudEdge: pick("cloud-edge"),
 		cloudWhole: pick("cloud-whole"), cloudTop: pick("cloud-top"),
 		cloudOctaves: count("cloud-octaves"),
-		auroraFloor:  pick("aurora-floor"), auroraFall: pick("aurora-fall"),
+		cloudBillow:  pick("cloud-billow"), cloudDetail: pick("cloud-detail"),
+		cloudReach:         pick("cloud-reach"),
+		cloudDetailOctaves: count("cloud-detail-octaves"),
+		cloudEquator:       pick("cloud-equator"), cloudDry: pick("cloud-dry"),
+		cloudTrack: pick("cloud-track"), cloudWidth: pick("cloud-width"),
+		cloudDryAt: pick("cloud-dry-at"), cloudTrackAt: pick("cloud-track-at"),
+		cloudStretch: pick("cloud-stretch"), cloudJet: pick("cloud-jet"),
+		cloudWhorlSize: pick("cloud-whorl-size"),
+		cloudWhorlTurn: pick("cloud-whorl-turn"),
+		cloudWhorlCore: pick("cloud-whorl-core"),
+		cloudFilament:  pick("cloud-filament"),
+		cloudAcross:    pick("cloud-filament-across"),
+		cloudCluster:   pick("cloud-cluster"), cloudBeads: pick("cloud-beads"),
+		cloudEye:      pick("cloud-eye"),
+		cloudEyeClear: pick("cloud-eye-clear"),
+		cloudArms:     pick("cloud-arms"),
+		cloudArmCover: pick("cloud-arm-cover"),
+		cloudDeck:     pick("cloud-deck"), cloudDeckWidth: pick("cloud-deck-width"),
+		cloudTerminator:      pick("cloud-terminator"),
+		cloudTerminatorWidth: pick("cloud-terminator-width"),
+		cloudNight:           pick("cloud-night"),
+		cloudNightFrom:       pick("cloud-night-from"),
+		cloudNightWidth:      pick("cloud-night-width"),
+		cloudBroken:          pick("cloud-broken"),
+		cloudLockedStorm:     pick("cloud-locked-storm"),
+		cloudLockedStretch:   pick("cloud-locked-stretch"),
+		cloudLockedFilament:  pick("cloud-locked-filament"),
+		cloudLockedJet:       pick("cloud-locked-jet"),
+		cloudLockedStrength:  pick("cloud-locked-strength"),
+		cloudTowerBase:       pick("cloud-tower-base"),
+		cloudTowerWidth:      pick("cloud-tower-width"),
+		cloudTowers:          pick("cloud-towers"),
+		cloudTowerFrequency:  pick("cloud-tower-frequency"),
+		cloudFar:             pick("cloud-far"),
+		cloudFarFrom:         pick("cloud-far-from"),
+		cloudFarWidth:        pick("cloud-far-width"),
+		cloudTowerBillow:     pick("cloud-tower-billow"),
+		cloudLockedEyeClear:  pick("cloud-locked-eye-clear"),
+		cloudLockedArmCover:  pick("cloud-locked-arm-cover"),
+		cloudLockedTurn:      pick("cloud-locked-turn"),
+		cloudLockedCore:      pick("cloud-locked-core"),
+		cloudLockedSize:      pick("cloud-locked-size"),
+		cloudLockedWhorlThin: pick("cloud-locked-whorl-thin"),
+		auroraFloor:          pick("aurora-floor"), auroraFall: pick("aurora-fall"),
 		auroraSoft: pick("aurora-soft"), auroraRays: pick("aurora-rays"),
 		auroraFolds: pick("aurora-folds"), auroraStretch: pick("aurora-stretch"),
 		auroraRayWeight: pick("aurora-ray-weight"),

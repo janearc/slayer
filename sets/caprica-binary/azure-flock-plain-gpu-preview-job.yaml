@@ -1,0 +1,10 @@
+$schema: https://github.com/janearc/slayer/schemas/job-v1.json
+# Diagnostic omits membrane paint because GPU rejects posed membrane paint.
+scene: {set: azure-flock-plain-gpu.yaml}
+renderer: gpu-native
+shortcuts: {restir: off}
+film: {width: 960, height: 600, rays: 1, wide: 55}
+camera: {name: flock}
+outputs:
+  picture: ../../out/2026-11-27-azure-flock-plain-gpu-preview/proof.png
+  raw: ../../out/2026-11-27-azure-flock-plain-gpu-preview/light.pfm

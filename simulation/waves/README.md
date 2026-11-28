@@ -39,15 +39,13 @@ of light.
 
 Their tensor is transverse and traceless. This is linearized
 vacuum gravity, without a nonlinear Einstein or binary-merger evolution.
-The intended adapter retains both initial profiles and time derivatives.
+The [gravitational adapter](../gravitational/README.md) retains both initial
+profiles and time derivatives.
 [Einstein Toolkit plane waves](https://einsteintoolkit.org/thornguide/EinsteinInitialData/IDLinearWaves/documentation.html).
 
-The initial CPU contract is tested against analytic modes, reversible
-composition, zero-mode drift, independent modal energy, refusal and
-copy properties. The planned Metal path retains both initial spectra,
-applies the two-mode combination and inverse transforms in one batch,
-then reads back the final value and rate. Neither model advances when a
-camera asks for a sample; queries are absolute times from the initial state.
+The CPU tests cover analytic modes, reversible composition, zero-mode
+drift, independent modal energy, refusals and copy behavior. CPU and Metal
+queries both use absolute times from the initial state.
 
 For periodic water with no supplied mass source, the mean surface rate
 must vanish. `NewWater` refuses a rate mean larger than a picked

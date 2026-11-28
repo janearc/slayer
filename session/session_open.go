@@ -34,7 +34,7 @@ var openers = map[string]opener{sceneSet: openSet, sceneSmoke: openSmoke,
 // opened is Open: the stamp kept as Run keeps it, the shutter's glimpses
 // placed, what the job asks laid over the defaults, and its scene staged
 // by the opener of its form.
-func opened(ctx context.Context, wanted job.Job, stamp Stamp) (*Session,
+func opened(ctx context.Context, wanted job.Job, stamp Stamp, detail *WorkingDetail) (*Session,
 	error) {
 	if err := ctx.Err(); err != nil {
 		return nil, err
@@ -59,6 +59,7 @@ func opened(ctx context.Context, wanted job.Job, stamp Stamp) (*Session,
 	if err != nil {
 		return nil, err
 	}
+	given.detail = detail
 	given.steps = newSteps(ctx, os.Stderr, time.Now)
 	given.steps.begin()
 	session, err := open(wanted, given)
@@ -66,6 +67,7 @@ func opened(ctx context.Context, wanted job.Job, stamp Stamp) (*Session,
 	if err != nil {
 		return nil, err
 	}
+	toldOf(os.Stderr, session.given)
 	if session.given.exactSamples > 0 {
 		if err := exactSamplesRefusal(session.given); err != nil {
 			return nil, errors.Join(err, session.Close())
@@ -163,6 +165,18 @@ func openSet(wanted job.Job, given asked) (*Session, error) {
 // openStill stages a set as the still path does, all it can draw: sets
 // with no ground, and lens rigs among it.
 func openStill(wanted job.Job, given asked) (*Session, error) {
+	_, shuttered := wanted.Shutter()
+	camera, _ := wanted.Camera()
+	_, zoomed := camera.Zoom()
+	if shuttered || given.cameraPath || zoomed || given.glass != nil {
+		read, err := given.readSet()
+		if err != nil {
+			return nil, err
+		}
+		if hasFlowingBody(read) {
+			return nil, fmt.Errorf("%s: flowing giants do not yet support a shutter, camera path, zoom or lens rig", given.set)
+		}
+	}
 	world, made, given, err := staged(given)
 	if err == nil {
 		err = rigZoom(wanted, given)
@@ -178,7 +192,7 @@ func openStill(wanted job.Job, given asked) (*Session, error) {
 	still := stillFramer{world: world, made: made, given: given,
 		plan: cameraPlan(wanted)}
 	session := newSession(still, given, wanted, given.tone())
-	if given.metered {
+	if given.metered && given.detail == nil {
 		if err := session.pictureMetered(); err != nil {
 			letGo(given)
 			return nil, err
@@ -195,6 +209,9 @@ func openFilm(wanted job.Job, given asked) (*Session, error) {
 	read, err := given.readSet()
 	if err != nil {
 		return nil, err
+	}
+	if hasFlowingBody(read) {
+		return nil, fmt.Errorf("%s: flowing giants do not yet support films", given.set)
 	}
 	if sceneClockOcean(read) {
 		_, groundlessAir := read.GroundlessAir()
@@ -316,7 +333,7 @@ func openSmoke(wanted job.Job, given asked) (*Session, error) {
 		tone.Exposure = given.exposure
 	}
 	given = smokeSeen(scene, given)
-	smoke := timedFramer{plan: cameraPlan(wanted), given: given}
+	smoke := smokeFramer{timedFramer{plan: cameraPlan(wanted), given: given}}
 	return newSession(smoke, given, wanted, tone), nil
 }
 

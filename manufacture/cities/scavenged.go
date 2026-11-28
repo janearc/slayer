@@ -34,8 +34,8 @@ import (
 // how crowded that is. Wear, dents, bending and water are not in version 1.
 //
 // Every number is in scavenged.yaml. Which kinds the parts are drawn from
-// is the set's to say; the manufactory draws any that fit the size range if
-// the set says none. The manufactory makes the parts and puts them where
+// is the set's to say; the manufactory draws from its historical list
+// within the size range if the set says none. It makes the parts and puts them where
 // this package says; this package knows only their faces, boxes and
 // volumes.
 

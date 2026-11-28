@@ -21,14 +21,7 @@ var unshifted maths.Vec
 // a world, and no terrain, planet, things or stands for hillside to stand
 // anything on.
 func worldOnly(read set.Set) bool {
-	if _, groundlessAir := read.GroundlessAir(); groundlessAir {
-		return false
-	}
-	_, hasWorld := read.World()
-	_, grounded := read.Ground()
-	_, planeted := read.Planet()
-	return hasWorld && !grounded && !planeted &&
-		len(read.Things()) == nothing && len(read.Stands()) == nothing
+	return stage.WorldOnly(read)
 }
 
 // saysFilm is whether a film says anything: a size, a lens, an exposure,
@@ -125,18 +118,37 @@ func stagedWorld(read set.Set, given asked) drawing {
 		given.wide = film.Wide()
 	}
 	given.print = filmPrint(film)
-	if given.said.exposure {
-		// the job's exposure develops the picture, through the set's
-		// print or hillside's own: a world of a set's pieces has no
-		// lamps of hillside's for it to scale
+	if exposure, says := worldExposure(given, film); says {
+		// the job's exposure, or else the film's, develops the picture,
+		// through the set's print or hillside's own: a world of a set's
+		// pieces has no lamps of hillside's for it to scale
 		tone := given.tone()
-		tone.Exposure = given.exposure
+		tone.Exposure = exposure
 		given.print = &tone
 	}
+	lines, err := making.starred(read, given, eye.Origin, unexposed)
+	if err != nil {
+		return refused(given, err)
+	}
+	given.departures = append(given.departures, lines...)
 	if given.overlay, err = making.overlaid(read); err != nil {
 		return refused(given, err)
 	}
 	return drawing{world: world, made: talliedWorld(world), given: given}
+}
+
+// worldExposure is the exposure a picture of a set's world half is
+// developed at, and whether there is one: the job's where it says one,
+// else the film's where the set's film says one. With neither the
+// picture is developed as hillside does, unexposed.
+func worldExposure(given asked, film set.Film) (float64, bool) {
+	if given.said.exposure {
+		return given.exposure, true
+	}
+	if exposure := film.Exposure(); positive(exposure) {
+		return exposure, true
+	}
+	return nothing, false
 }
 
 // worldOnlyShot preserves the world-half camera rule: a named camera is

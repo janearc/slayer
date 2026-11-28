@@ -1,29 +1,17 @@
 # ReSTIR direct light for many lamps
 
-Status: written 2026-11-17, before the code. Where the code differs from
-this note, the code is right and this note is stale; say so in the commit.
+ReSTIR is an optional direct-light approximation for scenes with
+many positioned lamps. select `shortcuts: {restir: on}`. it runs on
+native Metal with a pinhole and a closed shutter. it requires at least
+one positioned lamp and refuses floods, suns, beams, polar lamps,
+gravity and participating media. disable it for a raw-light reference.
 
-This is an approximation. It is drawn only when a job asks for it, as the
-shortcut `restir`, under `fastlight` or `vibes`. It adds noise, bias and
-a lag in time, and its job records it by name. It never changes a picture
-drawn with `vibes: off` and `fastlight: off`, nor `quality: exact` with the
-shortcuts off. `gpu/restir_exact_draw_test.go` holds that with a digest of
-the exact picture taken before this code existed.
-
-## What it is for
-
-The exact GPU path lights a surface point from its lamps by one of two
-rules (`asked` in `gpu/trace.metal`): with sixteen lamps or fewer, every
-lamp, with a shadow ray each; with more, it lays every lamp's worth end to
-end, scanning all of them, and takes eight picks. The scan is a loop over
-every lamp at every surface point, so a frame costs pixels times lamps.
-At 100,000 lamps and 1280 by 720 that is about 9 x 10^10 lamp evaluations.
-
-ReSTIR DI (Bitterli, Wyman, Pharr, Shirley, Lefohn, Jarosz, "Spatiotemporal
-reservoir resampling for real-time ray tracing with dynamic direct
-lighting", SIGGRAPH 2020) replaces the scan with a few candidates a pixel,
-kept in a reservoir, shared with the pixel's neighbours and with the last
-frame's pixel, and one shadow ray at the end.
+the regular path already uses a light tree for large groups of
+positioned lamps. ReSTIR adds reservoir resampling at primary hits:
+it proposes lamps from a light tree, reuses candidates from nearby
+samples and the previous frame, and casts a final shadow ray for
+the chosen lamp. the estimator follows ReSTIR DI (Bitterli et al.,
+SIGGRAPH 2020).
 
 ## Where it plugs in
 
@@ -89,8 +77,8 @@ alike.
 
 ## Per frame
 
-1. `restir_gbuffer`: the primary hit of each sample, as `shade` finds it.
-2. `restir_resample`: four candidates from the tree (a job may say other),
+1. `restir_gbuffer` records each primary hit.
+2. `restir_resample` takes four candidates from the tree,
    then, if `Visibility` is set (it is off by default), one shadow ray on
    the chosen one, an occluded choice having `W = 0`.
 
@@ -98,7 +86,7 @@ alike.
    if the pixel found there has a depth within ten percent and a normal
    within about 25 degrees, its reservoir joins, its `M` capped at twenty
    times the current one's.
-3. `restir_spatial`: three neighbours drawn from within sixteen pixels, kept
+3. `restir_spatial`: three neighbours drawn from within sixteen sample positions, kept
    if alike by the same test, joined by their `phat` at this point.
 4. `trace`: the megakernel, as ever, except that at the primary hit
    `falling` takes the reservoir's lamp in place of `asked`, casts one real
@@ -116,8 +104,8 @@ Merging a neighbour's reservoir: its candidate is weighed
   lamp that is hidden here is kept and then shot at in step 4: the pixel
   gets nought from it instead of a better candidate. This darkens near
   shadow edges. It is the biased variant of the paper, named as such.
-- Temporal reuse lags: a lamp that moves is followed by up to twenty frames
-  of old candidates.
+- temporal reuse can lag behind moving lights. the reservoir count
+  cap limits the weight of reused samples.
 - The estimate is noisy at one candidate set a pixel; neighbours' sharing
   is what smooths it.
 - Lamps with a cone are proposed as if they lit every way. They are
@@ -125,25 +113,20 @@ Merging a neighbour's reservoir: its candidate is weighed
 
 ## How a job turns it on
 
-`shortcuts: {restir: on}`, or `fastlight: on`, or `vibes: on` (it is a
-light shortcut). It is GPU only and is refused on the CPU, through a rig's
-lens, beside a proof, for a named scene, and for a world with a lamp that
-has no position.
+choose `shortcuts: {restir: on}` in the job or `--restir on` on the
+command line. `fastlight: on` and `vibes: on` request it too.
+ReSTIR takes priority over the lamp store and shared sky looks.
+set `shortcuts: {restir: off}` to use those instead. see
+[lighting flags](flags.md) for precedence.
 
-restir is drawn before the lamp store and the sky looks, and a picture
-drawn with restir applies neither: the lamp store refuses more than sixteen
-lamps, and restir draws no media. `vibes: on` alone therefore draws a crowd
-of lamps. The `fast light:` line says that the two were not applied.
-
-The job's canonical form holds the flag as said, so the picture key
-differs from an exact picture's. Hillside prints a `fast light: restir`
-line.
+the job records which shortcuts it requests. the GPU profile reports
+when ReSTIR was applied, and a retained film drawer can reuse the
+preceding frame’s reservoirs.
 
 ## Not done here
 
 - The passes run through the host between dispatches: each pass reads
-  its inputs into the device and its reservoirs back. That is the largest
-  cost at 1280 by 720 (see the measured table in `scratch/restir/REPORT.md`).
-  The remedy is to hold the reservoirs in a retained stream on the device.
+  reservoirs through host storage. a device-resident stream is a
+  possible improvement.
 - No visibility on spatial reuse, no unbiased (MIS) combination.
 - Lamps that move between frames rebuild the tree each frame.

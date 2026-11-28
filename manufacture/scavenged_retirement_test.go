@@ -18,15 +18,16 @@ func TestScavengedCandidatePopulationKeepsPreRetirementOrder(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	names := kindNames()
+	public := kindNames()
 	for name := range models {
-		if slices.Contains(names, name) {
+		if slices.Contains(public, name) {
 			t.Errorf("retired model %q became a public kind", name)
 		}
-		names = append(names, name)
 	}
-	names = slices.DeleteFunc(names, func(name string) bool { return name == ClusterKind })
-	slices.Sort(names)
+	names, err := scavengedCandidates()
+	if err != nil {
+		t.Fatal(err)
+	}
 	digest := fmt.Sprintf("%x", sha256.Sum256([]byte(strings.Join(names, "\n"))))
 	if len(names) != 282 || digest != "993d9acaaa98393646779329fd70e15dcf1bef5d6a14c69ba6b7585fb78c53cd" {
 		t.Fatalf("candidate population %d %s", len(names), digest)
@@ -74,7 +75,7 @@ func TestSuperblockPrivateDefaultDrawAndExplicitPartRefusal(t *testing.T) {
 	}
 }
 
-func TestScavengedCandidateCollisionsAreRefused(t *testing.T) {
+func TestScavengedCandidatesRefuseCollisionsAndMissingKinds(t *testing.T) {
 	models := map[string]func() (Kind, error){}
 	first := func() (Kind, error) { return Kind{name: "first"}, nil }
 	second := func() (Kind, error) { return Kind{name: "second"}, nil }
@@ -87,11 +88,17 @@ func TestScavengedCandidateCollisionsAreRefused(t *testing.T) {
 	if row, _ := models["same"](); row.name != "first" {
 		t.Fatal("duplicate replaced the original candidate")
 	}
-	if _, err := scavengedCandidateNames([]string{"same", "can"}, models); err == nil {
+	candidates := []string{"can", "same"}
+	if err := checkScavengedCandidates(candidates, []string{"same", "can"}, models); err == nil {
 		t.Fatal("public/private collision accepted")
 	}
-	names, err := scavengedCandidateNames([]string{ClusterKind, "can"}, models)
-	if err != nil || !slices.Equal(names, []string{"can", "same"}) {
-		t.Fatalf("distinct candidates %v: %v", names, err)
+	if err := checkScavengedCandidates(candidates, []string{ClusterKind, "can", "new-kind"}, models); err != nil {
+		t.Fatalf("distinct candidates refused: %v", err)
+	}
+	if err := checkScavengedCandidates(candidates, []string{"new-kind"}, models); err == nil {
+		t.Fatal("missing historical candidate accepted")
+	}
+	if err := checkScavengedCandidates([]string{ClusterKind}, []string{ClusterKind}, models); err == nil {
+		t.Fatal("cluster accepted as its own candidate")
 	}
 }

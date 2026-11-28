@@ -18,7 +18,22 @@ func disk(distance, radius, feather float64) float64 {
 // bodyMarks shares the coat rules across profiles in straight local space.
 // turn is zero at the back, +/- one at the underside, and wraps at that seam.
 func bodyMarks(kind string, phase, turn, feather float64) coatMarks {
-	cell, across := math.Floor(phase), periodic(phase)
+	cell := math.Floor(phase)
+	across := phase - cell - .5
+	coat := marksInCell(kind, cell, across, turn, feather)
+	// A saddle edge or the left-shifted flank mark may touch the next
+	// cell. Sample both where the supports overlap to keep that edge whole.
+	if math.Abs(across) > .25 && (kind == "saddles" || kind == "reticulated") {
+		offset := math.Copysign(1, across)
+		neighbour := marksInCell(kind, cell+offset, across-offset, turn, feather)
+		coat.border = max(coat.border, neighbour.border)
+		coat.dark = max(coat.dark, neighbour.dark)
+		coat.pale = max(coat.pale, neighbour.pale)
+	}
+	return coat
+}
+
+func marksInCell(kind string, cell, across, turn, feather float64) coatMarks {
 	side := math.Abs(turn)
 	distance := math.Inf(1)
 	var pale, ring float64
@@ -32,7 +47,7 @@ func bodyMarks(kind string, phase, turn, feather float64) coatMarks {
 		warp := .10 * turn * math.Sin(turn*8+cell*1.43)
 		jag := .10*math.Sin(turn*13+cell*1.31) + .045*math.Sin(turn*29+cell*.73)
 		distance = spot(across-shift-warp, turn, width, reach) - jag
-		flank := spot(periodic(phase+.32), side-.62, .18, .10)
+		flank := spot(across+.32, side-.62, .18, .10)
 		ring = disk(flank, 1, feather)
 	case "spots":
 		// Paired larger dorsal ovals and a smaller, hollow flank ocellus.

@@ -1,0 +1,7 @@
+"$schema": https://github.com/janearc/slayer/schemas/job-v1.json
+scene: {set: system-showcase.yaml}
+renderer: gpu
+camera: {name: disc}
+outputs:
+  picture: ../../../out/2026-11-27-system-showcase-overview/proof.png
+  raw: ../../../out/2026-11-27-system-showcase-overview/light.pfm

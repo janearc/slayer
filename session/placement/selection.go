@@ -32,7 +32,7 @@ func SpaceGeometry(read set.Set) (*spaceGeometry, error) {
 		}
 		if each.Recipe() != "" {
 			recipe, found := read.Recipe(each.Recipe())
-			if !found || (!recipe.IsPlant() && !recipe.IsAnimal() && !recipe.IsAlga()) {
+			if !found || !(recipe.IsPlant() || recipe.IsAnimal() || recipe.IsAlga() || recipe.HasPoseClip()) {
 				return nil, fmt.Errorf("selection does not support this recipe")
 			}
 		}

@@ -38,7 +38,10 @@ import (
 // from the exact picture is measured by reach_test.go.
 //
 // What it leaves alone: surfaces are lit exactly, as before; a gas, a
-// puff, a wisp, a shell, a ring and a wake are lit exactly, as before.
+// giant, a body's air and clouds, a puff, a wisp, a shell, a ring and a
+// wake are lit exactly, as before. A giant's clouds and a body's air and
+// clouds are shells far thinner than a cell over their box, and from a
+// grid a giant rippled.
 // A world with more lamps than are each lit at a point (lampsEvery) is
 // refused by name, since the exact tracer picks among those and a store
 // would not.

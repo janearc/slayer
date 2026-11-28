@@ -1,0 +1,10 @@
+"$schema": https://github.com/janearc/slayer/schemas/job-v1.json
+scene: {set: 12-drop-seam-horizon.yaml}
+renderer: gpu-native
+shortcuts: {restir: off}
+film: {width: 500, height: 500, rays: 1, wide: 65}
+print: {knee: 0.7, top: 8, bloom: 2, stops: -24.8}
+camera: {name: 12-system}
+outputs:
+  picture: ../../../out/2026-11-27-caprica-12-drop-seam-horizon-preview/proof.png
+  raw: ../../../out/2026-11-27-caprica-12-drop-seam-horizon-preview/light.pfm

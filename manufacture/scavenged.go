@@ -23,8 +23,8 @@ const scavengedStream = 7
 // ClusterAsk is what a set asks of a cluster: the kinds its parts are
 // drawn from, each with a weight, how many parts it has, and how far apart
 // its bands stand. A kind written with twice the weight is twice as likely.
-// A part that is nought or empty is left to the manufactory's data: any kind
-// that fits the size range, the count and the spacing in scavenged.yaml.
+// Empty Parts uses the historical candidate list and the size range in
+// scavenged.yaml. Zero Count or BandSpacing uses the default in that file.
 type ClusterAsk struct {
 	Parts       map[string]float64
 	Count       int
@@ -243,7 +243,7 @@ func madeDefaultPart(name string, number uint64, detail string) (good, error) {
 }
 
 // drawKind is a kind name drawn from the set's parts by weight if it has
-// any, and otherwise from the catalogue, less the cluster itself.
+// any, and otherwise from the historical candidate list.
 func drawKind(ask ClusterAsk, rng *rand.Rand) (string, error) {
 	if len(ask.Parts) > 0 {
 		names := make([]string, 0, len(ask.Parts))
@@ -261,33 +261,11 @@ func drawKind(ask ClusterAsk, rng *rand.Rand) (string, error) {
 		}
 		return names[len(names)-1], nil
 	}
-	models, err := scavengedModels()
-	if err != nil {
-		return "", err
-	}
-	names, err := scavengedCandidateNames(kindNames(), models)
+	names, err := scavengedCandidates()
 	if err != nil {
 		return "", err
 	}
 	return names[rng.IntN(len(names))], nil
-}
-
-// scavengedCandidateNames refuses public/private collisions before drawing.
-func scavengedCandidateNames(public []string, models map[string]func() (Kind, error)) ([]string, error) {
-	var names []string
-	for _, name := range public {
-		if _, exists := models[name]; exists {
-			return nil, fmt.Errorf("manufacture: cluster candidate %q is also a public kind", name)
-		}
-		if name != ClusterKind {
-			names = append(names, name)
-		}
-	}
-	for name := range models {
-		names = append(names, name)
-	}
-	slices.Sort(names)
-	return names, nil
 }
 
 // randomTurn is an orientation drawn evenly from all those there are: a

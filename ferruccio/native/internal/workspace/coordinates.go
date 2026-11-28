@@ -32,7 +32,7 @@ func (work *Workspace) coordinatesPanel() widget.Widget {
 		}
 	}
 	labels := []string{"East (m)", "North (m)", "Up (m)", "Heading (degrees)"}
-	if object.Grounded() {
+	if object.Grounded() && !object.AbsolutePosition() {
 		labels[2] = "Above ground (m)"
 	}
 	count := 4
@@ -58,10 +58,16 @@ func (work *Workspace) coordinatesPanel() widget.Widget {
 		work.problem(work.submitCoordinates(count == 4))
 	})
 	items = append(items, apply)
+	if object.Grounded() && object.AbsolutePosition() {
+		items = append(items, work.paragraph("Up uses the scene’s authored vertical datum. Size is read-only for absolute ground placements.", appearance.Ink))
+	}
 	return primitives.VBox(items...).Gap(8)
 }
 
 func (work *Workspace) submitGeneratedHeading(text string) error {
+	if err := work.refuseMapEdit(); err != nil {
+		return err
+	}
 	if err := work.fullRenderRefusal("changing the scene"); err != nil {
 		return err
 	}
@@ -101,6 +107,9 @@ func (work *Workspace) generatedHeadingControl() widget.Widget {
 
 // submitCoordinates makes one checked and undoable source transaction.
 func (work *Workspace) submitCoordinates(withHeading bool) error {
+	if err := work.refuseMapEdit(); err != nil {
+		return err
+	}
 	if err := work.fullRenderRefusal("changing the scene"); err != nil {
 		return err
 	}
@@ -120,12 +129,13 @@ func (work *Workspace) submitCoordinates(withHeading bool) error {
 		}
 		values[i] = n
 	}
-	if object.Grounded() {
-		if err := work.checkTerrainAddition([3]float64{values[0], values[1], values[2]}); err != nil {
+	if object.Grounded() && !object.AbsolutePosition() {
+		if err := work.checkTerrainPosition([3]float64{values[0], values[1], values[2]}); err != nil {
 			return err
 		}
 	}
 	at := object.Position()
+	base, current := work.poseBase()
 	delta := draft.PoseChange{ID: object.ID(), East: values[0] - at[0], North: values[1] - at[1], Up: values[2] - at[2], LengthUnit: "m", AngleUnit: "deg"}
 	if withHeading {
 		current, said := object.Heading()
@@ -139,6 +149,7 @@ func (work *Workspace) submitCoordinates(withHeading bool) error {
 		delta.Heading = target - current
 	}
 	before := work.state.document.Text()
+	work.rememberProvisional()
 	if err := work.state.document.ChangePose(delta); err != nil {
 		return err
 	}
@@ -146,6 +157,9 @@ func (work *Workspace) submitCoordinates(withHeading bool) error {
 		return nil
 	}
 	work.rememberWorking(work.working.scene)
+	if current {
+		work.previewPose(base, object, delta)
+	}
 	work.stopPreview()
 	work.editor.ApplyText(work.state.document.Text())
 	work.needsCheck = false

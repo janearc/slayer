@@ -43,8 +43,8 @@ In Play, an imported object selected in the object picker offers a Size
 panel. Its height is an explicit metre value, blank when the source has no
 height; submitting it makes one undoable draft edit and does not request an
 offline preview. Invalid input reports the refusal and leaves the source.
-The panel is limited to imported models; it does not offer an invented size
-control for other kinds.
+The imported-model panel edits height. Eligible native objects use the separate
+[uniform scale field](../../SPACE-SCALE-DESIGN.md).
 
 Recipe-backed things in a space set use the same explicit metre placement as
 kind-backed things. They are included in the object list when their placement

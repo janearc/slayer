@@ -1,7 +1,7 @@
 # Macrostructures and large terrain features
 
-Five independent manufactory recipes add kilometre-scale scenery without
-changing any existing shot. All dimensions, proportions, colours, structural
+Five manufactory recipes build kilometre-scale scenery. Their dimensions,
+proportions, colours, structural
 interpretations and geological profiles are authored choices. These are
 mathematical scenery constructors, not engineering or geological simulations.
 Their named numeric records are in
@@ -20,9 +20,9 @@ The [example set](../../macrostructures.yaml) has an overview and separate
 [still job](../../examples/jobs/macrostructures.yaml) uses the normal Slayer front door:
 
 ```sh
-game build
+game build slayer
 game run slayer -- draw doc/examples/jobs/macrostructures.yaml
-game run slayer -- draw doc/examples/jobs/macrostructures.yaml --camera spires
+game run slayer -- draw doc/examples/jobs/macrostructures.yaml --camera spires --out out/macrostructure-spires.png
 ```
 
 Choose `--out` to retain separate views. Set camera and world coordinates are

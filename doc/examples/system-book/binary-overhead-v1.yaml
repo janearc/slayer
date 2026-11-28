@@ -1,0 +1,806 @@
+$schema: https://github.com/janearc/slayer/schemas/ecosystem-v2.json
+# One fictional system four years after binary periapsis. Distances in the map
+# are in thousands of kilometres. See README.md for the shot and source notes.
+scene:
+  name: Caprica and the wind-fed binary
+  seed: 271
+  setting: space
+  light: none
+  film:
+    width: 1280
+    height: 800
+    rays: 2
+    exposure: 0.00006
+    wide: 36
+    print: {knee: 0.72, top: 5, source: eye}
+  cameras:
+    binary-overhead:
+      title: Both stars from above the binary plane (proposed)
+      location: {at: [-7045821, 1444129, 2500000]}
+      orientation: {look_at: [-7045821, 1544129, 0]}
+    transfer:
+      title: A long arc of wind curls from the blue-white primary toward the dwarf
+      location: {at: [-9365550.73927, 2360402.89876, 880497.173294]}
+      orientation: {look_at: [-7058664.5976, 1601816.01642, 0]}
+      wide: 38
+    capture:
+      title: The wind pinches into a hot spiral around the white dwarf
+      location: {at: [-7271109.50399, 876915.889201, 1800]}
+      orientation: {look_at: [-7268934.94716, 874410.210132, 15]}
+      wide: 43
+    lavastream:
+      title: Dark rafts on the lava drop and its copper wake
+      location: {at: [-429.139656, -1137.940256, 38]}
+      orientation: {look_at: [-335.139656, -974.940256, 4]}
+      wide: 54
+    caprica:
+      title: Caprica's day cloud deck (proposed)
+      location: {at: [9.08, -2.43, 3.5]}
+      orientation: {look_at: [5.261, -3.684, 3]}
+      wide: 37
+    jovian-crown:
+      title: Teal and violet above the hot giant's northern limb
+      location: {at: [-6863487.75164, 2227822.15172, 290]}
+      orientation: {look_at: [-6863653.15194, 2228417.2557, 76]}
+      wide: 31
+    jovian-tail:
+      title: The escaping envelope streams over thirty planetary radii
+      location: {at: [-6865293.00753, 2225427.4158, 1180]}
+      orientation: {look_at: [-6864727.19034, 2229617.34132, 30]}
+      wide: 51
+    pilgrim-breakup:
+      title: A bright comet leads three pieces through the incoming dust
+      location: {at: [-6828071.20818, 2213685.90805, 400]}
+      orientation: {look_at: [-6827940.87506, 2215027.16465, 0]}
+      wide: 43
+    drop-from-caprica:
+      title: Fresno from above Caprica (proposed)
+      location: {at: [6.2, -1.6, 2.3]}
+      orientation: {look_at: [-374.139656, -1027.940256, 0]}
+      wide: 43
+    azure-orbit:
+      title: Azure, a blue ice-rich giant (proposed)
+      location: {at: [-3830600, 2213848.79561, 60]}
+      orientation: {look_at: [-3830749.61307, 2213848.79561, 0]}
+      wide: 40
+  world:
+    unit: 1000000
+    sky:
+      stars: {seed: 29, share: 0.06, size: 0.5, bright: 0.9}
+      source: eye
+    binaries:
+      pair:
+        # Masses, axes, phases and epoch follow the original Caprica set.
+        # A cooler temperature is authored for the white dwarf.
+        generate:
+          primary: {mass: 2.45, age: 1.2e7}
+          companion: {mass: 0.62, temperature: 7400, radius: 0.0122}
+          separation: 9.2
+          eccentricity: 0.16
+          drop:
+            mass: 0.1
+            temperature: 3000
+            age: 1.0e9
+            distance: 48
+            phase: 8
+            made_up: true
+        drop_at: [-374.139656, -1027.940256, 0]
+        time: 4
+    bodies:
+      caprica:
+        generate:
+          mass: 1
+          makeup: {metal: 0.32, rock: 0.6798, ice: 0.0002, gas: 0}
+          tilt: 0
+          flux: 1
+          age: 4.5e9
+          seed: 1
+          locked: true
+          air_look:
+            height_km: 17
+            loss_per_km: 0.006
+            colour: [0.26, 0.59, 1]
+            made_up: true
+          clouds:
+            base: 3
+            top: 18
+            cover: 0.49
+            loss: 0.18
+            weather: soft-bands
+            storm_turn: 0.8
+            made_up: true
+        circles: pair
+        phase: 70
+        detail: 5
+      amber:
+        template: hot-jupiter
+        middle: [-6863617.00718, 2228405.52725, 0]
+        tilt: 17
+        detail: 4
+      azure:
+        # Artistic fixed-time stand-in: 20 AU east of the primary, not a
+        # declared dynamic orbit. Ice-rich inputs and blue bands are made up.
+        generate:
+          mass: 17.15
+          makeup: {metal: 0.03, rock: 0.12, ice: 0.70, gas: 0.15}
+          day: 16
+          tilt: 20
+          distance: 20
+          sun: {mass: 2.45, luminosity: 50.6292440418}
+          age: 1.2e7
+          seed: 29
+          giant_look:
+            made_up: true
+            paints: [[0.03, 0.08, 0.2], [0.12, 0.42, 0.65], [0.58, 0.85, 0.9], [0.08, 0.25, 0.5], [0.25, 0.65, 0.75], [0.04, 0.12, 0.3], [0.45, 0.7, 0.85]]
+            roil: 0.09
+            shear: 5
+            grain: 0.06
+            fine: 0.04
+            mottle: 0.4
+            jets: 14
+        middle: [-3830749.61307, 2213848.79561, 0]
+        detail: 3
+      # The same comet constructor makes all four pieces. A radius override
+      # scales the entire template, including the coma and both tails.
+      pilgrim:
+        template: hale-bopp
+        middle: [-6827575.35896, 2214954.81843, -20]
+        radius: 0.15
+        detail: 2
+      pilgrim-north:
+        template: hale-bopp
+        middle: [-6827954.07666, 2214937.88017, 31]
+        radius: 0.083
+        detail: 2
+      pilgrim-ember:
+        template: hale-bopp
+        middle: [-6828194.79783, 2214866.7021, -39]
+        radius: 0.045
+        detail: 2
+      pilgrim-shard:
+        template: hale-bopp
+        middle: [-6828352.53619, 2214937.86114, 64]
+        radius: 0.029
+        detail: 2
+    materials:
+      captured-gas-knots:
+        glow: {srgb_linear: [12000, 3700, 770]}
+        source: "Artistic highlight cores of the wind close to the dwarf."
+    spheres:
+      capture-knot-1:
+        material: captured-gas-knots
+        middle: [-7268922.20512, 873935.87097, 17]
+        radius: 8
+        source: eye
+      capture-knot-2:
+        material: captured-gas-knots
+        middle: [-7268882.97937, 873866.941001, 29]
+        radius: 6
+        source: eye
+      capture-knot-3:
+        material: captured-gas-knots
+        middle: [-7268879.48309, 873776.184315, 38]
+        radius: 3
+        source: eye
+      capture-knot-4:
+        material: captured-gas-knots
+        middle: [-7268887.37794, 873720.842908, 18]
+        radius: 3
+        source: eye
+      capture-knot-5:
+        material: captured-gas-knots
+        middle: [-7268930.37203, 873655.059108, 5]
+        radius: 2
+        source: eye
+    lamps:
+      # Local illumination lets the drop's wisp colours remain visible.
+      # This is a lighting cue, at the capture flow and the drop's rim.
+      capture-light:
+        at: [-7269099.27656, 873853.617059, 95]
+        temperature: 12100
+        strength: 2400000000
+        radius: 30
+        source: eye
+      drop-rim-light:
+        at: [-358.139656, -1059.940256, 39]
+        temperature: 5700
+        strength: 18000000
+        radius: 15
+        source: eye
+    spots:
+      # These aim into the polar wisps from outside the visible crown.
+      # The wisps scatter their light and have no self-emission.
+      polar-light:
+        at: [-6863858.80009, 2228389.366, 365]
+        aim: [227.525248413, 20.7908954755, -195]
+        cone: 27
+        soft: 9
+        temperature: 13000
+        strength: 5.4e9
+        source: eye
+    wisps:
+      # An extended wind caught by the remnant, with a denser warm core
+      # and a blue-grey sheath. All shapes and densities are art direction.
+      wind-core-01:
+        middle: [-6822984.88263, 2212992.20728, 0]
+        radius: 109593.8
+        thick: 0.000009
+        seed: 10
+        scale: 21544.08
+        amount: 0.83
+        colour: {srgb_linear: [0.85, 0.26, 0.11]}
+        source: eye
+      wind-sheath-01:
+        middle: [-6812852.28354, 2209616.87978, -235]
+        radius: 168605.8
+        thick: 0.0000027
+        seed: 35
+        scale: 40746.41
+        amount: 0.9
+        colour: {srgb_linear: [0.29, 0.51, 0.82]}
+        source: eye
+      wind-core-02:
+        middle: [-6875970.08826, 2081919.42813, 52.5328890437]
+        radius: 107392.6
+        thick: 0.0000096
+        seed: 11
+        scale: 20888.39
+        amount: 0.83
+        colour: {srgb_linear: [0.85, 0.26, 0.11]}
+        source: eye
+      wind-sheath-02:
+        middle: [-6865837.48917, 2078544.10064, -182.467110956]
+        radius: 164812.2
+        thick: 0.0000027
+        seed: 36
+        scale: 40746.41
+        amount: 0.9
+        colour: {srgb_linear: [0.29, 0.51, 0.82]}
+        source: eye
+      wind-core-03:
+        middle: [-6929751.46059, 1951111.86459, 99.9234928897]
+        radius: 105191.3
+        thick: 0.0000102
+        seed: 12
+        scale: 20232.7
+        amount: 0.83
+        colour: {srgb_linear: [0.85, 0.26, 0.11]}
+        source: eye
+      wind-sheath-03:
+        middle: [-6919618.8615, 1947736.5371, -135.07650711]
+        radius: 161018.6
+        thick: 0.0000027
+        seed: 37
+        scale: 40746.41
+        amount: 0.9
+        colour: {srgb_linear: [0.29, 0.51, 0.82]}
+        source: eye
+      wind-core-04:
+        middle: [-6982147.53081, 1819842.83522, 137.532889044]
+        radius: 102990.1
+        thick: 0.0000108
+        seed: 13
+        scale: 19577.01
+        amount: 0.83
+        colour: {srgb_linear: [0.85, 0.26, 0.11]}
+        source: eye
+      wind-sheath-04:
+        middle: [-6972014.93172, 1816467.50772, -97.4671109563]
+        radius: 157224.9
+        thick: 0.0000027
+        seed: 38
+        scale: 40746.41
+        amount: 0.9
+        colour: {srgb_linear: [0.29, 0.51, 0.82]}
+        source: eye
+      wind-core-05:
+        middle: [-7031924.19281, 1687701.23993, 161.67960777]
+        radius: 100788.8
+        thick: 0.0000114
+        seed: 14
+        scale: 18921.32
+        amount: 0.83
+        colour: {srgb_linear: [0.85, 0.26, 0.11]}
+        source: eye
+      wind-sheath-05:
+        middle: [-7021791.59372, 1684325.91244, -73.3203922298]
+        radius: 153431.3
+        thick: 0.0000027
+        seed: 39
+        scale: 40746.41
+        amount: 0.9
+        colour: {srgb_linear: [0.29, 0.51, 0.82]}
+        source: eye
+      wind-core-06:
+        middle: [-7078321.6055, 1554433.96375, 170]
+        radius: 98587.58
+        thick: 0.000012
+        seed: 15
+        scale: 18265.63
+        amount: 0.83
+        colour: {srgb_linear: [0.85, 0.26, 0.11]}
+        source: eye
+      wind-sheath-06:
+        middle: [-7068189.00641, 1551058.63626, -65]
+        radius: 149637.7
+        thick: 0.0000027
+        seed: 40
+        scale: 40746.41
+        amount: 0.9
+        colour: {srgb_linear: [0.29, 0.51, 0.82]}
+        source: eye
+      wind-core-07:
+        middle: [-7121080.04717, 1419954.48933, 161.67960777]
+        radius: 96386.34
+        thick: 0.0000126
+        seed: 16
+        scale: 17609.94
+        amount: 0.83
+        colour: {srgb_linear: [0.85, 0.26, 0.11]}
+        source: eye
+      wind-sheath-07:
+        middle: [-7110947.44809, 1416579.16183, -73.3203922298]
+        radius: 145844.1
+        thick: 0.0000027
+        seed: 41
+        scale: 40746.41
+        amount: 0.9
+        colour: {srgb_linear: [0.29, 0.51, 0.82]}
+        source: eye
+      wind-core-08:
+        middle: [-7160459.23953, 1284349.33401, 137.532889044]
+        radius: 94185.1
+        thick: 0.0000132
+        seed: 17
+        scale: 16954.25
+        amount: 0.83
+        colour: {srgb_linear: [0.85, 0.26, 0.11]}
+        source: eye
+      wind-sheath-08:
+        middle: [-7150326.64044, 1280974.00652, -97.4671109563]
+        radius: 142050.4
+        thick: 0.0000027
+        seed: 42
+        scale: 40746.41
+        amount: 0.9
+        colour: {srgb_linear: [0.29, 0.51, 0.82]}
+        source: eye
+      wind-core-09:
+        middle: [-7197219.02368, 1147871.61279, 99.9234928897]
+        radius: 91983.85
+        thick: 0.0000138
+        seed: 18
+        scale: 16298.56
+        amount: 0.83
+        colour: {srgb_linear: [0.85, 0.26, 0.11]}
+        source: eye
+      wind-sheath-09:
+        middle: [-7187086.42459, 1144496.28529, -135.07650711]
+        radius: 138256.8
+        thick: 0.0000027
+        seed: 43
+        scale: 40746.41
+        amount: 0.9
+        colour: {srgb_linear: [0.29, 0.51, 0.82]}
+        source: eye
+      wind-core-10:
+        middle: [-7232593.5057, 1010932.42572, 52.5328890437]
+        radius: 89782.61
+        thick: 0.0000144
+        seed: 19
+        scale: 15642.88
+        amount: 0.83
+        colour: {srgb_linear: [0.85, 0.26, 0.11]}
+        source: eye
+      wind-sheath-10:
+        middle: [-7222460.90662, 1007557.09823, -182.467110956]
+        radius: 134463.2
+        thick: 0.0000027
+        seed: 44
+        scale: 40746.41
+        amount: 0.9
+        colour: {srgb_linear: [0.29, 0.51, 0.82]}
+        source: eye
+      wind-core-11:
+        middle: [-7268764.15443, 874258.454262, 2.08189955855e-14]
+        radius: 87581.37
+        thick: 0.000015
+        seed: 20
+        scale: 14987.19
+        amount: 0.83
+        colour: {srgb_linear: [0.85, 0.26, 0.11]}
+        source: eye
+      wind-sheath-11:
+        middle: [-7258631.55534, 870883.126768, -235]
+        radius: 130669.5
+        thick: 0.0000027
+        seed: 45
+        scale: 40746.41
+        amount: 0.9
+        colour: {srgb_linear: [0.29, 0.51, 0.82]}
+        source: eye
+      # A fixed, tightening arc toward the dwarf. The gradient is staged
+      # with real point lighting and density changes.
+      capture-arc-01:
+        middle: [-7268751.35547, 874585.982398, 62.9065617503]
+        radius: 389.66
+        thick: 0.0008
+        seed: 70
+        scale: 153.6
+        amount: 0.8
+        colour: {srgb_linear: [0.8, 0.4, 0.25]}
+        source: eye
+      capture-arc-02:
+        middle: [-7268487.18174, 874278.798332, 81.269465723]
+        radius: 344.6758
+        thick: 0.00109
+        seed: 71
+        scale: 139.089
+        amount: 0.8
+        colour: {srgb_linear: [0.8, 0.453, 0.321]}
+        source: eye
+      capture-arc-03:
+        middle: [-7268417.65197, 873945.623153, 96.0858384583]
+        radius: 303.5221
+        thick: 0.00138
+        seed: 72
+        scale: 125.8136
+        amount: 0.8
+        colour: {srgb_linear: [0.8, 0.506, 0.392]}
+        source: eye
+      capture-arc-04:
+        middle: [-7268502.0218, 873677.289915, 104.125904029]
+        radius: 266.2906
+        thick: 0.00167
+        seed: 73
+        scale: 113.8034
+        amount: 0.8
+        colour: {srgb_linear: [0.8, 0.559, 0.463]}
+        source: eye
+      capture-arc-05:
+        middle: [-7268669.06173, 873522.066143, 103.637033052]
+        radius: 233.0877
+        thick: 0.00196
+        seed: 74
+        scale: 103.0928
+        amount: 0.8
+        colour: {srgb_linear: [0.8, 0.612, 0.534]}
+        source: eye
+      capture-arc-06:
+        middle: [-7268845.222, 873482.090522, 94.7257930191]
+        radius: 204.0403
+        thick: 0.00225
+        seed: 75
+        scale: 93.72267
+        amount: 0.8
+        colour: {srgb_linear: [0.8, 0.665, 0.605]}
+        source: eye
+      capture-arc-07:
+        middle: [-7268977.66796, 873524.669898, 79.3347179818]
+        radius: 179.3036
+        thick: 0.00254
+        seed: 76
+        scale: 85.74311
+        amount: 0.8
+        colour: {srgb_linear: [0.8, 0.718, 0.676]}
+        source: eye
+      capture-arc-08:
+        middle: [-7269045.78182, 873602.432117, 60.8188614693]
+        radius: 159.0767
+        thick: 0.00283
+        seed: 77
+        scale: 79.21828
+        amount: 0.8
+        colour: {srgb_linear: [0.8, 0.771, 0.747]}
+        source: eye
+      capture-arc-09:
+        middle: [-7269059.19609, 873674.300413, 43.2144385994]
+        radius: 143.6313
+        thick: 0.00312
+        seed: 78
+        scale: 74.23589
+        amount: 0.8
+        colour: {srgb_linear: [0.8, 0.824, 0.818]}
+        source: eye
+      # The outgassed silhouette is deliberately much wider than a
+      # physical atmosphere. A layered, curved wake follows it.
+      drop-haze-rim:
+        middle: [-374.139656, -1027.940256, 0]
+        radius: 24.83169
+        thick: 0.032
+        seed: 144
+        scale: 7
+        amount: 0.82
+        colour: {srgb_linear: [1, 0.31, 0.12]}
+        source: eye
+      drop-haze-halo:
+        middle: [-377.139656, -1024.940256, 1]
+        radius: 30.83169
+        thick: 0.009
+        seed: 145
+        scale: 11
+        amount: 0.8
+        colour: {srgb_linear: [0.95, 0.26, 0.19]}
+        source: eye
+      drop-wake-01:
+        middle: [-366.039656, -1017.940256, -4]
+        radius: 16
+        thick: 0.021
+        seed: 151
+        scale: 7
+        amount: 0.86
+        colour: {srgb_linear: [0.92, 0.25, 0.13]}
+        source: eye
+      drop-wake-02:
+        middle: [-353.646656, -1000.940256, -2]
+        radius: 20.4
+        thick: 0.01409396
+        seed: 152
+        scale: 9.5
+        amount: 0.86
+        colour: {srgb_linear: [0.92, 0.279, 0.207]}
+        source: eye
+      drop-wake-03:
+        middle: [-342.987656, -983.940256, 0]
+        radius: 24.8
+        thick: 0.01060606
+        seed: 153
+        scale: 12
+        amount: 0.86
+        colour: {srgb_linear: [0.92, 0.308, 0.284]}
+        source: eye
+      drop-wake-04:
+        middle: [-334.062656, -966.940256, 2]
+        radius: 29.2
+        thick: 0.008502024
+        seed: 154
+        scale: 14.5
+        amount: 0.86
+        colour: {srgb_linear: [0.92, 0.337, 0.361]}
+        source: eye
+      drop-wake-05:
+        middle: [-326.871656, -949.940256, 4]
+        radius: 33.6
+        thick: 0.007094595
+        seed: 155
+        scale: 17
+        amount: 0.86
+        colour: {srgb_linear: [0.92, 0.366, 0.438]}
+        source: eye
+      drop-wake-06:
+        middle: [-321.414656, -932.940256, 6]
+        radius: 38
+        thick: 0.006086957
+        seed: 156
+        scale: 19.5
+        amount: 0.86
+        colour: {srgb_linear: [0.92, 0.395, 0.515]}
+        source: eye
+      drop-wake-07:
+        middle: [-317.691656, -915.940256, 8]
+        radius: 42.4
+        thick: 0.005329949
+        seed: 157
+        scale: 22
+        amount: 0.86
+        colour: {srgb_linear: [0.92, 0.424, 0.592]}
+        source: eye
+      # Two warped arcs above the tilted pole. These are scattering
+      # streamers with a cyan foot and violet tips, an aurora study proxy.
+      crown-cyan-01:
+        middle: [-6863683.55305, 2228387.31749, 124]
+        radius: 28
+        thick: 0.016
+        seed: 210
+        scale: 11
+        amount: 0.94
+        colour: {srgb_linear: [0.035, 0.86, 0.99]}
+        source: eye
+      crown-violet-01:
+        middle: [-6863708.37307, 2228381.83824, 163]
+        radius: 38
+        thick: 0.009
+        seed: 231
+        scale: 14
+        amount: 0.93
+        colour: {srgb_linear: [0.35, 0.078, 0.9]}
+        source: eye
+      crown-cyan-02:
+        middle: [-6863689.27092, 2228354.38353, 117.407489458]
+        radius: 31.36588
+        thick: 0.016
+        seed: 211
+        scale: 11
+        amount: 0.94
+        colour: {srgb_linear: [0.035, 0.86, 0.99]}
+        source: eye
+      crown-violet-02:
+        middle: [-6863715.8552, 2228337.64838, 166.505141275]
+        radius: 27.41368
+        thick: 0.009
+        seed: 232
+        scale: 14
+        amount: 0.93
+        colour: {srgb_linear: [0.35, 0.078, 0.9]}
+        source: eye
+      crown-cyan-03:
+        middle: [-6863657.10242, 2228342.53289, 107.28800122]
+        radius: 31.63719
+        thick: 0.016
+        seed: 212
+        scale: 11
+        amount: 0.94
+        colour: {srgb_linear: [0.035, 0.86, 0.99]}
+        source: eye
+      crown-cyan-04:
+        middle: [-6863631.71043, 2228341.24646, 108.466609262]
+        radius: 28.56448
+        thick: 0.016
+        seed: 213
+        scale: 11
+        amount: 0.94
+        colour: {srgb_linear: [0.035, 0.86, 0.99]}
+        source: eye
+      crown-violet-04:
+        middle: [-6863636.48679, 2228319.31872, 149.160049359]
+        radius: 36.6777
+        thick: 0.009
+        seed: 234
+        scale: 14
+        amount: 0.93
+        colour: {srgb_linear: [0.35, 0.078, 0.9]}
+        source: eye
+      crown-cyan-05:
+        middle: [-6863604.95863, 2228322.80961, 119.216650042]
+        radius: 24.97279
+        thick: 0.016
+        seed: 214
+        scale: 11
+        amount: 0.94
+        colour: {srgb_linear: [0.035, 0.86, 0.99]}
+        source: eye
+      crown-violet-05:
+        middle: [-6863599.45473, 2228294.22893, 149.135020098]
+        radius: 32.01008
+        thick: 0.009
+        seed: 235
+        scale: 14
+        amount: 0.93
+        colour: {srgb_linear: [0.35, 0.078, 0.9]}
+        source: eye
+      crown-cyan-06:
+        middle: [-6863575.1878, 2228333.95061, 123.789288632]
+        radius: 24.1643
+        thick: 0.016
+        seed: 215
+        scale: 11
+        amount: 0.94
+        colour: {srgb_linear: [0.035, 0.86, 0.99]}
+        source: eye
+      crown-cyan-07:
+        middle: [-6863575.42344, 2228368.41845, 115.485598785]
+        radius: 26.88234
+        thick: 0.016
+        seed: 216
+        scale: 11
+        amount: 0.94
+        colour: {srgb_linear: [0.035, 0.86, 0.99]}
+        source: eye
+      crown-violet-07:
+        middle: [-6863559.3443, 2228355.17173, 151.132612807]
+        radius: 33.14793
+        thick: 0.009
+        seed: 237
+        scale: 14
+        amount: 0.93
+        colour: {srgb_linear: [0.35, 0.078, 0.9]}
+        source: eye
+      crown-cyan-08:
+        middle: [-6863570.2895, 2228391.16617, 106.470505581]
+        radius: 30.62795
+        thick: 0.016
+        seed: 217
+        scale: 11
+        amount: 0.94
+        colour: {srgb_linear: [0.035, 0.86, 0.99]}
+        source: eye
+      crown-violet-08:
+        middle: [-6863552.54615, 2228385.68007, 153.354344765]
+        radius: 35.94199
+        thick: 0.009
+        seed: 238
+        scale: 14
+        amount: 0.93
+        colour: {srgb_linear: [0.35, 0.078, 0.9]}
+        source: eye
+      crown-cyan-09:
+        middle: [-6863558.70471, 2228423.83594, 109.951141683]
+        radius: 31.95743
+        thick: 0.016
+        seed: 218
+        scale: 11
+        amount: 0.94
+        colour: {srgb_linear: [0.035, 0.86, 0.99]}
+        source: eye
+      crown-cyan-10:
+        middle: [-6863584.41016, 2228442.93919, 120.828367048]
+        radius: 29.64847
+        thick: 0.016
+        seed: 219
+        scale: 11
+        amount: 0.94
+        colour: {srgb_linear: [0.035, 0.86, 0.99]}
+        source: eye
+      crown-violet-10:
+        middle: [-6863572.58683, 2228455.41901, 164.773788871]
+        radius: 28.57753
+        thick: 0.009
+        seed: 240
+        scale: 14
+        amount: 0.93
+        colour: {srgb_linear: [0.35, 0.078, 0.9]}
+        source: eye
+      crown-cyan-11:
+        middle: [-6863615.14424, 2228435.3641, 123.167021033]
+        radius: 25.82392
+        thick: 0.016
+        seed: 220
+        scale: 11
+        amount: 0.94
+        colour: {srgb_linear: [0.035, 0.86, 0.99]}
+        source: eye
+      crown-violet-11:
+        middle: [-6863614.7938, 2228445.60044, 155.638767702]
+        radius: 37.90964
+        thick: 0.009
+        seed: 241
+        scale: 14
+        amount: 0.93
+        colour: {srgb_linear: [0.35, 0.078, 0.9]}
+        source: eye
+      # Loose debris makes the family read between the resolved comae.
+      pilgrim-dust-01:
+        middle: [-6827750.92857, 2214922.42532, -26]
+        radius: 119
+        thick: 0.0023
+        seed: 271
+        scale: 37
+        amount: 0.87
+        colour: {srgb_linear: [0.74, 0.49, 0.28]}
+        source: eye
+      pilgrim-dust-02:
+        middle: [-6827941.01832, 2214926.28364, -24]
+        radius: 99
+        thick: 0.0021
+        seed: 272
+        scale: 37
+        amount: 0.87
+        colour: {srgb_linear: [0.74, 0.49, 0.28]}
+        source: eye
+      pilgrim-dust-03:
+        middle: [-6828116.94706, 2214899.26371, 21]
+        radius: 76
+        thick: 0.0024
+        seed: 273
+        scale: 37
+        amount: 0.87
+        colour: {srgb_linear: [0.74, 0.49, 0.28]}
+        source: eye
+      pilgrim-dust-04:
+        middle: [-6828337.42401, 2214906.67425, 20]
+        radius: 80
+        thick: 0.0017
+        seed: 274
+        scale: 37
+        amount: 0.87
+        colour: {srgb_linear: [0.74, 0.49, 0.28]}
+        source: eye
+      pilgrim-dust-05:
+        middle: [-6828575.7966, 2214897.81379, 37]
+        radius: 125
+        thick: 0.0007
+        seed: 275
+        scale: 37
+        amount: 0.87
+        colour: {srgb_linear: [0.74, 0.49, 0.28]}
+        source: eye

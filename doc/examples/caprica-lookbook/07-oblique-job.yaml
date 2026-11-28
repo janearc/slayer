@@ -1,0 +1,10 @@
+"$schema": https://github.com/janearc/slayer/schemas/job-v1.json
+scene: {set: caprica-lookbook.yaml}
+renderer: gpu-native
+shortcuts: {restir: off}
+film: {width: 800, height: 800, rays: 4, wide: 60}
+print: {knee: 0.6, top: 8, bloom: 0.5, stops: -9.6}
+camera: {name: 07-oblique}
+outputs:
+  picture: ../../../out/2026-11-27-caprica-07-oblique/proof.png
+  raw: ../../../out/2026-11-27-caprica-07-oblique/light.pfm

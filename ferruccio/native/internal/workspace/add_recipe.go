@@ -266,11 +266,16 @@ func (work *Workspace) checkTerrainAddition(at [3]float64) error {
 	if !work.state.document.GroundSetting() {
 		return nil
 	}
-	live := &work.working
-	if live.parsed == nil || live.source != work.state.document.Text() || live.path != work.state.path {
+	return work.checkTerrainPosition(at)
+}
+
+// checkTerrainPosition uses the parsed terrain for a known ground placement.
+func (work *Workspace) checkTerrainPosition(at [3]float64) error {
+	parsed := work.authoringSet()
+	if parsed == nil {
 		return fmt.Errorf("wait for the current terrain to finish loading before editing its positions")
 	}
-	ground, ok := live.parsed.Ground()
+	ground, ok := parsed.Ground()
 	if !ok {
 		return fmt.Errorf("the set has no terrain")
 	}
@@ -295,11 +300,11 @@ func (work *Workspace) defaultTerrainAddition() {
 		work.play.addAt = [3]string{strconv.FormatFloat(at[0], 'f', -1, 64), strconv.FormatFloat(at[1], 'f', -1, 64), "0"}
 		return
 	}
-	live := &work.working
-	if live.parsed == nil || live.source != work.state.document.Text() || live.path != work.state.path {
+	parsed := work.authoringSet()
+	if parsed == nil {
 		return
 	}
-	ground, ok := live.parsed.Ground()
+	ground, ok := parsed.Ground()
 	if !ok {
 		return
 	}

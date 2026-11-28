@@ -135,8 +135,12 @@ func manufacturedKind(given asked, row manufacture.Kind, pick int,
 	}
 	if manufacture.Deforms(row) {
 		seed := manufacture.Sow(placement.Seed(given.seed, pick))
+		sample, err := manufacture.PrepareDeformation(row, seed, detail)
+		if err != nil {
+			return kept{}, err
+		}
 		result.deform = func(at time.Duration) ([]thing.Thing, error) {
-			frame, err := manufacture.MakeAtTime(row, seed, detail, at)
+			frame, err := sample(at)
 			if err != nil {
 				return nil, err
 			}

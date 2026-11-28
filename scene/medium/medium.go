@@ -204,10 +204,22 @@ func (giant Giant) Bounds() maths.Box {
 	return cube(giant.Radius)
 }
 
-// Span is where a ray crosses the giant's ball: its cloud tops.
+// Span is where a ray crosses the giant's ball, from its cloud tops to
+// where it meets the ball Depth under them, below which nothing gets
+// through. A ray that starts under that, or never reaches it, has the
+// whole of its crossing. A march cut into steps then puts them all in
+// the ramp, where the light changes, and not mostly in the dark below.
 func (giant Giant) Span(ray maths.Ray, near, far float64) (float64, float64,
 	bool) {
-	return sphere(giant.Radius, ray, near, far)
+	enter, leave, crossed := sphere(giant.Radius, ray, near, far)
+	if !crossed || giant.Depth <= nought || giant.Depth >= giant.Radius {
+		return enter, leave, crossed
+	}
+	core, _, met := sphere(giant.Radius-giant.Depth, ray, enter, leave)
+	if met && core > enter {
+		leave = core
+	}
+	return enter, leave, crossed
 }
 
 // Density is zero outside Radius and rises smoothly to Thick by Depth below it,

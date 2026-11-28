@@ -15,5 +15,5 @@ camera:
       to: {x: -30, y: 9, z: 0}
       duration: {value: 1, unit: s}
 outputs:
-  frames: ../images/step-7-frames
-  movie: ../images/step-7-orbit.mp4
+  frames: ../../../../../out/spacecraft-orbit-frames
+  movie: ../../../../../out/spacecraft-orbit.mp4

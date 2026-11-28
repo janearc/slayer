@@ -94,7 +94,7 @@ The log is QUEUE/pages.log. Final publication failures retry on the next
 ten-second poll without rerendering. Clean shutdown makes a bounded final
 refresh. Restart catches up jobs finished in the last ten minutes; older
 missed folders need operator publish. Every partial requires recorded music
-with a matching digest and verified audio. No silent preview is published.
+and verified audio. If the render records a music digest, it must match.
 pages and publish --renders ROOT --folder frames/X are the operator's;
 agents do not run them.
 Use fresh output paths; the scheduler does not yet prevent a tool from
@@ -157,7 +157,9 @@ resubmit with a new key merely because the worker stopped. Recovery signals
 no PID. Agents: do not run execute or execute-owned; these are internal handoffs.
 
 The worker and request SLAYER_* environment select Slayer's ordinary caches.
-Operators should set common cache and render roots explicitly; GPU trees
-also need SLAYER_TREE_CACHE. Keep requested --fresh comparison flags intact.
+Set an absolute SLAYER_CACHE for Slayer commands. GPU trees use that cache
+home. SLAYER_TREE_STORE=files selects individual tree files. Set SLAYER_RENDERS
+on the worker or pass --renders ROOT to publish the gallery. Keep requested
+--fresh comparison flags intact.
 
 Human instructions and current limitations: doc/azazel.md.

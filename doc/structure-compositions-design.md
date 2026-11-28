@@ -1,8 +1,10 @@
 # Structures from parts: design for review
 
-23 November 2026. Proposed, not implemented. Base: rc-v0.1.5
-94748bebcac89e68fb83f52e32e29f285d3ff731. The first subject is the gate
-bridge in the hub-bridge sketch, not a new compiled bridge kind.
+23 November 2026. This proposal records the design at rc-v0.1.5
+94748bebcac89e68fb83f52e32e29f285d3ff731. It uses the gate bridge in the
+hub-bridge sketch. For the implemented input see [sets](sets.md).
+The [implementation record](structure-compositions-progress.md) records
+what was staged and checked.
 
 ## Boundary
 

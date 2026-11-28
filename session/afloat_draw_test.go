@@ -13,6 +13,7 @@ import (
 	"github.com/janearc/slayer/maths"
 	"github.com/janearc/slayer/moonlight"
 	"github.com/janearc/slayer/scene/sky"
+	"github.com/janearc/slayer/session/placement"
 )
 
 // afloatScene is a small set in space: a can at the origin and a boulder
@@ -159,6 +160,10 @@ func TestASetAfloatCanUseModeledMoonlight(t *testing.T) {
 	}
 	if _, ok := world.Sky.(moonlight.Skies); !ok {
 		t.Fatalf("moonlit sky is %T, want computed moonlight skies", world.Sky)
+	}
+	markers := placement.WorkingLights(world)
+	if len(markers) != 1 || markers[0].Kind != "Moon" || markers[0].Author.Name != "moon" {
+		t.Fatalf("producer lost its authored Moon identity: %+v", markers)
 	}
 }
 

@@ -10,12 +10,10 @@ absorbing or scattering water volume. Its flood light does not test the sun's
 path through a water interface. The field is finite, vertically displaced
 only, and inherits the height-field marcher's grazing limitations.
 
-Assess the job and override its output with Slayer's ordinary interface:
-
-```sh
-game5 lane tests -- slayer assess validation/ocean-interface/job.yaml --out /path/to/interface.png
-game5 lane tests -- slayer draw validation/ocean-interface/job.yaml --out /path/to/interface.png --fresh
-```
+Set `SLAYER_CACHE` to an absolute cache directory.
+Assess without drawing with `slayer assess validation/ocean-interface/job.yaml`.
+Submit `slayer draw validation/ocean-interface/job.yaml --out /path/to/interface.png --fresh`
+through [Azazel](../../doc/azazel.md) to make a new still.
 
 The 256 × 144, one-ray CPU study and exact render receipt are in
 `renders/frames/2026-11-16-studio-authored-ocean-interface/`. The initial

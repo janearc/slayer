@@ -28,7 +28,7 @@ be drawn and each file it would write, and writes nothing.
 
 --spp is an exact total per pixel and stands over a job's rays; --rays
 counts per side and stands over samples. Give only one of the two flags.
-Exact samples support CPU and software-GPU stills without a rig or region.
+Exact samples support CPU and GPU stills without a rig, region or lighting shortcuts.
 
 --fetch-terrain fetches the datasets the set names (its terrain, and
 its moon's face) that are not on the shelf, SLAYER_SHELF, checks them

@@ -1,8 +1,12 @@
 package preview
 
 import (
+	"crypto/sha256"
+	"encoding/hex"
 	"encoding/json"
+	"errors"
 	"fmt"
+	"io"
 	"os"
 	"path/filepath"
 )
@@ -18,7 +22,8 @@ const directLane = "none"
 
 // writeDirectIntent preserves the explicit transport and exact foreground argv.
 func (plan *Plan) writeDirectIntent(_ Tools, producer []string) error {
-	intent := map[string]any{"transport": "slayer", "producer": producer, "lane": directLane, "source_sha256": plan.Digest, "width": plan.Profile.Width, "height": plan.Profile.Height, "quality": plan.Profile.quality()}
+	width, height := plan.Profile.OutputSize()
+	intent := map[string]any{"transport": "slayer", "producer": producer, "lane": directLane, "source_sha256": plan.Digest, "width": width, "height": height, "quality": plan.Profile.quality()}
 	if plan.Profile.Full && plan.Profile.Samples > 0 {
 		intent["samples_per_pixel"] = plan.Profile.Samples
 	} else {
@@ -43,8 +48,40 @@ func (plan *Plan) writeDirectIntent(_ Tools, producer []string) error {
 	if profile.Full && profile.Samples > 0 {
 		sampling = fmt.Sprintf("samples per pixel: %d", profile.Samples)
 	}
-	text := fmt.Sprintf("Explicit shared-Slayer render, started directly: no Game lane.\nExact argv (JSON): %s\nRequested image: %dx%d; %s; quality: %s.\nSource text SHA256: %s\nFrozen input: %q\nAudit YAML: scene.yaml\nInvocation: direct-request.json\nMeasured image and actual executable paths: receipt.json after completion.\nProcess completion is not artistic approval.\n", exact, profile.Width, profile.Height, sampling, profile.quality(), plan.Digest, plan.Input)
+	text := fmt.Sprintf("Explicit shared-Slayer render, started directly: no Game lane.\nExact argv (JSON): %s\nRequested image: %dx%d; %s; quality: %s.\nSource text SHA256: %s\nFrozen input: %q\nAudit YAML: scene.yaml\nInvocation: direct-request.json\nMeasured image and actual executable paths: receipt.json after completion.\nProcess completion is not artistic approval.\n", exact, width, height, sampling, profile.quality(), plan.Digest, plan.Input)
 	return retainSubmissionFile(filepath.Join(plan.Directory, "recipe.txt"), []byte(text))
+}
+
+// checkCurrent detects a persistent change to the referenced set whose
+// film settings informed this request.
+func (reference filmReference) checkCurrent() error {
+	if reference.path == "" {
+		return nil
+	}
+	file, err := os.Open(reference.path)
+	if err != nil {
+		return fmt.Errorf("cannot verify referenced set %q: %w", reference.path, err)
+	}
+	hash := sha256.New()
+	_, readErr := io.Copy(hash, file)
+	if err := errors.Join(readErr, file.Close()); err != nil {
+		return fmt.Errorf("cannot verify referenced set %q: %w", reference.path, err)
+	}
+	if hex.EncodeToString(hash.Sum(nil)) != reference.digest {
+		return fmt.Errorf("referenced set changed since render preparation: %s", reference.path)
+	}
+	return nil
+}
+
+// acceptDirect verifies the reference and output before recording success.
+func (plan *Plan) acceptDirect(tools Tools, argv []string) error {
+	if err := plan.Profile.reference.checkCurrent(); err != nil {
+		return err
+	}
+	if err := plan.record(tools); err != nil {
+		return err
+	}
+	return plan.recordDirectIdentity(tools, argv)
 }
 
 // recordDirectIdentity names the actual producer invoked, with no Game and no

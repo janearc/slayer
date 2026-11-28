@@ -51,3 +51,24 @@ func TestLibraryKeepsPlainLabelsWhenNamesDiffer(t *testing.T) {
 		}
 	}
 }
+
+func TestLibraryListsOnlyTheDeclaredOaklandStudyEntry(t *testing.T) {
+	directory := makeBundledStudyFixture(t)
+	writeScene(t, directory, "oakland-larson/scratch.yaml")
+	entries := readSceneLibrary(directory)
+	if len(entries) != 1 || entries[0].name != filepath.Join("oakland-larson", "set.yaml") ||
+		entries[0].label != "Oakland Larson study" {
+		t.Fatalf("bundled study entries = %+v", entries)
+	}
+}
+
+func TestLarsonCampIsNearTheTopOfTheExamples(t *testing.T) {
+	entries := sortedLibrary([]sceneEntry{
+		{name: "other.yaml", label: "Another"},
+		{name: campExample, label: "Larson camp"},
+		{name: playgroundExample, label: "Larson playground"},
+	})
+	if entries[0].name != playgroundExample || entries[1].name != campExample {
+		t.Fatalf("starter order: %+v", entries)
+	}
+}

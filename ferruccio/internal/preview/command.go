@@ -46,11 +46,17 @@ func (plan *Plan) arguments(tools Tools) ([]string, error) {
 	if profile.Camera != "" {
 		arguments = append(arguments, "--camera", profile.Camera)
 	}
-	if profile.CPURenderer {
-		arguments = append(arguments, "--renderer", "cpu")
+	if profile.CameraWide != 0 {
+		arguments = append(arguments, "--camera-wide", strconv.FormatFloat(profile.CameraWide, 'g', -1, 64))
 	}
-	if profile.GPU {
-		arguments = append(arguments, "--renderer", "gpu")
+	if profile.CameraPathRecipe != "" {
+		arguments = append(arguments, "--still-camera", profile.CameraPathRecipe)
+	}
+	if profile.StillAt != 0 {
+		arguments = append(arguments, "--at", profile.StillAt.String())
+	}
+	if renderer := profile.rendererOverride(); renderer != "" {
+		arguments = append(arguments, "--renderer", renderer)
 	}
 	return arguments, nil
 }

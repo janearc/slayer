@@ -1,13 +1,10 @@
 # named
 
-Scenes built in Go, by name. Four of slayer's scenes were built inside their
-commands, in `package main`, from flags, so nothing but the command could
-draw them. This package holds their construction so a job can say
-`scene: {named: orbital, with: {gas: 0.25}}` and get the same picture the
-command draws.
-
-This package is a bridge, agreed as one. Each named scene is owed a set
-file; when the last of them has one, `named` goes.
+named scenes are built in Go and selected in a job. for example,
+`scene: {named: orbital, with: {gas: 0.25}}` changes the nebula density
+in the orbital scene. `slayer list scenes` lists the scenes and parameters
+available in the running binary. see [jobs](../../job/README.md) for the
+other inputs and [examples](../../EXAMPLES.md) for jobs to try.
 
 ## What it holds
 
@@ -19,13 +16,12 @@ file; when the last of them has one, `named` goes.
 | `ring` | a mirror ring round a flaring magnetar | a thousand kilometres |
 | `moonrise` | the full moon rising behind a tree | a metre |
 | `magnetar` | a real magnetar at its true size: its field drawn, how far the danger reaches, a giant flare, and zappy beside it | a kilometre |
-
 | `weather` | a planet's air stirred by storms, drawn as three maps | none: no world |
 
-`All` lists every scene of both kinds, the traced first, each once.
-`Traced` lists the traced ones. `Get` is a traced scene by name and
-`GetMaps` a scene drawn as maps; each refuses the other kind's name by
-saying which kind it is, and a name no scene has by listing the names.
+`All` lists traced scenes first, then maps. use `Get` for traced scenes
+and `GetMaps` for map scenes. an application can add scenes at startup
+through [`RegisterAuthored`](authored.go), as Slayer does with `heard`
+and `heard-film`.
 
 Zappy itself is defined in package `lantern` (`lantern.Zappy()`); the
 orbital's far view and the `zappy` scene both place it from there.
@@ -81,12 +77,10 @@ checks every key and value first and refuses by name:
 A key left out takes its default. `Check` is the same checking without
 building, for an editor.
 
-What `Build` gives back holds the world and the eye, and is told the time
-of each frame before it is drawn (`Set`). Zappy, alone or as the
-orbital's far view's middle, has lamps that keep their own time, its
-beams; for the rest `Set` does nothing, and `Timed` says which. The
-package holds no mutable state: the beams' clock is the built scene's
-own.
+the built scene holds its world and camera. `Advance` applies scene time
+to lights and authored camera motion and propagates motion errors.
+`Timed` reports whether that update is needed. Zappy has a beam clock and
+the magnetar updates its flare.
 
 ## Parameters
 

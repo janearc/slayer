@@ -82,6 +82,23 @@ func (w *Widget) ApplyText(text string) {
 	}
 	w.undo = appendHistory(w.undo, string(w.text))
 	w.redo = nil
+	w.replaceText(text)
+}
+
+// RelocateText updates existing history snapshots after a successful Save As.
+func (w *Widget) RelocateText(text string, rebase func(string) string) {
+	for index, entry := range w.undo {
+		w.undo[index] = rebase(entry)
+	}
+	for index, entry := range w.redo {
+		w.redo[index] = rebase(entry)
+	}
+	if normalized := normalizeNewlines(text); normalized != string(w.text) {
+		w.replaceText(normalized)
+	}
+}
+
+func (w *Widget) replaceText(text string) {
 	w.text = []rune(text)
 	if w.cursor > len(w.text) {
 		w.cursor = len(w.text)
@@ -156,6 +173,9 @@ func (w *Widget) Draw(_ widget.Context, canvas widget.Canvas) {
 		Max: geometry.Pt(bounds.Max.X-1, bounds.Max.Y-1),
 	}, appearance.Ground, 5)
 	canvas.StrokeRoundRect(bounds, appearance.Border, 6, 1)
+	if w.IsFocused() && bounds.Width() > 4 && bounds.Height() > 4 {
+		canvas.StrokeRoundRect(bounds.Expand(-2), appearance.Cyan, 4, 2)
+	}
 	inner := geometry.Rect{
 		Min: geometry.Pt(bounds.Min.X+1, bounds.Min.Y+1),
 		Max: geometry.Pt(bounds.Max.X-1, bounds.Max.Y-1),

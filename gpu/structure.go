@@ -220,6 +220,8 @@ constexpr constant float lamp_split_square = `+
 constexpr constant int lamp_tree_floats = %d;
 constexpr constant int field_seed_words = 16;
 constexpr constant int boxed_kind = %d;
+constexpr constant int boxed_air = %d;
+constexpr constant int boxed_clouds = %d;
 constexpr constant int shell_kind = %d;
 constexpr constant float beam_zero = %g;
 constexpr constant float beam_one = %g;
@@ -241,7 +243,7 @@ constexpr constant float clip_rounding = %g;
 constexpr constant int glow_on = %d;
 `, max(volumes, 1), treeStack, per+perRecord*records, per, perRecord,
 		records, nowhere, coniferStack, mostConiferDepth, lampsAsked,
-		lampsEvery, lampsMarched, nodeFloats, boxedKind, shellKind, float64(beamZero), float64(beamWhole), beamHalf,
+		lampsEvery, lampsMarched, nodeFloats, boxedKind, boxedAir, boxedClouds, shellKind, float64(beamZero), float64(beamWhole), beamHalf,
 		beamstep.Radii(), beamstep.RadialSamples(),
 		beamstep.MaximumSplits(), polarKind, floodKind, float64(beamWhole), beamHalf,
 		gasOn, rayleighLobe, fourPi, lobePower, float64(lobeTwice),

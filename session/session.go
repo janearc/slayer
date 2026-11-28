@@ -194,7 +194,7 @@ func NewAsk(width, height, rays int, sink progress.Sink) (Ask, error) {
 // here, by name; a cancelled context gives its error and stages nothing.
 func Open(ctx context.Context, wanted job.Job, stamp Stamp) (*Session,
 	error) {
-	return opened(ctx, wanted, stamp)
+	return opened(ctx, wanted, stamp, nil)
 }
 
 // Times is the scene time of each frame, in order; a still has one.
@@ -241,6 +241,9 @@ const toneUnit = 1.0
 // draws nothing; the session stays open.
 func (session *Session) Frame(ctx context.Context, index int,
 	ask Ask) (Drawn, error) {
+	if session.given.detail != nil {
+		return Drawn{}, fmt.Errorf("scene detail is available only as a working view")
+	}
 	return session.frame(ctx, index, ask)
 }
 

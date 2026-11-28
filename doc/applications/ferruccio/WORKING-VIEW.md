@@ -1,62 +1,34 @@
 # Working viewport
 
-Ferruccio keeps an opaque native-geometry viewport responsive during gestures.
-On release, the existing Slayer preview refines the authored scene. Working
-geometry is an editing representation, not a claim about completed transport,
-glass, lighting or the final image.
+The working view shows the geometry Slayer staged for the current draft. Use
+**Solid**, **Edges** or **Wireframe** to inspect shapes and placements.
+**Rendered** shows accepted Slayer pixels. In Play, manipulating a camera
+or object can display working geometry while you drag. Release commits one
+undoable source edit. Use Preview or Render fully to make a new photograph.
 
-## Geometry and identity
+The staging helper accepts sets, legacy sets and still jobs. Coverage
+depends on the source. The viewport approximates water with a finite
+mean-level surface, draws glass as opaque and uses a pinhole approximation
+for physical lenses. It can omit unsupported lights, volumes and other
+features. Open **View details…** for the current scene's notices or staging error.
+The offline image uses Slayer's full render path.
 
-The pure Go session/placement display adapter shares native manufacture seed
-mixing and SpaceAt transforms with Slayer. It requests native hull detail,
-which lowers tessellation without discarding arbitrary faces; kinds without
-that representation retain their source detail. Mesh corners, smooth normals
-and MeshGroup placements follow the existing GPU geometry encoders.
+## Implementation
 
-Analytic
-spheres and tubes are tessellated from native parameters. The pad is made by
-stage.Add, matching the rendered world's geometry.
+Staging preserves authored IDs and shared object-local meshes. Rendering
+and picking use those meshes and their staged transforms. During a gesture,
+only camera or placement data changes. Cached geometry stays immutable.
 
-DisplayCache retains immutable object-local meshes. Native source identities
-match draft object IDs; the world is an unselectable occluder. During movement
-the UI copies DisplayScene and its Objects slice, then changes only placements
-and camera values. A pose or camera change does not upload replacement meshes.
+The lightweight cache can anchor a compact world mesh using its first
+visible producer placement or the midpoint of that surface’s native bounds.
+It does this when the anchor is more than 100,000 scene units from world
+zero along any axis and every component fits within 100,000 units of that
+anchor along each axis. Camera motion leaves the mesh anchored. Dispersed
+worlds can still lose precision during working GPU upload, and anchoring
+cannot recover precision already lost in the source vertices.
 
-## Drawing and gestures
-
-The native workingview adapter retains GPU vertex/index buffers, depth and
-offscreen colour targets. Solid, edge and occlusion-correct wire modes share
-the same geometry. Camera and object uniforms change per draw. Current
-integration reads the completed GPU target back for the existing image widget.
-
-Shot.Focus supplies the authored camera anchor. SetViewport adjusts the native
-sensor pixel aspect; GPU projection uses authored width times Lens.Pixel over
-authored height. Pick uses native film rays and cached mesh intersections at
-current placements. Drag uses the selected object's horizontal plane and
-accepts finite captured coordinates outside the image.
-
-draft.PreviewCamera exposes the exact existing Navigate orbit for transient
-east/north/up camera poses. It does not edit YAML or add undo entries. The UI
-commits the gesture to the source and its existing undo history on release.
-
-## Current limits
-
-The adapter supports fixed pinhole space scenes with native manufactured
-objects and finite supported world surfaces. Recipes, burning objects, lens
-rigs and unsupported set features are refused. Glass is opaque, materials use
-native display colours and live lighting is simplified. Volumetric transport,
-reflections and refined surface detail remain Slayer's work. Selection during
-a gesture follows the displayed coarse geometry.
-
-Mesh pointers must remain immutable. Rebuild through the cache after structural
-source changes; use placement/camera updates for pointer motion. Draw-resource
-statistics report completed work, not inferred frame-rate or render progress.
-
-## Native use and packaging
-
-The Live app opens in Wireframe. The display selector also offers Solid,
-Edges and Rendered; Rendered temporarily uses Edges during manipulation,
-then returns to accepted Slayer pixels. Chroma supplies the background and
-edge colours. The existing opening app remains separately installed.
-
-The filled fragment writes depth offset by one pixel of its measured depth slope before the line overlay; line depth tests remain enabled. This avoids the pinned GoGPU Metal binding's integer argument path for setDepthBias:slopeScale:clamp:. That binding issue is an upstream follow-up, not a claimed library repair. Single-sample line rasterization still has ordinary pixel aliasing.
+A background worker reads the current source snapshot. It can publish
+the parsed set for authoring before the helper finishes assembling geometry.
+The app accepts results only for the current document, path and buffer. Undo
+can cancel a pending stage and restore the previous source and its view.
+Closing joins helper work before deleting its cache.

@@ -7,9 +7,62 @@ import (
 	"github.com/gogpu/ui/widget"
 )
 
+// refuseCameraGesture prevents a provisional move of an unavailable camera.
+func (work *Workspace) refuseCameraGesture() bool {
+	if work.working.plan != nil {
+		return true
+	}
+	if work.working.detail != "" && !work.photographVisible() {
+		return false
+	}
+	err := work.cameraEditRefusal()
+	work.problem(err)
+	return err != nil
+}
+
+func (work *Workspace) cameraEditRefusal() error {
+	if work.working.plan != nil {
+		return fmt.Errorf("use Orbit or Travel to navigate the authored map")
+	}
+	if work.photographVisible() {
+		return fmt.Errorf("%s", work.cameraEditingHint())
+	}
+	if work.working.cameraPath != "" {
+		return fmt.Errorf("edit the inherited camera path in the job YAML")
+	}
+	if work.working.cameraName != "" {
+		return fmt.Errorf("edit camera %q in Source", work.working.cameraName)
+	}
+	return nil
+}
+
+func (work *Workspace) cameraEditingHint() string {
+	if work.state.document.Kind() == "catalogue" {
+		return "Edit the catalogue camera in YAML"
+	}
+	if work.composition != "play" {
+		return "Choose Play to move the working camera"
+	}
+	return "Choose Solid, Edges or Wire to move the working camera"
+}
+
 // Navigate edits the current supported camera and queues its next preview.
 func (work *Workspace) Navigate(yaw, pitch, zoom float64) error {
+	if work.working.detail != "" {
+		return work.navigateDetail(yaw, pitch, zoom)
+	}
 	if err := work.fullRenderRefusal("moving the camera"); err != nil {
+		return err
+	}
+	if plan := work.working.plan; plan != nil {
+		if zoom > 0 && !work.viewer.dragging {
+			plan.span = max(1, min(1e9, plan.span*zoom))
+			work.working.dirty = true
+			work.invalidate()
+		}
+		return nil
+	}
+	if err := work.cameraEditRefusal(); err != nil {
 		return err
 	}
 	if !work.viewer.navigable || work.viewer.source == nil || !work.state.document.CanNavigate() {
@@ -43,6 +96,7 @@ func (work *Workspace) undoCamera(ctx widget.Context, redo bool) {
 		return
 	}
 	before := work.state.document.Text()
+	work.rememberProvisional()
 	if redo {
 		work.editor.Redo(ctx)
 	} else {
@@ -55,6 +109,14 @@ func (work *Workspace) undoCamera(ctx widget.Context, redo bool) {
 		work.stopPreview()
 		work.play.sizeObject, work.play.poseObject, work.play.groupAreaID = "", "", ""
 		work.status = "History restored · restoring working view"
+		work.invalidate()
+		return
+	}
+	if work.restoreProvisional(work.state.document.Text()) {
+		work.stopPreview()
+		work.play.sizeObject, work.play.poseObject, work.play.groupAreaID = "", "", ""
+		work.refreshLayout = true
+		work.status = "History restored · working view updating"
 		work.invalidate()
 		return
 	}
@@ -103,11 +165,15 @@ func (work *Workspace) stopPreview() {
 // render, full or preview.
 func (work *Workspace) cancelRender() {
 	work.clearNavigation()
+	work.fullCancellationNote = ""
 	work.generation++
 	work.cancelRequested = work.cancel != nil
 	if work.cancelRequested {
 		work.cancel()
 		work.status = "Cancelling preview request"
+		if work.fullRunning {
+			work.status = "Cancelling full render request"
+		}
 	} else {
 		work.status = "Preview stopped"
 	}
@@ -175,7 +241,7 @@ func (work *Workspace) finishPreview(result renderResult) {
 	if result.err != nil {
 		work.status = "Preview failed"
 		if work.queueState == "cancelled" {
-			work.status = "Preview cancelled"
+			work.status = cancellationRenderName(result.full) + " cancelled"
 		}
 		if work.queueState == "interrupted" {
 			work.status = "Preview interrupted"
@@ -201,29 +267,31 @@ func (work *Workspace) finishPreview(result renderResult) {
 	work.acceptedGeneration = result.generation
 	work.acceptedText, work.acceptedPath = work.state.document.Text(), work.state.path
 	if work.composition == "play" {
-		work.play.geometry = result.geometry
 		work.play.renderedText = work.state.document.Text()
 	}
-	work.caption = "Slayer preview · one ray per side"
-	if result.full {
-		work.caption = fmt.Sprintf("Full Slayer render · %d × %d · %d rays per side · exact", result.plan.Profile.Width, result.plan.Profile.Height, result.plan.Profile.Rays)
+	if work.composition == "play" {
+		work.caption = chooseWorkingView
+	} else {
+		work.caption = work.cameraEditingHint()
 	}
-	if work.state.document.CanNavigate() {
-		work.caption = "Drag to orbit · scroll to zoom · arrows / + / − · ⌘Z to undo"
-		if work.composition == "play" {
-			work.caption = "Grab something · drag to change it · scroll to approach · ⌘Z undo"
-			if work.play.geometry == nil {
-				work.caption = "Drag to look around · Source to edit this scene"
-			}
-		}
-		if result.plan.Kind == "catalogue" {
-			work.caption = result.plan.Specimen + " · " + work.caption
-		}
-		work.viewer.SetNavigable(true)
+	if result.plan.Kind == "catalogue" {
+		work.caption = result.plan.Specimen + " · " + work.cameraEditingHint()
 	}
 	if result.full {
 		_ = work.SetWorkingMode("rendered")
-		work.caption = fmt.Sprintf("Full Slayer render · %d × %d · %d rays per side · exact", result.plan.Profile.Width, result.plan.Profile.Height, result.plan.Profile.Rays)
+		profile := result.plan.Profile
+		sampling := renderSamplingLabel(profile)
+		width, height := profile.OutputSize()
+		work.caption = fmt.Sprintf("Full Slayer render · %d × %d · %s · exact", width, height, sampling)
+	}
+	if result.plan.Profile.Camera != "" {
+		work.caption += fmt.Sprintf(" · camera %q", result.plan.Profile.Camera)
+	}
+	if result.plan.Profile.CameraWide != 0 {
+		work.caption += fmt.Sprintf(" · %g°", result.plan.Profile.CameraWide)
+	}
+	if result.plan.Profile.CameraPathRecipe != "" {
+		work.caption += " · job camera path"
 	}
 	work.caption += work.reducedNote
 	work.status = "Preview ready · " + work.state.document.Name()

@@ -21,9 +21,15 @@ func cloudsLayer(t *testing.T) Clouds {
 	}
 }
 
+// cloudVisible is the share of its full thickness a cloud must have to
+// count as clouded: the thin margins of a patch, which it fades out in,
+// are too faint to be a cloud.
+const cloudVisible = 0.1
+
 // Clouds sit in their layer and nowhere else, a cover of a half clouds
 // about two thirds of the sphere, as Clouds says, and they are thickest
-// low in the layer. over twenty seeds a half clouds 0.64 to 0.71.
+// low in the layer. over twenty seeds a half clouds 0.64 to 0.71, where a
+// tenth of the full thickness is a cloud.
 func TestCloudsCoverTheirShare(t *testing.T) {
 	cloudy := cloudsLayer(t)
 	below := maths.V(picked(t, "clouds-below-layer"), nought, nought)
@@ -36,7 +42,8 @@ func TestCloudsCoverTheirShare(t *testing.T) {
 	clouded, sampled := nought, nought
 	for place := range samples {
 		direction := scatter(t, place)
-		if cloudy.Density(direction.Scale(bodyHeight)) > nought {
+		if cloudy.Density(direction.Scale(bodyHeight)) >
+			cloudVisible*cloudy.Thick {
 			clouded++
 		}
 		sampled++

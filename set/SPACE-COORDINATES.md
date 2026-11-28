@@ -1,27 +1,25 @@
-# signed native space placement
+# placing things in space
 
-A version 2 scene with explicit `setting: space` places manufactured
-things in a local metre frame. Its east and north values may be signed,
-within the existing schema coordinate cap of one billion metres in each
-direction. `height` retains its nonnegative metre quantity contract.
-This permits an object edit across the local origin without changing
-terrain placement or allowing a non-finite native transform.
+use the [v2 schema](ecosystem-v2.schema.json) and set `scene.setting` to
+`space`. a manufactured thing can use `east` and `north` from minus one
+billion to plus one billion metres. set both. `height` is an optional
+nonnegative metre quantity. use `position` with metre quantities for
+`east`, `north` and `up` when you need all three axes to be signed.
 
-Version 1, unlabelled legacy scenes, and version 2 scenes with ground or
-no setting retain nonnegative thing east and north values. Version 1 and
-legacy files still cannot use the version 2 `setting` key. No terrain,
-stand, world geometry or camera coordinate contract changes.
+```yaml
+position:
+  east: {value: -15, unit: m}
+  north: {value: 20, unit: m}
+  up: {value: -3, unit: m}
+heading: {value: 90, unit: deg}
+```
 
-The version 2 thing definition holds the signed cap. A scene conditional
-adds the ground minimum unless the scene explicitly says `setting: space`.
-This shares the existing thing definition and all its other validation.
+use one position form per thing. `heading` turns clockwise from north.
+the fixed camera’s `location.at` and `orientation.look_at` triples are
+`[east, north, up]`. the corresponding axes in Go are x east, y up and z
+south.
 
-The version 1 schema stays unchanged. The reader determines the scene's
-coordinate frame before reading its children so YAML key order cannot
-change the accepted range. Its numeric reader continues to reject NaN,
-infinity and values outside the frame's bounds.
-
-Tests pair signed space reads with ground refusals, both coordinate
-edges, non-finite and oversized values, height refusal, and a setting
-written after the set. The embedded Ferruccio contracts must match the
-producer schemas after this change.
+legacy scenes, v1 scenes and v2 ground scenes keep nonnegative `east` and
+`north` in the older placement form. their `position` coordinates stay
+signed. see [sets](../doc/sets.md#places) for terrain rebasing and
+[Webb at L2](../sets/webb-at-l2.yaml) for a complete space scene.

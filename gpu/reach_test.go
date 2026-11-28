@@ -264,6 +264,45 @@ func TestReserveReachKeepsAGridForBoxedMediaAndNoOther(t *testing.T) {
 	}
 }
 
+// TestAShellRoundABodyKeepsNoGridInTheStore encodes a giant's clouds, a
+// body's air and its clouds, each beside the smoke column. Each is a
+// shell far thinner than a cell of a grid over its box, and drawn from
+// one a giant rippled (like-jupiter, vibes on, 2026-11-26), so only the
+// column is noted for the store and the shell's row says it is lit
+// directly.
+func TestAShellRoundABodyKeepsNoGridInTheStore(t *testing.T) {
+	for _, shell := range []struct {
+		name string
+		med  medium.Medium
+	}{
+		{"a giant", medium.Giant{Radius: 1, Depth: .08, Thick: 500}},
+		{"an air", medium.Air{Radius: 1, Height: .02, Thick: 20}},
+		{"clouds", medium.Clouds{Radius: 1, Low: .01, High: .03,
+			Cover: .5, Thick: 50, Seed: 5}},
+	} {
+		t.Run(shell.name, func(t *testing.T) {
+			world, eye := smokeUnderLamps(t)
+			world.AddVolume(thing.Volume{Medium: shell.med,
+				Material: &thing.Material{Glow: maths.Grey(1)}})
+			encoded, err := encode(world, eye, film.Pinhole{}, 0, 4, 4)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if len(encoded.reached) != 1 {
+				t.Fatalf("encoding noted %d media for the store; want the "+
+					"column alone", len(encoded.reached))
+			}
+			if err = encoded.reserveReachAt(4); err != nil {
+				t.Fatal(err)
+			}
+			if got := lightingRow(encoded, 1); got[3] != -1 {
+				t.Fatalf("%s was given a grid in the store: %v", shell.name,
+					got)
+			}
+		})
+	}
+}
+
 // TestReachHeaderSaysTheStoreOnlyWhenItIsToBeRead writes the header's
 // lighting field for a bake and for the trace, and reads it back.
 func TestReachHeaderSaysTheStoreOnlyWhenItIsToBeRead(t *testing.T) {

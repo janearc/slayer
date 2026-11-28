@@ -1,8 +1,8 @@
 # heard. - opening direction for screenplay v3
 
-SHOOT.md is the current screenplay; MUSIC.md gives its new 72-bar
-arrangement. These replace the earlier ten-bar proposal and the old
-64-bar allocation. Script and music review precede scene integration.
+This opening direction belongs to [screenplay v3](SHOOT-v3.md) and its
+[arrangement](MUSIC-v3.md). They replaced the initial ten-bar proposal
+and the 64-bar allocation. See the [film guide](README.md) for the v6 take.
 
 ## First encounters
 

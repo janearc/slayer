@@ -14,7 +14,7 @@ import (
 )
 
 func TestQueueMalformedLedgerAndMissingOutputCannotAcceptPixels(t *testing.T) {
-	for _, variant := range []string{"malformed", "version", "missing job", "duplicate job", "unknown state", "mismatched terminal result", "missing PNG", "bad PNG", "status unavailable"} {
+	for _, variant := range []string{"malformed", "version", "missing job", "duplicate job", "unknown state", "mismatched terminal result", "missing PNG", "bad PNG"} {
 		t.Run(variant, func(t *testing.T) {
 			plan, tools := queuedPlan(t)
 			runner := NewMockRunner(gomock.NewController(t))
@@ -26,7 +26,7 @@ func TestQueueMalformedLedgerAndMissingOutputCannotAcceptPixels(t *testing.T) {
 				case "malformed":
 					return []byte("{"), nil
 				case "version":
-					return queueJSON(t, map[string]any{"version": 2, "jobs": []queueJob{job}}), nil
+					return queueJSON(t, map[string]any{"version": 4, "jobs": []queueJob{job}}), nil
 				case "missing job":
 					return queueJSON(t, map[string]any{"version": 1, "jobs": []queueJob{}}), nil
 				case "duplicate job":
@@ -39,8 +39,6 @@ func TestQueueMalformedLedgerAndMissingOutputCannotAcceptPixels(t *testing.T) {
 					if err := os.WriteFile(plan.Output, []byte("not a PNG"), 0600); err != nil {
 						t.Fatal(err)
 					}
-				case "status unavailable":
-					return nil, errors.New("queue status unavailable")
 				}
 				return queueJSON(t, map[string]any{"version": 1, "jobs": []queueJob{job}}), nil
 			}

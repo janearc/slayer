@@ -1,0 +1,10 @@
+"$schema": https://github.com/janearc/slayer/schemas/job-v1.json
+scene: {set: caprica/10-drop-oblique-surface-crop.yaml}
+renderer: gpu-native
+shortcuts: {restir: off}
+film: {width: 1080, height: 960, rays: 3, wide: 40}
+print: {knee: 0.7, top: 8, bloom: 2, stops: -24.8}
+camera: {name: 10-drop-oblique}
+outputs:
+  picture: ../../../../out/2026-11-27-system-half-06-fresno-close/proof.png
+  raw: ../../../../out/2026-11-27-system-half-06-fresno-close/light.pfm

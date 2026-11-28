@@ -1,0 +1,2 @@
+# Build the spherical island study without building every command.
+island . :: go build -o bin/island ./cmd/island

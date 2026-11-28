@@ -96,7 +96,9 @@ const (
 	// faint is how little of the light behind has to be left for a march
 	// to stop early. It is a share and not an amount: what is dropped
 	// is under a thousandth of whatever lies behind, which shows if
-	// what lies behind is a thousand times white.
+	// what lies behind is a thousand times white. A march that stops
+	// for it keeps none of that light (settled), else an opaque body
+	// would let a sun through.
 	faint = 1e-3
 	// evenly is how much of a lamp an isotropic scatterer sends toward the
 	// eye, against a surface's cosine: a lit cloud beside a lit wall

@@ -1,0 +1,48 @@
+# Native adult chest material specimen in the matched studio series.
+"$schema": https://github.com/janearc/slayer/schemas/ecosystem-v2.json
+scene:
+  name: Medium skin, high regional contrast
+  seed: 27
+  setting: space
+  light: none
+  set:
+    things:
+      adult:
+        kind: adult-chest-medium-high-contrast
+        seed: 27
+        position:
+          east: {value: 0, unit: m}
+          north: {value: 0, unit: m}
+          up: {value: 0, unit: m}
+  film:
+    width: 528
+    height: 480
+    rays: 4
+    exposure: 1
+    wide: 31
+  cameras:
+    chest-front:
+      title: Medium skin, high regional contrast
+      location: {at: [0, -0.97, 1.19]}
+      orientation: {look_at: [0, 0, 1.19]}
+  world:
+    unit: 1
+    sky:
+      horizon: {srgb_linear: [0.12, 0.12, 0.12]}
+      zenith: {srgb_linear: [0.12, 0.12, 0.12]}
+      ground: {srgb_linear: [0.12, 0.12, 0.12]}
+      source: eye
+    suns:
+      left:
+        toward: [-0.38, -0.81, 0.44]
+        colour: {srgb_linear: [0.86, 0.86, 0.86]}
+        source: eye
+      right:
+        toward: [0.38, -0.81, 0.44]
+        colour: {srgb_linear: [0.86, 0.86, 0.86]}
+        source: eye
+    floods:
+      room:
+        colour: {srgb_linear: [0.16, 0.16, 0.16]}
+        strength: 1
+        source: eye

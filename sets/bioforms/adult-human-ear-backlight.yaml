@@ -1,0 +1,42 @@
+# The lamp clears the rear of the skull and lights the left pinna.
+"$schema": https://github.com/janearc/slayer/schemas/ecosystem-v2.json
+scene:
+  name: Native adult ear under a local backlight
+  seed: 27
+  setting: space
+  light: none
+  set:
+    things:
+      adult:
+        kind: adult-human-auricle-thin-skin
+        seed: 27
+        position:
+          east: {value: 0, unit: m}
+          north: {value: 0, unit: m}
+          up: {value: 0, unit: m}
+  film:
+    width: 480
+    height: 600
+    rays: 4
+    wide: 27
+    exposure: 1
+  cameras:
+    left-ear:
+      location: {at: [0.31, -0.045, 1.570]}
+      orientation: {look_at: [0.078, 0.018, 1.570]}
+  world:
+    unit: 1
+    spots:
+      backlight:
+        at: [0.081, 0.085, 1.597]
+        aim: [0.14, -0.92, -0.36]
+        cone: 57
+        soft: 12
+        temperature: 6500
+        strength: 0.026
+        source: eye
+    suns:
+      camera-fill:
+        toward: [0.82, -0.49, 0.26]
+        colour: {srgb_linear: [0.26, 0.25, 0.24]}
+        source: eye

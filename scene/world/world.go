@@ -14,6 +14,7 @@ import (
 	"fmt"
 	"math"
 	"sort"
+	"sync"
 
 	"github.com/janearc/slayer/maths"
 	"github.com/janearc/slayer/maths/hexes"
@@ -72,6 +73,13 @@ type World struct {
 	height []float64     // above the sea is positive; by index
 	biome  []Biome       // by index
 	fixed  []Biome       // by index, a class a feature fixed, or Unfixed
+	wet    []int         // by index, how many tiles from the sea
+	middle []maths.Vec   // by index, the tile's centre
+	reach  [][]int       // by index, the tile and two rings round it
+	rainBy float64       // tiles over which rain fades from the sea
+	// treeOnce makes grown, the ground's tree, when it is first asked for
+	treeOnce sync.Once
+	grown    *tree
 }
 
 // New works out the terrain. an Ocean, a Cold or an Axis that is no number
@@ -117,6 +125,11 @@ func (w *World) lay() {
 			}
 		}
 	}
+	w.middle = make([]maths.Vec, len(w.tiles))
+	for i, tile := range w.tiles {
+		w.middle[i] = w.Tiling.Centre(tile)
+	}
+	w.layReach()
 }
 
 // index is a tile's index, or minus one for a tile the world does not
@@ -307,6 +320,8 @@ func (w *World) pourSea() {
 // classify picks each tile's biome from its height, its cold and its rain.
 func (w *World) classify() {
 	wet := w.toSea()
+	w.wet = wet
+	w.rainBy = math.Max(2, w.across()/5)
 	north := w.north()
 	w.biome = make([]Biome, len(w.tiles))
 	for i, tile := range w.tiles {
@@ -315,8 +330,7 @@ func (w *World) classify() {
 		lat := w.Tiling.Latitude(c, north)
 		nz := noise.Fractal(w.Seed+60, c.X*4, c.Y*4, c.Z*4, 3)
 		cold := lat*1.05 + math.Max(0, e)*0.45 + 0.12*nz + w.Cold
-		reach := math.Max(2, w.across()/5)
-		rain := math.Exp(-float64(wet[i])/reach) +
+		rain := math.Exp(-float64(wet[i])/w.rainBy) +
 			0.3*noise.Fractal(w.Seed+61, c.X*3, c.Y*3, c.Z*3, 3)
 		w.biome[i] = pick(e, cold, rain, wet[i])
 		if w.fixed[i] != unfixed {
@@ -325,31 +339,47 @@ func (w *World) classify() {
 	}
 }
 
+// The levels pick tells biomes apart at: heights, colds and rains. Set
+// when the world was made, in Miami; Scrooged decides its classes by them.
+const (
+	iceCold     = 1.0
+	deepHeight  = -0.35
+	snowCold    = 1.08
+	snowHeight  = 0.82
+	rockHeight  = 0.62
+	tundraCold  = 0.88
+	beachHeight = 0.03
+	desertRain  = 0.28
+	grassRain   = 0.5
+	jungleCold  = 0.35
+	jungleRain  = 0.75
+)
+
 // pick is a biome from height, cold and rain.
 func pick(e, cold, rain float64, fromSea int) Biome {
 	if e < 0 {
 		switch {
-		case cold > 1.0:
+		case cold > iceCold:
 			return Ice
-		case e < -0.35:
+		case e < deepHeight:
 			return Deep
 		}
 		return Sea
 	}
 	switch {
-	case cold > 1.08 || e > 0.82:
+	case cold > snowCold || e > snowHeight:
 		return Snow
-	case e > 0.62:
+	case e > rockHeight:
 		return Rock
-	case cold > 0.88:
+	case cold > tundraCold:
 		return Tundra
-	case fromSea == 1 && e < 0.03:
+	case fromSea == 1 && e < beachHeight:
 		return Beach
-	case rain < 0.28:
+	case rain < desertRain:
 		return Desert
-	case rain < 0.5:
+	case rain < grassRain:
 		return Grass
-	case cold < 0.35 && rain > 0.75:
+	case cold < jungleCold && rain > jungleRain:
 		return Jungle
 	}
 	return Forest

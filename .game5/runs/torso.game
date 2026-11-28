@@ -1,0 +1,5 @@
+torso-study . :: go run ./studies/torso
+torso-check . :: go test -cover ./manufacture/animals/vertebrates/mammals/primates ./studies/torso
+torso-kind-check . :: go test -run TestAdultTorsoProducesOneClosedNativePart ./manufacture
+thorax-sections . :: go test -v -run TestTransverseMedialWall ./manufacture/animals/vertebrates/mammals/primates
+thorax-shoulder . :: go test -v -run TestUpperShoulderRayCrossings ./manufacture/animals/vertebrates/mammals/primates

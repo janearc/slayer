@@ -49,6 +49,9 @@ func runDirect(ctx context.Context, tools Tools, plan *Plan, output io.Writer, n
 	if err := ctx.Err(); err != nil {
 		return err
 	}
+	if err := plan.Profile.reference.checkCurrent(); err != nil {
+		return err
+	}
 	if err := plan.writeDirectIntent(tools, argv); err != nil {
 		return err
 	}
@@ -104,13 +107,15 @@ func runDirect(ctx context.Context, tools Tools, plan *Plan, output io.Writer, n
 		}
 		return fmt.Errorf("shared Slayer preview failed: %w", runError)
 	}
+	err = plan.acceptDirect(tools, argv)
 	if notify != nil {
-		notify(Update{State: "succeeded", Terminal: true})
+		state := "succeeded"
+		if err != nil {
+			state = "failed"
+		}
+		notify(Update{State: state, Terminal: true})
 	}
-	if err := plan.record(tools); err != nil {
-		return err
-	}
-	return plan.recordDirectIdentity(tools, argv)
+	return err
 }
 
 // setDirectUncertain records whether a started shared Slayer preview still

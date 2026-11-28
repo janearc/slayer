@@ -164,6 +164,9 @@ func TestStockControlsFitSmallestWindow(t *testing.T) {
 	}
 	work.toggleDisclosure("stock")
 	work.root.Layout(ctx, geometry.Loose(smallestWindow))
+	if width := libraryWidget(work.root, "Development stock").(interface{ Bounds() geometry.Rect }).Bounds().Width(); width != playDrawerContentWidth {
+		t.Fatalf("stock choices have %g points, want %g", width, float32(playDrawerContentWidth))
+	}
 	for _, id := range []string{"Development stock", "Set stock"} {
 		point, found := centreOf(work.root, id, geometry.Point{})
 		if !found || point.X < 0 || point.Y < 0 || point.X > smallestWindow.Width || point.Y > smallestWindow.Height {

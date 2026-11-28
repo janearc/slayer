@@ -20,13 +20,13 @@ current command help define the live interface.
 
 ## Work through Game, not raw Go
 
-Development runs through Game, driven by the `.game` file in the repo root:
+Development runs through Game, driven by `.game5/` in the repo root:
 
 - `game build` builds and stamps binaries into `bin/`. It runs a pre-build
-  source verification (`go run ./cmd/sources verify`), which reads the
-  committed `shelf/` unless `SLAYER_SHELF` names another.
-- `game run <name>` runs the named runs declared in `.game` (hillside,
-  smoke-one, observatory, check-film, ...). Application runs use the `bin/`
+  source verification (`go run ./cmd/sources verify`), which reads `shelf/`
+  unless `SLAYER_SHELF` names another; required sources must be present.
+- `game run <name>` runs the named runs declared in `.game5/` (hillside,
+  smoke-one, observatory, ...). Application runs use the `bin/`
   binaries: rebuild after changing Go code.
 - `game check` runs formatting, vet and tests. `game lint`, `game cover`
   and `game sweep` are the other gates.
@@ -58,7 +58,7 @@ serial:
 
 - The 60m timeout accommodates cold-cache smoke renders; it skips nothing.
 - `game cover` requires every measured file to reach 100%, across the whole
-  checkout. `.game` omit/exclude entries do NOT narrow the report; generated
+  checkout. Game omit/exclude entries do NOT narrow the report; generated
   mocks and commands without package tests can fail the whole run. Report
   any coverage percentage with the source revision and measurement mode.
 - Metal tests need macOS, the Xcode command-line tools and a usable Metal
@@ -96,4 +96,4 @@ Read [the renderer guide](doc/renderer.md) and
   merge resolutions too, and the rule is never weakened to make a candidate
   pass.
 - Mocks are generated with `go tool mockgen` (pinned in go.mod as a tool)
-  through the `mocks` runs in `.game`; the generated files are committed.
+  through the `mocks` runs in `.game5/`; the generated files are committed.

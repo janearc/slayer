@@ -26,6 +26,8 @@ scenes. Import paths below are relative to `github.com/janearc/slayer/`.
 
 - **camera:** checked moves, speeds and holds, sampled from elapsed time
   without a mutable playhead. The path keeps its look target separate.
+- **bioforms/framing:** whole-figure camera suggestions and tracking from
+  posed part bounds. See [whole-figure cameras](doc/bioform-framing.md).
 - **scene/thing:** worlds, surfaces, volumes, fields, lamps, sky, and haze.
   Motions place objects over time and compose through nested transforms.
   A look is made of a material and a finish; `Stopping` is what a material

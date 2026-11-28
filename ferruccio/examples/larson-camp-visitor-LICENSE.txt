@@ -1,0 +1,15 @@
+SMPL-X sample body by Meshcapade and the Max Planck Institute for
+Intelligent Systems. Creative Commons Attribution 4.0 International.
+https://smpl.is.tue.mpg.de/bodylicense.html
+https://creativecommons.org/licenses/by/4.0/
+
+Source: Meshcapade SMPL_texture_samples, revision
+c87d871c7498fdc98f3cabb7341b5c85c38debaa, SMPLX-female.obj.
+https://github.com/Meshcapade/SMPL_texture_samples/tree/c87d871c7498fdc98f3cabb7341b5c85c38debaa
+Credit the SMPL-X authors: Pavlakos et al., Expressive Body Capture:
+3D Hands, Face, and Body from a Single Image (CVPR 2019).
+
+Changes: Slayer triangulated and applied the portrait study's standing
+pose, generated normals, and exported static GLB geometry. The camp set
+supplies a bronze material, grounds the lowest point at the landing pad,
+and normalizes the asset to two metres.

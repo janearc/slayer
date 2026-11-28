@@ -10,6 +10,7 @@ import (
 	"github.com/gogpu/gpucontext"
 	"github.com/gogpu/gputypes"
 	"github.com/gogpu/wgpu"
+	"github.com/janearc/slayer/internal/observability"
 	"github.com/janearc/slayer/maths"
 	"github.com/janearc/slayer/session/placement"
 	"image"
@@ -39,6 +40,8 @@ var ErrReadbackLate = errors.New("working GPU readback was late")
 // Misses counts readbacks abandoned because the GPU handed them back late.
 type Statistics struct {
 	Meshes, Triangles, Uploads, Draws, Misses, Width, Height int
+	ReusedInstances                                          int
+	SplitWorldFallback                                       bool
 	Elapsed                                                  time.Duration
 }
 type mesh struct {
@@ -46,23 +49,25 @@ type mesh struct {
 	instances                *wgpu.Buffer
 	instanceBytes            int
 	triangles, lines         uint32
+	split                    bool
+	splitRequested           bool
 }
-type object struct {
+type cameraUniform struct {
 	uniform *wgpu.Buffer
 	group   *wgpu.BindGroup
 }
 
-// drawObject pairs one resident mesh with the uniform that places it.
+// drawObject identifies one resident mesh and its visible instance count.
 type drawObject struct {
-	mesh   *mesh
-	object *object
-	count  uint32
+	mesh  *mesh
+	count uint32
 }
 
 type pendingFrame struct {
 	mapRequest       *wgpu.MapPending
 	scene            *placement.DisplayScene
 	camera           matrix
+	eye              maths.Subspace
 	width, height    int
 	mode             string
 	background, edge [4]float32
@@ -79,7 +84,8 @@ type View struct {
 	shader                  *wgpu.ShaderModule
 	solid, lines, depthOnly *wgpu.RenderPipeline
 	meshes                  map[*placement.DisplayMesh]*mesh
-	objects                 map[string]*object
+	meshBounds              map[*placement.DisplayMesh]sphere
+	camera                  *cameraUniform
 	colour, depth           *wgpu.Texture
 	colourView, depthView   *wgpu.TextureView
 	readback                *wgpu.Buffer
@@ -93,6 +99,8 @@ type View struct {
 	late int
 	// pending retains a batch frame while its GPU readback is in flight.
 	pending *pendingFrame
+	stable  *stableBatches
+	split   splitWorldPipelines
 }
 
 // New attaches after the app initializes its native GPU context.
@@ -104,7 +112,7 @@ func New(provider gpucontext.DeviceProvider) (*View, error) {
 	if device == nil {
 		return nil, fmt.Errorf("working view: no wgpu device")
 	}
-	view := &View{device: device, queue: device.Queue(), meshes: map[*placement.DisplayMesh]*mesh{}, objects: map[string]*object{}, mode: "edges", background: [4]float32{.03, .04, .055, 1}, edge: [4]float32{.08, .11, .15, 1}}
+	view := &View{device: device, queue: device.Queue(), meshes: map[*placement.DisplayMesh]*mesh{}, meshBounds: map[*placement.DisplayMesh]sphere{}, mode: "edges", background: [4]float32{.03, .04, .055, 1}, edge: [4]float32{.08, .11, .15, 1}}
 	if err := view.createPipelines(); err != nil {
 		view.Close()
 		return nil, err
@@ -163,32 +171,33 @@ func (view *View) createPipelines() error {
 		{ArrayStride: 36, StepMode: gputypes.VertexStepModeVertex, Attributes: []gputypes.VertexAttribute{{Format: gputypes.VertexFormatFloat32x3, Offset: 0, ShaderLocation: 0}, {Format: gputypes.VertexFormatFloat32x3, Offset: 12, ShaderLocation: 1}, {Format: gputypes.VertexFormatFloat32x3, Offset: 24, ShaderLocation: 2}}},
 		{ArrayStride: 64, StepMode: gputypes.VertexStepModeInstance, Attributes: []gputypes.VertexAttribute{{Format: gputypes.VertexFormatFloat32x4, Offset: 0, ShaderLocation: 3}, {Format: gputypes.VertexFormatFloat32x4, Offset: 16, ShaderLocation: 4}, {Format: gputypes.VertexFormatFloat32x4, Offset: 32, ShaderLocation: 5}, {Format: gputypes.VertexFormatFloat32x4, Offset: 48, ShaderLocation: 6}}},
 	}
-	makePipeline := func(mode string) (*wgpu.RenderPipeline, error) {
-		topology := gputypes.PrimitiveTopologyTriangleList
-		entry, fragment := "solid_vertex", "solid_fragment"
-		if mode == "lines" {
-			topology = gputypes.PrimitiveTopologyLineList
-			entry, fragment = "edge_vertex", "edge_fragment"
-		}
-		mask := gputypes.ColorWriteMaskAll
-		if mode == "depth" {
-			mask = gputypes.ColorWriteMaskNone
-		}
-		return view.device.CreateRenderPipeline(&wgpu.RenderPipelineDescriptor{Label: "Ferruccio opaque working view", Layout: view.pipelineLayout, Vertex: wgpu.VertexState{Module: view.shader, EntryPoint: entry, Buffers: vertex}, Primitive: gputypes.PrimitiveState{Topology: topology, FrontFace: gputypes.FrontFaceCCW, CullMode: gputypes.CullModeNone}, DepthStencil: &wgpu.DepthStencilState{Format: wgpu.TextureFormatDepth32Float, DepthWriteEnabled: mode != "lines", DepthCompare: gputypes.CompareFunctionLessEqual}, Multisample: gputypes.MultisampleState{Count: 1, Mask: 0xffffffff}, Fragment: &wgpu.FragmentState{Module: view.shader, EntryPoint: fragment, Targets: []gputypes.ColorTargetState{{Format: wgpu.TextureFormatRGBA8Unorm, WriteMask: mask}}}})
-	}
-	view.solid, err = makePipeline("solid")
+	view.solid, err = view.meshPipeline(view.shader, vertex, "solid", "")
 	if err != nil {
 		return fmt.Errorf("working triangles: %w", err)
 	}
-	view.lines, err = makePipeline("lines")
+	view.lines, err = view.meshPipeline(view.shader, vertex, "lines", "")
 	if err != nil {
 		return fmt.Errorf("working edges: %w", err)
 	}
-	view.depthOnly, err = makePipeline("depth")
+	view.depthOnly, err = view.meshPipeline(view.shader, vertex, "depth", "")
 	if err != nil {
 		return fmt.Errorf("working depth: %w", err)
 	}
 	return nil
+}
+
+func (view *View) meshPipeline(shader *wgpu.ShaderModule, vertex []gputypes.VertexBufferLayout, mode, prefix string) (*wgpu.RenderPipeline, error) {
+	topology := gputypes.PrimitiveTopologyTriangleList
+	entry, fragment := "solid_vertex", "solid_fragment"
+	if mode == "lines" {
+		topology = gputypes.PrimitiveTopologyLineList
+		entry, fragment = "edge_vertex", "edge_fragment"
+	}
+	mask := gputypes.ColorWriteMaskAll
+	if mode == "depth" {
+		mask = gputypes.ColorWriteMaskNone
+	}
+	return view.device.CreateRenderPipeline(&wgpu.RenderPipelineDescriptor{Label: "Ferruccio opaque working view", Layout: view.pipelineLayout, Vertex: wgpu.VertexState{Module: shader, EntryPoint: prefix + entry, Buffers: vertex}, Primitive: gputypes.PrimitiveState{Topology: topology, FrontFace: gputypes.FrontFaceCCW, CullMode: gputypes.CullModeNone}, DepthStencil: &wgpu.DepthStencilState{Format: wgpu.TextureFormatDepth32Float, DepthWriteEnabled: mode != "lines", DepthCompare: gputypes.CompareFunctionLessEqual}, Multisample: gputypes.MultisampleState{Count: 1, Mask: 0xffffffff}, Fragment: &wgpu.FragmentState{Module: shader, EntryPoint: fragment, Targets: []gputypes.ColorTargetState{{Format: wgpu.TextureFormatRGBA8Unorm, WriteMask: mask}}}})
 }
 
 // buffer creates a device buffer holding data. It fails when data is empty.
@@ -209,19 +218,18 @@ func (view *View) buffer(label string, data []byte, usage gputypes.BufferUsage) 
 
 // upload returns the device copy of source, uploading it on first use.
 func (view *View) upload(source *placement.DisplayMesh) (*mesh, error) {
-	if ready := view.meshes[source]; ready != nil {
+	return view.uploadMesh(source, false)
+}
+
+func (view *View) uploadMesh(source *placement.DisplayMesh, wantSplit bool) (*mesh, error) {
+	ready := view.meshes[source]
+	if ready != nil && ready.splitRequested == wantSplit {
 		return ready, nil
 	}
 	if source == nil || len(source.Vertices) == 0 || len(source.Indices)%3 != 0 {
 		return nil, fmt.Errorf("working view: invalid native mesh")
 	}
-	vertices := make([]byte, len(source.Vertices)*36)
-	for index, vertex := range source.Vertices {
-		values := []float32{float32(vertex.Position.X), float32(vertex.Position.Y), float32(vertex.Position.Z), float32(vertex.Normal.X), float32(vertex.Normal.Y), float32(vertex.Normal.Z), float32(vertex.Colour.R), float32(vertex.Colour.G), float32(vertex.Colour.B)}
-		for field, value := range values {
-			binary.LittleEndian.PutUint32(vertices[index*36+field*4:], math.Float32bits(value))
-		}
-	}
+	split := wantSplit && splitWorldFits(view.device.Limits(), len(source.Vertices)) && view.prepareSplitWorld()
 	indices := func(values []uint32) ([]byte, error) {
 		result := make([]byte, len(values)*4)
 		for index, value := range values {
@@ -247,17 +255,30 @@ func (view *View) upload(source *placement.DisplayMesh) (*mesh, error) {
 	if err != nil {
 		return nil, err
 	}
-	resident := &mesh{triangles: uint32(len(source.Indices)), lines: uint32(len(edges))}
-	resident.vertices, err = view.buffer("native local vertices", vertices, wgpu.BufferUsageVertex)
+	upload := func(label string, data []byte, usage gputypes.BufferUsage) (*wgpu.Buffer, error) {
+		return view.mappedMeshBuffer(label, uint64(len(data)), usage, func(mapped []byte) {
+			copy(mapped, data)
+		})
+	}
+	resident := &mesh{triangles: uint32(len(source.Indices)), lines: uint32(len(edges)), splitRequested: wantSplit}
+	if split {
+		resident.vertices, err = view.mappedMeshBuffer("native split world vertices", uint64(len(source.Vertices))*splitVertexBytes, wgpu.BufferUsageVertex, func(data []byte) {
+			packVertices(data, source.Vertices, splitVertexBytes)
+		})
+		resident.split = err == nil
+	}
+	if !resident.split {
+		resident.vertices, err = upload("native local vertices", vertexData(source.Vertices, false), wgpu.BufferUsageVertex)
+	}
 	if err != nil {
 		return nil, err
 	}
-	resident.indices, err = view.buffer("native triangles", triangles, wgpu.BufferUsageIndex)
+	resident.indices, err = upload("native triangles", triangles, wgpu.BufferUsageIndex)
 	if err != nil {
 		resident.vertices.Release()
 		return nil, err
 	}
-	resident.edges, err = view.buffer("native edges", lineData, wgpu.BufferUsageIndex)
+	resident.edges, err = upload("native edges", lineData, wgpu.BufferUsageIndex)
 	if err != nil {
 		resident.vertices.Release()
 		resident.indices.Release()
@@ -265,16 +286,20 @@ func (view *View) upload(source *placement.DisplayMesh) (*mesh, error) {
 	}
 	view.meshes[source] = resident
 	view.stats.Uploads++
-	view.stats.Triangles += len(source.Indices) / 3
+	if ready == nil {
+		view.stats.Triangles += len(source.Indices) / 3
+	} else {
+		ready.release()
+	}
 	return resident, nil
 }
 
-// object returns the device object for id, building it on first use.
-func (view *View) object(id string) (*object, error) {
-	if ready := view.objects[id]; ready != nil {
+// cameraBinding builds the camera uniform shared by every mesh on first use.
+func (view *View) cameraBinding() (*cameraUniform, error) {
+	if ready := view.camera; ready != nil {
 		return ready, nil
 	}
-	uniform, err := view.device.CreateBuffer(&wgpu.BufferDescriptor{Label: "working object transform", Size: uniformBytes, Usage: wgpu.BufferUsageUniform | wgpu.BufferUsageCopyDst})
+	uniform, err := view.device.CreateBuffer(&wgpu.BufferDescriptor{Label: "working camera transform", Size: uniformBytes, Usage: wgpu.BufferUsageUniform | wgpu.BufferUsageCopyDst})
 	if err != nil {
 		return nil, err
 	}
@@ -283,9 +308,8 @@ func (view *View) object(id string) (*object, error) {
 		uniform.Release()
 		return nil, err
 	}
-	ready := &object{uniform: uniform, group: group}
-	view.objects[id] = ready
-	return ready, nil
+	view.camera = &cameraUniform{uniform: uniform, group: group}
+	return view.camera, nil
 }
 
 // Draw changes camera/placement uniforms and renders the resident native meshes.
@@ -294,6 +318,38 @@ func (view *View) object(id string) (*object, error) {
 // belongs to the view and is reused by the next Draw of the same size. A
 // late readback returns ErrReadbackLate and leaves the view ready to retry.
 func (view *View) Draw(scene *placement.DisplayScene, width, height int) (*image.NRGBA, error) {
+	return view.draw(scene, width, height, false)
+}
+
+// DrawStable may reuse placement buffers when the caller keeps batch slices
+// immutable and replaces a slice whenever any of its placements change.
+func (view *View) DrawStable(scene *placement.DisplayScene, width, height int) (*image.NRGBA, error) {
+	return view.draw(scene, width, height, true)
+}
+
+// ForgetStable releases retained placement slices when the document changes.
+func (view *View) ForgetStable() {
+	if view != nil {
+		view.stable = nil
+	}
+}
+
+// DiscardScene drops geometry and an in-flight frame when leaving a document.
+func (view *View) DiscardScene() error {
+	view.stable = nil
+	err := view.cancelPending()
+	for _, resident := range view.meshes {
+		resident.release()
+	}
+	clear(view.meshes)
+	clear(view.meshBounds)
+	view.stats.Triangles = 0
+	view.stats.ReusedInstances = 0
+	view.stats.SplitWorldFallback = false
+	return err
+}
+
+func (view *View) draw(scene *placement.DisplayScene, width, height int, stable bool) (*image.NRGBA, error) {
 	if view == nil || view.device == nil || scene == nil {
 		return nil, fmt.Errorf("working view is not initialized")
 	}
@@ -301,9 +357,12 @@ func (view *View) Draw(scene *placement.DisplayScene, width, height int) (*image
 		return nil, fmt.Errorf("working view dimensions must be positive")
 	}
 	width, height = fit(width, height)
+	if !stable {
+		view.stable = nil
+	}
 	if view.pending != nil {
 		pending := view.pending
-		if pending.scene == scene && pending.width == width && pending.height == height && pending.camera == cameraMatrix(scene, width, height) && pending.mode == view.mode && pending.background == view.background && pending.edge == view.edge {
+		if pending.scene == scene && pending.width == width && pending.height == height && pending.eye == scene.Eye && pending.camera == cameraMatrix(scene, width, height) && pending.mode == view.mode && pending.background == view.background && pending.edge == view.edge {
 			return view.finishPending()
 		}
 		if err := view.cancelPending(); err != nil {
@@ -314,30 +373,40 @@ func (view *View) Draw(scene *placement.DisplayScene, width, height int) (*image
 		return nil, err
 	}
 	started := time.Now()
-	draws, err := view.place(scene, width, height)
+	timing := drawTiming{enabled: observability.Enabled()}
+	draws, err := view.placeScene(scene, width, height, stable, &timing)
 	if err != nil {
 		return nil, err
 	}
-	commands, err := view.encode(draws, width, height)
+	encodeStarted := timing.now()
+	commands, err := view.encode(draws, width, height, scene.SkyGradient != nil)
+	observeDrawPhase(workingEncodeMetric, encodeStarted)
 	if err != nil {
+		view.stable = nil
 		return nil, err
 	}
-	if _, err = view.queue.Submit(commands); err != nil {
+	submitStarted := timing.now()
+	_, err = view.queue.Submit(commands)
+	observeDrawPhase(workingSubmitMetric, submitStarted)
+	if err != nil {
 		commands.Release()
+		view.stable = nil
 		return nil, err
 	}
 	if len(scene.Batches) > 0 {
 		pending, err := view.readback.MapAsync(wgpu.MapModeRead, 0, uint64(view.rowBytes*height))
 		if err != nil {
+			view.stable = nil
 			return nil, fmt.Errorf("working GPU readback: %w", err)
 		}
-		view.pending = &pendingFrame{mapRequest: pending, scene: scene, camera: cameraMatrix(scene, width, height), width: width, height: height, mode: view.mode, background: view.background, edge: view.edge, started: started}
+		view.pending = &pendingFrame{mapRequest: pending, scene: scene, camera: cameraMatrix(scene, width, height), eye: scene.Eye, width: width, height: height, mode: view.mode, background: view.background, edge: view.edge, started: started}
 		return view.finishPending()
 	}
 	picture, err := view.read(width, height)
 	if err != nil {
 		return nil, err
 	}
+	fillSky(picture, scene)
 	view.stats.Draws++
 	view.stats.Elapsed = time.Since(started)
 	return picture, nil
@@ -359,12 +428,14 @@ func (view *View) finishPending() (*image.NRGBA, error) {
 	pending.mapRequest.Release()
 	view.pending = nil
 	if err != nil {
+		view.stable = nil
 		return nil, fmt.Errorf("working GPU readback: %w", err)
 	}
 	picture, err := view.copyReadback(pending.width, pending.height)
 	if err != nil {
 		return nil, err
 	}
+	fillSky(picture, pending.scene)
 	view.stats.Draws++
 	view.stats.Elapsed = time.Since(pending.started)
 	return picture, nil
@@ -403,18 +474,40 @@ func fit(width, height int) (int, int) {
 
 // place uploads each mesh once and batches its placements into one draw.
 func (view *View) place(scene *placement.DisplayScene, width, height int) ([]drawObject, error) {
+	view.stable = nil
+	return view.placeScene(scene, width, height, false, &drawTiming{})
+}
+
+func (view *View) placeScene(scene *placement.DisplayScene, width, height int, stable bool, timing *drawTiming) (draws []drawObject, resultErr error) {
+	view.stats.ReusedInstances = 0
+	view.stats.SplitWorldFallback = false
+	defer func() {
+		if resultErr != nil {
+			view.stable = nil
+		}
+	}()
+	cullStarted := timing.now()
+	changed, reuse := view.stable.changes(scene, width, height)
+	reuse = stable && reuse
+	cameraStarted := timing.now()
 	camera := cameraMatrix(scene, width, height)
-	uniform, err := view.object("staged-camera")
+	uniform, err := view.cameraBinding()
 	if err != nil {
 		return nil, err
 	}
-	if err := view.queue.WriteBuffer(uniform.uniform, 0, uniformData(camera, matrix{}, view.edge)); err != nil {
+	if err := view.queue.WriteBuffer(uniform.uniform, 0, uniformData(camera, scene.Eye.Origin, view.edge)); err != nil {
 		return nil, err
 	}
+	timing.uploaded(cameraStarted)
+	type instances struct {
+		places []maths.Subspace
+		mask   []uint64
+	}
 	type batch struct {
-		mesh  *mesh
-		data  []byte
-		count uint32
+		mesh   *mesh
+		parts  []instances
+		count  uint32
+		reused bool
 	}
 	live := make(map[*placement.DisplayMesh]bool)
 	for _, source := range scene.Objects {
@@ -434,22 +527,43 @@ func (view *View) place(scene *placement.DisplayScene, width, height int) ([]dra
 			view.stats.Triangles -= len(source.Indices) / 3
 		}
 	}
+	// Bounds belong to immutable local meshes, including those culled from
+	// the current view. Retire them when the scene no longer references them.
+	for source := range view.meshBounds {
+		if !live[source] {
+			delete(view.meshBounds, source)
+		}
+	}
 	var batches []batch
 	known := make(map[*placement.DisplayMesh]int)
 	frustum := viewFrustum(scene, width, height)
-	bounds := make(map[*placement.DisplayMesh]sphere)
-	count := func(source *placement.DisplayMesh, places []maths.Subspace, staged *placement.StagedBatch) ([]uint64, error) {
+	count := func(source *placement.DisplayMesh, places []maths.Subspace, staged *placement.StagedBatch, split bool) error {
 		if source == nil || len(source.Indices) == 0 || len(places) == 0 {
-			return nil, nil
+			return nil
 		}
-		sphere, found := bounds[source]
+		if reuse && !changed[source] {
+			if _, found := known[source]; !found {
+				count := view.stable.counts[source]
+				if count != 0 {
+					resident := view.meshes[source]
+					if resident == nil || resident.instances == nil {
+						return fmt.Errorf("working view: reusable instances are unavailable")
+					}
+					known[source] = len(batches)
+					batches = append(batches, batch{mesh: resident, count: count, reused: true})
+					view.stats.ReusedInstances += int(count)
+				}
+			}
+			return nil
+		}
+		sphere, found := view.meshBounds[source]
 		if !found {
 			var ok bool
 			sphere, ok = meshSphere(source)
 			if !ok {
-				return nil, fmt.Errorf("working view: mesh has no bounds")
+				return fmt.Errorf("working view: mesh has no bounds")
 			}
-			bounds[source] = sphere
+			view.meshBounds[source] = sphere
 		}
 		visible := 0
 		mask := make([]uint64, (len(places)+63)/64)
@@ -468,89 +582,97 @@ func (view *View) place(scene *placement.DisplayScene, width, height int) ([]dra
 			i++
 		}
 		if visible == 0 {
-			return nil, nil
+			return nil
 		}
 		index, found := known[source]
 		if !found {
-			geometry, err := view.upload(source)
-			if err != nil {
-				return nil, err
+			var uploadStarted time.Time
+			if timing.enabled && view.meshes[source] == nil {
+				uploadStarted = time.Now()
 			}
+			geometry, err := view.uploadMesh(source, split)
+			timing.uploaded(uploadStarted)
+			if err != nil {
+				return err
+			}
+			view.stats.SplitWorldFallback = view.stats.SplitWorldFallback || (split && !geometry.split)
 			index = len(batches)
 			known[source] = index
 			batches = append(batches, batch{mesh: geometry})
 		}
 		current := &batches[index]
 		if uint64(current.count)+uint64(visible) > math.MaxUint32 {
-			return nil, fmt.Errorf("working view has too many instances of one mesh")
+			return fmt.Errorf("working view has too many instances of one mesh")
 		}
 		current.count += uint32(visible)
-		return mask, nil
+		current.parts = append(current.parts, instances{places, mask})
+		return nil
 	}
-	objectMasks := make([][]uint64, len(scene.Objects))
-	for i, source := range scene.Objects {
-		var err error
-		objectMasks[i], err = count(source.Mesh, []maths.Subspace{source.At}, nil)
-		if err != nil {
+	for _, source := range scene.Objects {
+		if err := count(source.Mesh, []maths.Subspace{source.At}, nil, scene.SplitWorldVertices && len(scene.Batches) == 0 && source.ID == "scene.world" && source.At == maths.Local()); err != nil {
 			return nil, err
 		}
 	}
-	batchMasks := make([][]uint64, len(scene.Batches))
-	for i, source := range scene.Batches {
-		if !frustum.batchVisible(source) {
-			continue
-		}
-		var err error
-		batchMasks[i], err = count(source.Mesh, source.Places, &scene.Batches[i])
-		if err != nil {
-			return nil, err
-		}
-	}
-	for i := range batches {
-		batches[i].data = make([]byte, 0, int(batches[i].count)*64)
-	}
-	add := func(source *placement.DisplayMesh, places []maths.Subspace, mask []uint64) {
-		if mask == nil {
-			return
-		}
-		index, found := known[source]
-		if !found {
-			return
-		}
-		current := &batches[index]
-		for block, visible := range mask {
-			for visible != 0 {
-				i := block*64 + bits.TrailingZeros64(visible)
-				for _, value := range frameMatrix(places[i], false) {
-					current.data = binary.LittleEndian.AppendUint32(current.data, math.Float32bits(value))
-				}
-				visible &= visible - 1
-			}
-		}
-	}
-	for i, source := range scene.Objects {
-		add(source.Mesh, []maths.Subspace{source.At}, objectMasks[i])
-	}
-	for i, source := range scene.Batches {
-		add(source.Mesh, source.Places, batchMasks[i])
-	}
-	draws := make([]drawObject, 0, len(batches))
-	for _, current := range batches {
-		resident := current.mesh
-		if resident.instances == nil || resident.instanceBytes < len(current.data) {
-			buffer, err := view.buffer("working instance transforms", current.data, wgpu.BufferUsageVertex)
-			if err != nil {
+	for i := range scene.Batches {
+		source := &scene.Batches[i]
+		if frustum.batchVisible(*source) {
+			if err := count(source.Mesh, source.Places, source, false); err != nil {
 				return nil, err
 			}
-			if resident.instances != nil {
-				resident.instances.Release()
-			}
-			resident.instances, resident.instanceBytes = buffer, len(current.data)
-		} else if err := view.queue.WriteBuffer(resident.instances, 0, current.data); err != nil {
-			return nil, err
 		}
-		draws = append(draws, drawObject{mesh: resident, object: uniform, count: current.count})
 	}
+	timing.culling(cullStarted, timing.now())
+	prepareStarted := timing.now()
+	// WriteBuffer consumes the source bytes before returning. Reuse one
+	// scratch buffer instead of retaining transforms for every mesh at once.
+	maxCount := uint32(0)
+	for _, current := range batches {
+		if !current.reused && !current.mesh.split {
+			maxCount = max(maxCount, current.count)
+		}
+	}
+	scratch := make([]byte, 0, int(maxCount)*64)
+	draws = make([]drawObject, 0, len(batches))
+	for _, current := range batches {
+		resident := current.mesh
+		if !current.reused && !resident.split {
+			data := scratch[:0]
+			for _, part := range current.parts {
+				for block, visible := range part.mask {
+					for visible != 0 {
+						i := block*64 + bits.TrailingZeros64(visible)
+						for _, value := range instanceMatrix(part.places[i], scene.Eye.Origin) {
+							data = binary.LittleEndian.AppendUint32(data, math.Float32bits(value))
+						}
+						visible &= visible - 1
+					}
+				}
+			}
+			if resident.instances == nil || resident.instanceBytes < len(data) {
+				buffer, err := view.buffer("working instance transforms", data, wgpu.BufferUsageVertex)
+				if err != nil {
+					return nil, err
+				}
+				if resident.instances != nil {
+					resident.instances.Release()
+				}
+				resident.instances, resident.instanceBytes = buffer, len(data)
+			} else if err := view.queue.WriteBuffer(resident.instances, 0, data); err != nil {
+				return nil, err
+			}
+		}
+		draws = append(draws, drawObject{mesh: resident, count: current.count})
+	}
+	if stable {
+		counts := make(map[*placement.DisplayMesh]uint32, len(known))
+		for source, index := range known {
+			counts[source] = batches[index].count
+		}
+		view.stable = rememberBatches(scene, width, height, counts)
+	} else {
+		view.stable = nil
+	}
+	timing.preparation(prepareStarted, timing.now())
 	return draws, nil
 }
 
@@ -564,15 +686,17 @@ func (resident *mesh) release() {
 	}
 }
 
-// uniformData packs the camera, the model frame and the edge colour in the
+// uniformData packs projection, split eye coordinates and edge colour in the
 // layout shader.wgsl reads.
-func uniformData(camera, model matrix, edge [4]float32) []byte {
+func uniformData(camera matrix, eye maths.Vec, edge [4]float32) []byte {
 	data := make([]byte, uniformBytes)
 	for index, value := range camera {
 		binary.LittleEndian.PutUint32(data[index*4:], math.Float32bits(value))
 	}
-	for index, value := range model {
-		binary.LittleEndian.PutUint32(data[64+index*4:], math.Float32bits(value))
+	high, low := splitPosition(eye)
+	for index := range high {
+		binary.LittleEndian.PutUint32(data[64+index*4:], math.Float32bits(high[index]))
+		binary.LittleEndian.PutUint32(data[80+index*4:], math.Float32bits(low[index]))
 	}
 	for index, value := range edge {
 		binary.LittleEndian.PutUint32(data[128+index*4:], math.Float32bits(value))
@@ -583,12 +707,12 @@ func uniformData(camera, model matrix, edge [4]float32) []byte {
 // encode records the opaque pass and the copy into the readback buffer. An
 // encoder that fails is discarded, so none is left neither submitted nor
 // released, as wgpu requires.
-func (view *View) encode(draws []drawObject, width, height int) (*wgpu.CommandBuffer, error) {
+func (view *View) encode(draws []drawObject, width, height int, sky bool) (*wgpu.CommandBuffer, error) {
 	encoder, err := view.device.CreateCommandEncoder(&wgpu.CommandEncoderDescriptor{Label: "working viewport"})
 	if err != nil {
 		return nil, err
 	}
-	if err = view.pass(encoder, draws); err != nil {
+	if err = view.pass(encoder, draws, sky); err != nil {
 		encoder.DiscardEncoding()
 		return nil, err
 	}
@@ -603,29 +727,64 @@ func (view *View) encode(draws []drawObject, width, height int) (*wgpu.CommandBu
 }
 
 // pass draws the resident meshes as opaque solids, edges or wire.
-func (view *View) pass(encoder *wgpu.CommandEncoder, draws []drawObject) error {
-	pass, err := encoder.BeginRenderPass(&wgpu.RenderPassDescriptor{Label: "opaque native solids and edges", ColorAttachments: []wgpu.RenderPassColorAttachment{{View: view.colourView, LoadOp: gputypes.LoadOpClear, StoreOp: gputypes.StoreOpStore, ClearValue: gputypes.Color{R: float64(view.background[0]), G: float64(view.background[1]), B: float64(view.background[2]), A: 1}}}, DepthStencilAttachment: &wgpu.RenderPassDepthStencilAttachment{View: view.depthView, DepthLoadOp: gputypes.LoadOpClear, DepthStoreOp: gputypes.StoreOpStore, DepthClearValue: 1}})
+func (view *View) pass(encoder *wgpu.CommandEncoder, draws []drawObject, sky bool) error {
+	background := gputypes.Color{R: float64(view.background[0]), G: float64(view.background[1]), B: float64(view.background[2]), A: 1}
+	if sky {
+		// Sky fills only pixels that retained this zero clear alpha.
+		background = gputypes.Color{}
+	}
+	pass, err := encoder.BeginRenderPass(&wgpu.RenderPassDescriptor{Label: "opaque native solids and edges", ColorAttachments: []wgpu.RenderPassColorAttachment{{View: view.colourView, LoadOp: gputypes.LoadOpClear, StoreOp: gputypes.StoreOpStore, ClearValue: background}}, DepthStencilAttachment: &wgpu.RenderPassDepthStencilAttachment{View: view.depthView, DepthLoadOp: gputypes.LoadOpClear, DepthStoreOp: gputypes.StoreOpStore, DepthClearValue: 1}})
 	if err != nil {
 		return err
+	}
+	if len(draws) == 0 {
+		return pass.End()
 	}
 	fill := view.solid
 	if view.mode == "wire" {
 		fill = view.depthOnly
 	}
+	pass.SetPipeline(fill)
+	pass.SetBindGroup(0, view.camera.group, nil)
+	pipeline := fill
 	for _, item := range draws {
-		pass.SetPipeline(fill)
-		pass.SetBindGroup(0, item.object.group, nil)
+		want := fill
+		if item.mesh.split {
+			want = view.split.solid
+			if view.mode == "wire" {
+				want = view.split.depth
+			}
+		}
+		if want != pipeline {
+			pass.SetPipeline(want)
+			pass.SetBindGroup(0, view.camera.group, nil)
+			pipeline = want
+		}
 		pass.SetVertexBuffer(0, item.mesh.vertices, 0)
-		pass.SetVertexBuffer(1, item.mesh.instances, 0)
+		if !item.mesh.split {
+			pass.SetVertexBuffer(1, item.mesh.instances, 0)
+		}
 		pass.SetIndexBuffer(item.mesh.indices, gputypes.IndexFormatUint32, 0)
 		pass.DrawIndexed(gputypes.DrawIndexedArgs{IndexCount: item.mesh.triangles, InstanceCount: item.count})
 	}
 	if view.mode != "solid" {
+		pass.SetPipeline(view.lines)
+		pass.SetBindGroup(0, view.camera.group, nil)
+		pipeline := view.lines
 		for _, item := range draws {
-			pass.SetPipeline(view.lines)
-			pass.SetBindGroup(0, item.object.group, nil)
+			want := view.lines
+			if item.mesh.split {
+				want = view.split.lines
+			}
+			if want != pipeline {
+				pass.SetPipeline(want)
+				pass.SetBindGroup(0, view.camera.group, nil)
+				pipeline = want
+			}
 			pass.SetVertexBuffer(0, item.mesh.vertices, 0)
-			pass.SetVertexBuffer(1, item.mesh.instances, 0)
+			if !item.mesh.split {
+				pass.SetVertexBuffer(1, item.mesh.instances, 0)
+			}
 			pass.SetIndexBuffer(item.mesh.edges, gputypes.IndexFormatUint32, 0)
 			pass.DrawIndexed(gputypes.DrawIndexedArgs{IndexCount: item.mesh.lines, InstanceCount: item.count})
 		}
@@ -785,9 +944,10 @@ func (view *View) Close() error {
 	}
 	pendingErr := view.cancelPending()
 	view.releaseTargets()
-	for _, item := range view.objects {
-		item.group.Release()
-		item.uniform.Release()
+	if view.camera != nil {
+		view.camera.group.Release()
+		view.camera.uniform.Release()
+		view.camera = nil
 	}
 	for _, item := range view.meshes {
 		item.release()
@@ -807,12 +967,14 @@ func (view *View) Close() error {
 	if view.layout != nil {
 		view.layout.Release()
 	}
+	view.split.release()
 	if view.shader != nil {
 		view.shader.Release()
 	}
-	view.objects = nil
 	view.meshes = nil
+	view.meshBounds = nil
 	view.picture = nil
+	view.stable = nil
 	view.device = nil
 	view.queue = nil
 	return pendingErr

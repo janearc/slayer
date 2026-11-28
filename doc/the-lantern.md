@@ -5,6 +5,10 @@ its panels, like a pierced tin lantern. `slayer/lantern` builds the scene
 component; `swarm` renders it alone, and the orbital scene places it
 between the rings.
 
+the [lantern portrait job](examples/jobs/lantern-portrait.yaml) uses the
+named `swarm` scene. run `slayer list scenes` to find the settings a job
+can pass to `swarm` or `zappy`.
+
 ## Components
 
 - A glowing sphere of `Radius` at `At`.

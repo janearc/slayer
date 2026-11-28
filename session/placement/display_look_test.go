@@ -209,11 +209,11 @@ func TestClipNearCutsAtTheNearPlane(t *testing.T) {
 		t.Fatal("a segment behind the eye was kept")
 	}
 	first, second, in := clipNear(maths.V(0, 0, 4), maths.V(0, 0, -10))
-	if !in || math.Abs(-first.Z-displayNear) > near || second.Z != -10 {
+	if !in || math.Abs(-first.Z-DisplayNear) > near || second.Z != -10 {
 		t.Fatalf("the cut ends were %v and %v (%v)", first, second, in)
 	}
 	first, second, in = clipNear(maths.V(0, 0, -10), maths.V(0, 0, 4))
-	if !in || first.Z != -10 || math.Abs(-second.Z-displayNear) > near {
+	if !in || first.Z != -10 || math.Abs(-second.Z-DisplayNear) > near {
 		t.Fatalf("the cut ends were %v and %v (%v)", first, second, in)
 	}
 }

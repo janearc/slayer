@@ -1,35 +1,26 @@
-# A visitor beside the Larson
+# a visitor beside the Larson
 
-Open `set.yaml` in Ferruccio and render its preview. The scene combines
-Slayer's existing `mcrn-larson-landed` manufacture with Oakland's static
-glTF import. The eight-part mannequin and its binary buffer are original
-CC0 fixtures; their rights declaration is in `LICENSE.txt` and the set.
+open [set.yaml](set.yaml) in Ferruccio to see a manufactured Larson beside
+a static glTF mannequin. use the [Ferruccio quick start](../../doc/applications/ferruccio/quick-start.md)
+to open the set and connect the preview queue. keep the glTF, its buffer
+and [license](LICENSE.txt) beside the set.
 
-The mannequin's two-metre height is a chosen geometric reference. It is
-not a scan or a claim about a particular person's anatomy. Its matte
-colour, the landing pad and lighting are authored choices. The Larson's
-geometry and materials come from the existing manufactory unchanged.
+`scene.world.imports.visitor.at` places the visitor at east 7, north 1,
+up 0 metres. `heading` turns it. the imported figure is two metres tall
+as a geometric reference. the Larson is a seeded kind under
+`scene.set.things.larson`. the camera uses the same map coordinates.
 
-The set places the figure at east 7, north 1, up 0 metres. Change `at`
-or `heading` under `scene.world.imports.visitor` to place it elsewhere;
-the Larson's placement is under `scene.set.things.larson`. A camera's
-`location.at` and `orientation.look_at` use the same map coordinates.
-
-For a local comparison, use the Game-built Slayer:
+from the checkout root, build the Slayer command and check the set or
+write a still:
 
 ```sh
-game lane tests -- bin/slayer draw sets/oakland-larson/set.yaml \
-  --renderer cpu --out out/oakland-cpu.png
-game lane gpu -- bin/slayer draw sets/oakland-larson/set.yaml \
-  --renderer gpu --out out/oakland-metal.png
+game build slayer
+game run slayer -- assess sets/oakland-larson/set.yaml
+game run slayer -- draw sets/oakland-larson/set.yaml --renderer cpu --out out/oakland-cpu.png
 ```
 
-Each imported render writes an `.imports.json` receipt beside its image.
-It identifies the decoded source closure and native material bindings.
-Changing a source, the height choice or the set's material definition
-changes a fresh job's render identity. An admitted job keeps its frozen
-geometry and exact digests, including across command-line overrides.
-
-See [the import contract](../../set/IMPORTS.md) and
-[Oakland's supported subset](../../oakland/DESIGN.md) before importing
-another asset. USD, textures, skinning and animation are not implemented.
+on a Mac with Metal, use `--renderer gpu` and a different output path to
+compare the two paths. a render writes an `.imports.json` receipt beside
+the image with the geometry files and material bindings. the
+[import guide](../../set/IMPORTS.md) describes asset paths, rights and the
+supported part of glTF.

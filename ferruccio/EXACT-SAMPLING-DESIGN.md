@@ -13,7 +13,7 @@ the explicit box, trapezoid and tent filters retain their shapes. The original
 between samples and retain completed rows; its caller must key those rows by
 the exact count and every other input. Synthetic tests cover its row scheduling
 and averaging. CPU still jobs now carry `film.samples` or `--spp` through
-the session; the render sheet offers those counts on CPU and software GPU.
+the session; the render sheet offers those counts on CPU and both GPU backends.
 Azazel job 82 completed a 16 by 12 CPU smoke at seven samples. GPU job 83
 completed the same request and produced an identical PNG. Jobs 84 and 85
 rendered the playground on CPU and GPU at seven samples: the mean absolute
@@ -21,8 +21,9 @@ RGB difference was 0.0044/255, with a maximum difference of 2/255. Jobs
 86–91 completed GPU smokes at 1, 4, 7, 16, 25 and 64 samples; the logged
 completed sample-record counts were 192, 768, 1344, 3072, 4800 and 12288,
 respectively, for 192 picture pixels. These are bounded examples, not a
-claim of parity for every scene or material. Rig, region, wire, film,
-native traversal and accelerated lighting paths refuse exact totals.
+claim of parity for every scene or material. Native GPU uses the same
+per-pixel rays with Metal mesh traversal. Rig, region, wire, film and
+accelerated lighting paths refuse exact totals.
 
 The original GPU path expands both image dimensions by a side length. The
 exact still path instead dispatches `width * count` samples across each
@@ -33,14 +34,10 @@ still use square addressing and are refused for exact totals.
 Dispatching the next square and discarding extra samples would still trace
 more than requested and would misstate costs.
 
-Before exposing the setting:
-
-1. Complete queue admission estimates for the actual count, and verify the
-   request and receipt against a running native render.
-2. Expand support for physical rigs, regions, film, native traversal and
-   accelerated lighting only when each can honor the exact total.
-3. Check more CPU/GPU scenes, materials, filters and cancellation cases,
-   and obtain independent review before accepting the integration.
+For supported stills the render sheet exposes 1–64 total samples per pixel.
+See [full still rendering](internal/preview/FULL-RENDER.md) for invocation,
+queue routing and receipt behavior. Extending support to other drawing paths
+requires those paths to honor the exact total.
 
 Square-count sky comparisons do not prove parity for materials whose
 footprints depend on sample width. The CPU primitive uses the finished

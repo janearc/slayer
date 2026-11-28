@@ -1,0 +1,62 @@
+# The neutral study's specimen and lighting with the articulated pose.
+"$schema": https://github.com/janearc/slayer/schemas/ecosystem-v2.json
+scene:
+  name: Adult human, slight reach
+  seed: 27
+  setting: space
+  light: none
+  set:
+    things:
+      adult:
+        kind: adult-human-reaching
+        seed: 27
+        position:
+          east: {value: 0, unit: m}
+          north: {value: 0, unit: m}
+          up: {value: 0, unit: m}
+  film:
+    width: 600
+    height: 800
+    rays: 8
+    exposure: 1
+    wide: 31
+  cameras:
+    three-quarter:
+      title: Front left at mid-body height
+      location: {at: [2.08597, -2.08597, 0.86]}
+      orientation: {look_at: [0, 0, 0.86]}
+  world:
+    unit: 1
+    materials:
+      floor:
+        colour: {srgb_linear: [0.095, 0.106, 0.117]}
+        source: eye
+    boxes:
+      studio:
+        material: floor
+        middle: [0, 0, -0.15]
+        size: [160, 160, 0.30]
+        source: eye
+    sky:
+      horizon: {srgb_linear: [0.092, 0.104, 0.118]}
+      zenith: {srgb_linear: [0.052, 0.060, 0.070]}
+      ground: {srgb_linear: [0.070, 0.081, 0.091]}
+      source: eye
+    suns:
+      key:
+        toward: [-0.44, -0.80, 0.62]
+        colour: {srgb_linear: [1.26, 1.22, 1.18]}
+        source: eye
+      fill:
+        toward: [0.82, -0.46, 0.35]
+        colour: {srgb_linear: [0.42, 0.44, 0.48]}
+        source: eye
+      rim:
+        toward: [0.26, 0.84, 0.58]
+        colour: {srgb_linear: [0.53, 0.55, 0.58]}
+        source: eye
+    floods:
+      room:
+        colour: {srgb_linear: [0.11, 0.12, 0.13]}
+        strength: 1
+        source: eye

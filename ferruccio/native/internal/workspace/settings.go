@@ -29,7 +29,8 @@ func (work *Workspace) renderTools() preview.Tools {
 	resolved := work.resolved()
 	tools.Slayer = absolutePath(resolved.Value(settings.Slayer), tools.Slayer)
 	tools.Queue = absolutePath(resolved.Value(settings.Queue), tools.Queue)
-	if work.options.PreferQueueClient && tools.Queue != "" {
+	managedDefault := work.options.PrepareQueue != nil && tools.Queue == work.options.Tools.Queue
+	if work.options.PreferQueueClient && tools.Queue != "" && !managedDefault {
 		paired := filepath.Join(filepath.Dir(tools.Queue), "bin", "azazel")
 		if info, err := os.Stat(paired); err == nil && info.Mode().IsRegular() && info.Mode().Perm()&0o111 != 0 {
 			tools.Azazel = paired
@@ -66,11 +67,11 @@ func absolutePath(value, fallback string) string {
 }
 
 // ownRender is how a render started from this window chooses its renderer.
-// The Azazel road is another one: it keeps the CPU renderer it always had.
-// The person's choice is the GPU renderer or, by default, the CPU one.
+// The person's choice is the GPU renderer or, by default, the CPU one;
+// the queue transport still owns admission for either backend.
 func (work *Workspace) ownRender(profile preview.Profile) preview.Profile {
 	profile.CPURenderer = true
-	if work.options.Tools.Transport == "slayer" && work.resolved().Get(settings.Renderer).Value == settings.RendererGPU {
+	if work.resolved().Get(settings.Renderer).Value == settings.RendererGPU {
 		profile.CPURenderer, profile.GPU = false, true
 	}
 	return profile

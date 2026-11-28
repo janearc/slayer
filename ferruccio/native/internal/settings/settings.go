@@ -73,7 +73,7 @@ const (
 // what Ferruccio did before there were settings: the CPU renderer on two
 // processors.
 var Keys = []Key{
-	{Name: Queue, Label: "Render queue", Kind: Folder, Flag: "azazel-queue", Variable: "FERRUCCIO_AZAZEL_QUEUE", Why: "the shared Azazel queue used to render; its worker must be running"},
+	{Name: Queue, Label: "Render queue", Kind: Folder, Flag: "azazel-queue", Variable: "FERRUCCIO_AZAZEL_QUEUE", Why: "Choose the Azazel folder with queue.db."},
 	{Name: Evidence, Label: "Render output", Kind: Folder, Flag: "evidence", Variable: "FERRUCCIO_EVIDENCE", Why: "where rendered pictures and their receipts are saved"},
 	{Name: Cache, Label: "Cache folder", Kind: Folder, Flag: "cache", Variable: "SLAYER_CACHE", Why: "where Slayer keeps reusable work; required for direct rendering"},
 	{Name: Shelf, Label: "Source shelf", Kind: Folder, Flag: "shelf", Variable: "SLAYER_SHELF", Why: "the folder of source papers and data some scenes cite; optional"},

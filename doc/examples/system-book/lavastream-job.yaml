@@ -1,0 +1,7 @@
+"$schema": https://github.com/janearc/slayer/schemas/job-v1.json
+scene: {set: system.yaml}
+renderer: gpu-native
+shortcuts: {restir: off}
+film: {width: 640, height: 400, rays: 1}
+camera: {name: lavastream}
+outputs: {picture: ../../../out/2026-11-27-system-lavastream-preview/proof.png, raw: ../../../out/2026-11-27-system-lavastream-preview/light.pfm}

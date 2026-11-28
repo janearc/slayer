@@ -96,7 +96,7 @@ profiles:
       - {at: 0.990, width: 0.011610, height: 0.010660}
       - {at: 1.000, width: 0.000945, height: 0.000910}
     head: {eyeat: .975, eyeheight: .40, eyesize: 0.001485, pit: true}
-    pattern: {kind: reticulated, base: {r: 0.430, g: 0.360, b: 0.210}, mark: {r: 0.110, g: 0.100, b: 0.075}, belly: {r: 0.660, g: 0.600, b: 0.430}, edge: {r: 0.270, g: 0.220, b: 0.150}, repeat: 38, contrast: 0.82}
+    pattern: {kind: reticulated, base: {r: 0.430, g: 0.360, b: 0.210}, mark: {r: 0.110, g: 0.100, b: 0.075}, belly: {r: 0.660, g: 0.600, b: 0.430}, edge: {r: 0.270, g: 0.220, b: 0.150}, repeat: 38, contrast: 0.82, mottle: {seed: 38, scale: 0.058, strength: 0.55}, warp: {seed: 1038, scale: 0.22, strength: 0.82}}
   - kind: python-bivittatus
     scientific: Python bivittatus
     basis: picked
@@ -115,7 +115,7 @@ profiles:
       - {at: 0.990, width: 0.015050, height: 0.013530}
       - {at: 1.000, width: 0.001225, height: 0.001155}
     head: {eyeat: .975, eyeheight: .40, eyesize: 0.001925, pit: true}
-    pattern: {kind: saddles, base: {r: 0.430, g: 0.350, b: 0.220}, mark: {r: 0.130, g: 0.095, b: 0.060}, belly: {r: 0.670, g: 0.610, b: 0.460}, edge: {r: 0.570, g: 0.480, b: 0.310}, repeat: 30, contrast: 0.78}
+    pattern: {kind: saddles, base: {r: 0.430, g: 0.350, b: 0.220}, mark: {r: 0.130, g: 0.095, b: 0.060}, belly: {r: 0.670, g: 0.610, b: 0.460}, edge: {r: 0.570, g: 0.480, b: 0.310}, repeat: 30, contrast: 0.78, mottle: {seed: 30, scale: 0.062, strength: 0.53}, warp: {seed: 1030, scale: 0.24, strength: 0.87}}
   - kind: bitis-gabonica
     scientific: Bitis gabonica
     basis: picked
@@ -153,7 +153,7 @@ profiles:
       - {at: 0.990, width: 0.016340, height: 0.013940}
       - {at: 1.000, width: 0.001330, height: 0.001190}
     head: {eyeat: .975, eyeheight: .40, eyesize: 0.002090, pit: true}
-    pattern: {kind: saddles, base: {r: 0.370, g: 0.310, b: 0.190}, mark: {r: 0.100, g: 0.075, b: 0.055}, belly: {r: 0.640, g: 0.580, b: 0.420}, edge: {r: 0.500, g: 0.420, b: 0.280}, repeat: 27, contrast: 0.82}
+    pattern: {kind: saddles, base: {r: 0.370, g: 0.310, b: 0.190}, mark: {r: 0.100, g: 0.075, b: 0.055}, belly: {r: 0.640, g: 0.580, b: 0.420}, edge: {r: 0.500, g: 0.420, b: 0.280}, repeat: 27, contrast: 0.82, mottle: {seed: 27, scale: 0.068, strength: 0.54}, warp: {seed: 1027, scale: 0.26, strength: 0.83}}
   - kind: madtsoia-bai
     scientific: Madtsoia bai
     basis: picked

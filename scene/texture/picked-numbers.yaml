@@ -3,6 +3,81 @@
 # each by its name. a change to a value is a change to the picture. where
 # no reason was written down for a number, the entry says so.
 numbers:
+  - name: lava-frequency
+    value: 2.5
+    says: the frequency of a lava ball's coarse plates over the unit direction, so a plate is about 0.4 of a radius across and a few dozen show on a hemisphere
+    kind: picked
+    by: picked by eye, 2026-11-27, for a ball seen close; the lava lakes' plates run from metres to hundreds of metres across, and which sizes show is the picture's
+  - name: lava-size-spread
+    value: 0.7
+    says: how much the plates' size changes across the ball, the lattice being read at the exponential of this times a smooth noise of about plus or minus a half, so plates run from two thirds to one and a half times the middle size and a little over
+    kind: picked
+    by: picked by eye, 2026-11-27, so that plate sizes run into one another and are not in bands; at 1.1 the lattice stretched a step three times more one way than the other at the limb and plates came out as streaks
+  - name: lava-size-frequency
+    value: 0.9
+    says: the frequency of the noise that changes the plates' size, over the unit direction, so a large plate and a small one are on either side of the ball
+    kind: picked
+    by: picked by eye, 2026-11-27
+  - name: lava-seam-spread
+    value: 0.6
+    says: how much wider or narrower than lava-seam-width a seam may be, as a share, by the plate it borders
+    kind: picked
+    by: picked by eye, 2026-11-27, so the seams are not one width
+  - name: lava-halo-width
+    value: 0.09
+    says: how far from a seam, in coarse plates, the thinner crust beside it has cooled to a third of its excess over the plate's
+    kind: picked
+    by: picked by eye, 2026-11-27; crust is thin where magma has just welled up and thickens as it cools and moves off
+  - name: lava-halo-boost
+    value: 4
+    says: how many times brighter the crust at the foot of a seam is than the plate's own, as a share of it
+    kind: picked
+    by: picked by eye, 2026-11-27
+  - name: lava-warp
+    value: 0.08
+    says: how far, in coarse plates, smooth noise bends the plates' sides from straight; more than 0.3 folds the lattice over itself and makes soft blobs where the seams cross, and the squeezed plates at the limb of round two's last frame were with 0.12
+    kind: picked
+    by: picked by eye, 2026-11-27, so plates are irregular polygons and not a cut of cells
+  - name: lava-warp-frequency
+    value: 1.5
+    says: the frequency of the noise that bends the plates, over the plates' lattice
+    kind: picked
+    by: picked by eye, 2026-11-27
+  - name: lava-seam-width
+    value: 0.009
+    says: how far from a seam, in coarse plates, its glow has fallen to a third, so the glow falls off quickly into the plates
+    kind: picked
+    by: picked by eye, 2026-11-27; a seam of magma at a lava lake is thin against its plates
+  - name: lava-plate-spread
+    value: 0.7
+    says: how much a plate's crust differs from the mean crust, as a share of it, plate to plate, thick plates darker and thin ones brighter
+    kind: picked
+    by: picked by eye, 2026-11-27
+  - name: lava-crust-light
+    value: 0.012
+    says: the light in the red of a plate's crust of middle thickness as a share of the open magma's; a crust near 1600 K gives about a thousandth of a 3000 K body's red by Planck's law (from memory, to shelve) and the number is taken as ten times that so that a dull red shows
+    kind: picked
+    by: picked by eye, 2026-11-27, after a crust of 0.003 drew pure black
+  - name: lava-crust-green
+    value: 0.12
+    says: the crust's green, as a share of the magma's green, so the crust is a dull red; Wien's side of a body at 1600 K gives its green a small fraction of its red
+    kind: picked
+    by: picked by eye, 2026-11-27
+  - name: lava-crust-blue
+    value: 0.01
+    says: the crust's blue, as a share of the magma's blue
+    kind: picked
+    by: picked by eye, 2026-11-27
+  - name: lava-blur-from
+    value: 0.08
+    says: how many plates a pixel covers before its plates begin to blend into their mean
+    kind: picked
+    by: picked by eye, 2026-11-26
+  - name: lava-blur-to
+    value: 0.3
+    says: how many plates a pixel covers when its plates are wholly their mean
+    kind: picked
+    by: picked by eye, 2026-11-26
   - name: board-tone
     value: 0.45
     says: how far a board's own tone may differ from the concrete's, as a share of the stain's difference from it
@@ -423,6 +498,16 @@ numbers:
     says: the least a spot's stretch is read as, so that no spot is infinitely tall
     kind: picked
     by: picked by eye; no reason was written down
+  - name: spot-detail-scale
+    value: 8
+    says: frequency of seeded colour variation over a storm radius
+    kind: picked
+    by: artistic choice, 2026-11-27; not a measured cloud scale
+  - name: spot-detail-octaves
+    value: 3
+    says: number of scales in a storm's colour variation
+    kind: picked
+    by: artistic choice, 2026-11-27; not a measured cloud spectrum
   - name: street-lon-jitter
     value: 0.6
     says: how far, as a share of the gap between storms, a storm is placed off its even place along a street

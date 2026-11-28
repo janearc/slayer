@@ -1,7 +1,7 @@
 # Ferruccio first play: native Larson and authored two-metre scale human.
 # Coordinates are east, north, up in metres; height is elevation in space.
-# Explicit seed 5; quick is the named geometry budget for both models.
-# The native aluminium mannequin is exactly 2 m tall.
+# The ship uses seed 5 and the quick geometry budget.
+# The posed visitor is normalized to exactly 2 m.
 # Pad, colours, camera and studio lights are authored display choices.
 $schema: https://github.com/janearc/slayer/schemas/ecosystem-v2.json
 scene:
@@ -18,13 +18,6 @@ scene:
         east: 0
         north: 0
         height: {value: 0, unit: m}
-      visitor:
-        kind: human-scale-2m
-        seed: 5
-        complexity: quick
-        east: 7
-        north: 1
-        height: {value: 0, unit: m}
   film:
     width: 640
     height: 400
@@ -38,6 +31,9 @@ scene:
   world:
     unit: 1
     materials:
+      bronze:
+        colour: {srgb_linear: [0.52, 0.34, 0.19]}
+        source: eye
       pad:
         colour: {srgb_linear: [0.055, 0.07, 0.095]}
         source: eye
@@ -47,6 +43,15 @@ scene:
         middle: [0, 0, -0.12]
         size: [28, 28, 0.24]
         source: eye
+    imports:
+      visitor:
+        file: larson-camp-visitor.glb
+        height: {value: 2, unit: m}
+        at: [7, 1, 0]
+        heading: {value: 0, unit: deg}
+        materials: {material/0/visitor: bronze}
+        source: "Meshcapade and Max Planck Institute for Intelligent Systems SMPL-X sample (Pavlakos et al. 2019). Slayer triangulated, posed, and exported the sample, and normalized it to two metres. Attribution and licence: https://smpl.is.tue.mpg.de/bodylicense.html"
+        license: CC-BY-4.0
     sky:
       horizon: {srgb_linear: [0.022, 0.027, 0.05]}
       zenith: {srgb_linear: [0.004, 0.007, 0.02]}

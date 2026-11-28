@@ -280,6 +280,14 @@ func (sphere Sphere) near(tile Tile, room *[6]Tile) int {
 	return count
 }
 
+// NeighboursInto fills room with the tiles sharing an edge with this one,
+// as Neighbours has them but in no order, and says how many: for a caller
+// that asks of many tiles for a picture's every pixel and must not make a
+// list each time.
+func (sphere Sphere) NeighboursInto(tile Tile, room *[6]Tile) int {
+	return sphere.near(tile, room)
+}
+
 // Neighbours is the tiles sharing an edge with this one: five for a
 // pentagon, six for a hexagon, in order of ID.
 func (sphere Sphere) Neighbours(tile Tile) []Tile {

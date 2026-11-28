@@ -28,19 +28,13 @@ path also reports its native plan and build. Not every checkpoint fires:
 reuse, software traversal, per-call paths and failures take different
 branches.
 
-ReSTIR uses the shared encode checkpoints, but this trial does
-not separately instrument its acceleration and reservoir paths. Scene
-construction, animation advance, development, file output, allocations
-between checkpoints, system-wide memory, and device-level resource
-ownership are outside this trial.
+ReSTIR uses the shared encode checkpoints. acceleration and
+reservoir work have no separate checkpoints here. scene construction,
+animation, development and file output are outside these observations.
 
 A CPU-only smoke check that exercises real pool packing is:
 
 ```
 SLAYER_TEST_PACK_TRACE=1 SLAYER_MEMORY_STAGES=1 \
-  go test ./gpu -run '^TestMemoryStagesObserveScenePacking$' -count=1 -v
+  game test -- ./gpu -run '^TestMemoryStagesObserveScenePacking$' -count=1 -v
 ```
-
-Run tests through the appropriate Game lane. A representative GPU render
-is still needed to assess checkpoint overhead, compare peak and stage
-values, and check whether additional points are needed.

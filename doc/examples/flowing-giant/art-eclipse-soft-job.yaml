@@ -1,0 +1,7 @@
+"$schema": https://github.com/janearc/slayer/schemas/job-v1.json
+scene: {set: art-eclipse-soft.yaml}
+renderer: gpu
+camera: {name: disc}
+outputs:
+  picture: ../../../out/2026-11-27-flowing-art-eclipse-soft/proof.png
+  raw: ../../../out/2026-11-27-flowing-art-eclipse-soft/light.pfm

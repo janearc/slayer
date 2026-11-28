@@ -16,8 +16,11 @@ atmosphere has been loaded into a set.
 - Display typeface: Cormorant Garamond Regular, Catharsis Fonts. The SIL Open
   Font License is bundled in OFL-Cormorant.txt.
   Source: https://github.com/CatharsisFonts/Cormorant
-- Body and code fonts: supplied by the respective GoGPU and Fyne frontends
-  under their bundled font licences.
+- Native UI typeface: GoGPU UI embeds Inter Regular and Bold. Their
+  font metadata identifies Inter 4.001 at source revision 9221beed3.
+  The app bundles its SIL Open Font License in OFL-Inter.txt.
+  Source: https://github.com/rsms/inter/blob/9221beed3e5b521ce94050ca542f568755c17c22/LICENSE.txt
+- The legacy Fyne frontend supplies its own fonts.
 - Job schema: copied from this Slayer checkout, `job/job.schema.json`.
 
 The prototype stores these files locally and makes no image request at runtime.

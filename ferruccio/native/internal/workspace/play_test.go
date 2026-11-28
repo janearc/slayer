@@ -1,7 +1,6 @@
 package workspace
 
 import (
-	"bytes"
 	"context"
 	"errors"
 	"github.com/gogpu/gg"
@@ -10,6 +9,7 @@ import (
 	"github.com/janearc/slayer/ferruccio/native/internal/editor"
 	"image"
 	"image/png"
+	"math"
 	"os"
 	"path/filepath"
 	"strings"
@@ -20,7 +20,8 @@ import (
 	"github.com/gogpu/ui/app"
 	"github.com/gogpu/ui/event"
 	"github.com/gogpu/ui/geometry"
-	"github.com/janearc/slayer/ferruccio/native/internal/picking"
+	"github.com/janearc/slayer/session/placement"
+	"github.com/janearc/slayer/set"
 )
 
 // One placement release must be one editor history entry, including source undo.
@@ -157,25 +158,56 @@ func TestPlayModeKeysAndPlacementUseWindowDispatch(t *testing.T) {
 	}
 }
 
-// A render snapshot for older text is never selectable through setupPlay.
+// A working snapshot for older text is never selectable through setupPlay.
 func TestPlaySelectionRequiresDisplayedSourceIdentity(t *testing.T) {
 	work := playWorkspace(t)
 	work.play.selected = ""
-	geometry, err := picking.New(work.state.document.Text(), 1.6)
-	if err != nil {
-		t.Fatal(err)
-	}
-	work.play.geometry = geometry
-	if geometry.Pick(.5, .5) == "" {
+	installPlayWorkingView(t, work)
+	if work.workingPick(.5, .5) == "" {
 		t.Fatal("native scene center is not selectable")
 	}
-	work.play.renderedText = work.state.document.Text() + "# older display\n"
+	work.working.source = work.state.document.Text() + "# older display\n"
 	if work.viewer.selectObject(.5, .5) || work.play.selected != "" {
 		t.Fatal("unmatched display selected current document geometry")
 	}
-	work.play.renderedText = work.state.document.Text()
+	work.working.source = work.state.document.Text()
 	if !work.viewer.selectObject(.5, .5) || work.play.selected != "scene.set.things/larson" {
 		t.Fatal("current display did not select actual native Larson geometry")
+	}
+}
+
+func installPlayWorkingView(t *testing.T, work *Workspace) {
+	t.Helper()
+	path, source := work.state.path, work.state.document.Text()
+	read, err := set.Read(path, []byte(source))
+	if err != nil {
+		t.Fatal(err)
+	}
+	scene, err := placement.NewDisplayCache().Scene(read)
+	if err != nil {
+		t.Fatal(err)
+	}
+	work.working.scene, work.working.source, work.working.path, work.working.displayed = scene, source, path, true
+}
+
+func TestPlacementGestureCancelsOnSourceEdit(t *testing.T) {
+	work := playWorkspace(t)
+	installPlayWorkingView(t, work)
+	work.viewer.SetBounds(geometry.Rect{Min: geometry.Pt(0, 0), Max: geometry.Pt(800, 600)})
+	start, finish := geometry.Pt(400, 300), geometry.Pt(430, 300)
+	ctx := work.ui.Window().Context()
+	work.viewer.Event(ctx, event.NewMouseEvent(event.MousePress, event.ButtonLeft, event.ButtonStateLeft, start, start, event.ModNone))
+	if !work.viewer.dragging || !work.viewer.dragObject || work.working.gesture == nil {
+		t.Fatal("fixture did not start a placement drag")
+	}
+	edited := work.editor.Text() + "\n# Edit while the pointer is held.\n"
+	work.editor.ApplyText(edited)
+	if work.viewer.dragging || work.working.gesture != nil {
+		t.Fatal("source edit left the previous gesture captured")
+	}
+	work.viewer.Event(ctx, event.NewMouseEvent(event.MouseRelease, event.ButtonLeft, 0, finish, finish, event.ModNone))
+	if work.state.document.Text() != edited {
+		t.Fatal("stale release changed the edited source")
 	}
 }
 
@@ -255,25 +287,18 @@ func TestExportPlayWorkspaceWithActualSlayerPreview(t *testing.T) {
 	t.Log("exported actual native workspace tree with existing Slayer pixels; no OS window claim")
 }
 
-// The bundled application opens an independent exact copy of the native set.
-func TestPlayBundledSceneMatchesProducerAndOpensAsDefault(t *testing.T) {
-	producer, err := os.ReadFile("../../../../sets/ferruccio-playground.yaml")
-	if err != nil {
-		t.Fatal(err)
-	}
+// The bundled application opens a portable copy of the playable set.
+func TestPlayBundledSceneOpensAsDefaultAndSavesTheVisitor(t *testing.T) {
 	bundled, err := os.ReadFile("../../../examples/ferruccio-playground.yaml")
 	if err != nil {
 		t.Fatal(err)
-	}
-	if !bytes.Equal(producer, bundled) {
-		t.Fatal("bundled play scene differs from native producer set")
 	}
 	work, err := New(gogpu.NewApp(gogpu.DefaultConfig()), app.New(), Options{Examples: "../../../examples", Composition: "play"})
 	if err != nil {
 		t.Fatal(err)
 	}
-	t.Cleanup(func() { work.clearNavigation(); os.RemoveAll(filepath.Dir(work.state.path)) })
-	if work.DocumentName() != "ferruccio-playground.yaml" || work.editor.Text() != string(producer) || work.autoPreview || work.play.mode != "move" {
+	t.Cleanup(func() { work.clearNavigation(); work.releaseExample() })
+	if work.DocumentName() != "ferruccio-playground.yaml" || work.editor.Text() != string(bundled) || work.autoPreview || work.play.mode != "move" {
 		t.Fatal("play opening did not load the real native set without an automatic preview")
 	}
 	original, err := filepath.Abs("../../../examples/ferruccio-playground.yaml")
@@ -282,6 +307,125 @@ func TestPlayBundledSceneMatchesProducerAndOpensAsDefault(t *testing.T) {
 	}
 	if work.state.path == original {
 		t.Fatal("editable play scene points into bundled assets")
+	}
+	saved := filepath.Join(t.TempDir(), "playground.yaml")
+	if !work.saveAt(saved) {
+		t.Fatal("Save As failed")
+	}
+	savedSource, err := os.ReadFile(saved)
+	if err != nil {
+		t.Fatal(err)
+	}
+	read, err := set.Read(saved, savedSource)
+	if err != nil {
+		t.Fatal(err)
+	}
+	world, ok := read.World()
+	if !ok || len(world.Imports()) != 1 || world.Imports()[0].Name() != "visitor" {
+		t.Fatal("saved playground lost its posed visitor")
+	}
+	parts := world.Imports()[0].Asset().Instances()
+	if len(parts) != 1 {
+		t.Fatalf("posed visitor has %d parts, want one", len(parts))
+	}
+	box := parts[0].Geometry().Bounds()
+	at := parts[0].Placement().Within(world.Imports()[0].Placement(world.Unit()))
+	if at.Origin.X != 7 || at.Origin.Z != -1 ||
+		math.Abs(at.Out(box.Min).Y) > 1e-9 || math.Abs(at.Out(box.Max).Y-2) > 1e-9 {
+		t.Fatalf("posed visitor changed position or scale: %v, %v", at.Origin, box)
+	}
+	for _, resource := range larsonPlaygroundStudy.files {
+		if _, err := os.Stat(filepath.Join(filepath.Dir(saved), resource)); err != nil {
+			t.Fatal(err)
+		}
+	}
+	work.openPath(saved)
+	second := filepath.Join(t.TempDir(), "reopened.yaml")
+	if !work.saveAt(second) {
+		t.Fatal("Save As after reopening failed")
+	}
+	for _, resource := range larsonPlaygroundStudy.files {
+		first, err := os.ReadFile(filepath.Join(filepath.Dir(saved), resource))
+		if err != nil {
+			t.Fatal(err)
+		}
+		again, err := os.ReadFile(filepath.Join(filepath.Dir(second), resource))
+		if err != nil || string(again) != string(first) {
+			t.Fatalf("reopened save lost %s: %v", resource, err)
+		}
+	}
+}
+
+func TestPlaygroundSaveProtectsVisitorAssetNames(t *testing.T) {
+	work := libraryEventWorkspace(t)
+	source := filepath.Dir(work.state.path)
+	for _, name := range larsonPlaygroundStudy.files {
+		resource := filepath.Join(source, name)
+		original, err := os.ReadFile(resource)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if _, err := work.savePlayground(resource); !errors.Is(err, ErrStudyAssetConflict) {
+			t.Fatalf("source resource %q was not protected: %v", name, err)
+		}
+		current, err := os.ReadFile(resource)
+		if err != nil || string(current) != string(original) {
+			t.Fatalf("source resource %q changed: %v", name, err)
+		}
+	}
+	work.state.document.Replace("invalid: [")
+	for _, name := range larsonPlaygroundStudy.files {
+		destination := t.TempDir()
+		path := filepath.Join(destination, strings.ToUpper(name))
+		if _, err := work.savePlayground(path); !errors.Is(err, ErrStudyAssetConflict) {
+			t.Fatalf("destination resource %q was not protected: %v", name, err)
+		}
+		entries, err := os.ReadDir(destination)
+		if err != nil || len(entries) != 0 {
+			t.Fatalf("rejected save installed resources: %v, %v", entries, err)
+		}
+	}
+}
+
+func TestReopenedVisitorSaveTreatsTheCreditNoticeAsOptional(t *testing.T) {
+	for _, name := range []string{"missing notice", "different notice", "different attribution"} {
+		t.Run(name, func(t *testing.T) {
+			work := libraryEventWorkspace(t)
+			source := filepath.Join(t.TempDir(), "scene.yaml")
+			if !work.saveAt(source) {
+				t.Fatal(work.diagnostic)
+			}
+			notice := filepath.Join(filepath.Dir(source), larsonPlaygroundStudy.files[1])
+			switch name {
+			case "missing notice":
+				if err := os.Remove(notice); err != nil {
+					t.Fatal(err)
+				}
+			case "different notice":
+				if err := os.WriteFile(notice, []byte("Unrelated notice"), 0600); err != nil {
+					t.Fatal(err)
+				}
+			case "different attribution":
+				text := strings.Replace(work.state.document.Text(), posedVisitorCredit, "Other attribution", 1)
+				if err := os.WriteFile(source, []byte(text), 0600); err != nil {
+					t.Fatal(err)
+				}
+			}
+			work.openPath(source)
+			if !work.saveAt(source) {
+				t.Fatal(work.diagnostic)
+			}
+			saved := filepath.Join(t.TempDir(), "copy.yaml")
+			if !work.saveAt(saved) {
+				t.Fatal(work.diagnostic)
+			}
+			if _, err := os.Stat(filepath.Join(filepath.Dir(saved), larsonPlaygroundStudy.files[0])); err != nil {
+				t.Fatal(err)
+			}
+			if _, err := os.Stat(filepath.Join(filepath.Dir(saved), filepath.Base(notice))); !os.IsNotExist(err) {
+				t.Fatalf("the ordinary save carried an unrecognized notice: %v", err)
+			}
+		})
 	}
 }
 
@@ -415,8 +559,8 @@ func TestPlayPointerUsesWholeWidgetTree(t *testing.T) {
 			localBounds := work.viewer.imageBounds()
 			localCenter := geometry.Pt((localBounds.Min.X+localBounds.Max.X)/2, (localBounds.Min.Y+localBounds.Max.Y)/2)
 			normalized, ok := work.viewer.imagePoint(localCenter)
-			if !ok || work.play.geometry.Pick(float64(normalized.X), float64(normalized.Y)) != "scene.set.things/larson" {
-				t.Fatal("actual preview center does not address native Larson geometry")
+			if !ok || work.workingPick(float64(normalized.X), float64(normalized.Y)) != "scene.set.things/larson" {
+				t.Fatal("working view center does not address native Larson geometry")
 			}
 			before := work.state.document.Text()
 			work.ui.HandleEvent(event.NewMouseEvent(event.MousePress, event.ButtonLeft, event.ButtonStateLeft, start, start, event.ModNone))
@@ -438,32 +582,12 @@ func TestPlayPointerUsesWholeWidgetTree(t *testing.T) {
 
 func wholePlayRoot(t *testing.T) *Workspace {
 	t.Helper()
-	directory := os.Getenv("FERRUCCIO_UI_EVIDENCE_DIR")
-	if directory == "" {
-		t.Skip("set FERRUCCIO_UI_EVIDENCE_DIR for actual Slayer-image dispatch regression")
-	}
 	work := playWorkspace(t)
-	if err := work.showImage(filepath.Join(directory, "preview-640.png")); err != nil {
-		t.Fatal(err)
-	}
-	if work.viewer.source.Bounds().Dx() != 640 || work.viewer.source.Bounds().Dy() != 400 {
-		t.Fatal("requires actual matched Slayer640 preview")
-	}
-	work.viewer.SetNavigable(true)
-	geometry, err := picking.New(work.state.document.Text(), 1.6)
-	if err != nil {
-		t.Fatal(err)
-	}
-	work.play.geometry = geometry
-	work.play.renderedText = work.state.document.Text()
-	if work.play.geometry == nil {
-		t.Fatal("actual native geometry was not accepted")
-	}
+	installPlayWorkingView(t, work)
 	drawWholePlayRoot(t, work)
 	return work
 }
 
-// A real draw stamps the framework screen origins used by native pointer dispatch.
 func drawWholePlayRoot(t *testing.T, work *Workspace) {
 	t.Helper()
 	ctx := work.ui.Window().Context()
